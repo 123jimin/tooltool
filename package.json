@@ -1,0 +1,37 @@
+{
+  "name": "placeholder-name",
+  "version": "0.0.1",
+  "description": "placeholder-description",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "clean": "rm -r dist/",
+    "prepare": "npm run build",
+    "build": "npx tsc",
+    "build:watch": "npx tsc --watch",
+    "lint": "npx eslint src/",
+    "test": "npx mocha test/**/*.js"
+  },
+  "keywords": [],
+  "author": "placeholder-author",
+  "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.invalid/placeholder/placeholder.git"
+  },
+  "bugs": {
+    "url": "https://github.invalid/placeholder/placeholder/issues"
+  },
+  "homepage": "https://github.invalid/placeholder/placeholder",
+  "devDependencies": {
+    "@eslint/js": "^9.27.0",
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "chai": "^5.2.0",
+    "eslint": "^9.27.0",
+    "mocha": "^11.5.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.1"
+  }
+}

@@ -1,0 +1,21 @@
+name: Build and Test
+on: push
+jobs:
+  build:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.11
+          run_install: true
+      - name: Build
+        run: |
+          pnpm install
+          pnpm build
+      - name: Test
+        run: |
+          pnpm test

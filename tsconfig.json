@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "ES2024",
+        "module": "ESNext",
+        "declaration": true,
+        "outDir": "dist",
+        "sourceMap": false,
+        "strict": true,
+        "moduleResolution": "node",
+        "isolatedModules": true,
+        "paths": {
+            "@/*": ["./src/*"]
+        }
+    },
+    "include": ["src/**/*.ts"]
+}
