@@ -1,7 +1,7 @@
 {
-  "name": "placeholder-name",
+  "name": "tooltool",
   "version": "0.0.1",
-  "description": "placeholder-description",
+  "description": "Simple Utility Library for TypeScript",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -14,16 +14,16 @@
     "test": "npx mocha test/**/*.js"
   },
   "keywords": [],
-  "author": "placeholder-author",
-  "license": "UNLICENSED",
+  "author": "Jimin Park",
+  "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.invalid/placeholder/placeholder.git"
+    "url": "git+https://github.com/123jimin/tooltool.git"
   },
   "bugs": {
-    "url": "https://github.invalid/placeholder/placeholder/issues"
+    "url": "https://github.com/123jimin/tooltool/issues"
   },
-  "homepage": "https://github.invalid/placeholder/placeholder",
+  "homepage": "https://github.com/123jimin/tooltool",
   "devDependencies": {
     "@eslint/js": "^9.27.0",
     "@types/chai": "^5.2.2",

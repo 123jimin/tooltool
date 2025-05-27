@@ -1,15 +1,39 @@
-# Node.js TypeScript template
+# tooltool
 
-Use this template for creating a Node.js library written in TypeScript.
+tooltool is a simple utility library for TypeScript.
 
-1. Choose a license and replace the `LICENSE` file and the `license` field in `package.json`.
-2. Rewrite this README file.
-3. Rename the placeholders (search all `placeholder` text) in `package.json`.
-4. Run `pnpm up --latest`.
-5. Start writing code under `src/` directory.
-6. Write tests under `test/` directory.
+Currently, tooltool is intended to be used for personal projects, and no backward compatibility is guaranteed.
+More specifically, some parts of tooltool may be separated into their own packages in the future.
 
-## TODO
+## Installation
 
-- [ ] Move `test/**/*.js` to `src/**/*.spec.ts`.
-- [ ] Provide a bootstrap script.
+```
+npm install @jiminp/tooltool
+```
+
+(The package is not published yet.)
+
+## Features
+
+- No dependencies.
+- Can be used in both Node.js and browser environments.
+  - Node.js 22 or later is recommended.
+- Simple features that may be cumbersome to implement by oneself.
+
+### Data Structure
+
+- Multimap.
+
+### Function
+
+- Various utility functions for functional programming and asynchronous programming.
+- Batch/paginated processing.
+- Rate limiting.
+
+### Iterator
+
+- Various utility functions for iterators.
+
+### String
+
+- Utility functions useful for manual HTML parsing, etc.
