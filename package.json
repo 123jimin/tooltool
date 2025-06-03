@@ -1,6 +1,6 @@
 {
   "name": "@jiminp/tooltool",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Simple Utility Library for TypeScript",
   "type": "module",
   "main": "dist/index.js",
@@ -13,6 +13,9 @@
     "lint": "npx eslint src/",
     "test": "npx mocha test/**/*.js"
   },
+  "files": [
+    "dist"
+  ],
   "keywords": [],
   "author": "Jimin Park",
   "license": "MIT",
