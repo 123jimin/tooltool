@@ -7,7 +7,7 @@ More specifically, some parts of tooltool may be separated into their own packag
 
 ## Installation
 
-```
+```bash
 npm install @jiminp/tooltool
 ```
 

@@ -1,6 +1,6 @@
 {
-  "name": "tooltool",
-  "version": "0.0.1",
+  "name": "@jiminp/tooltool",
+  "version": "0.1.0",
   "description": "Simple Utility Library for TypeScript",
   "type": "module",
   "main": "dist/index.js",
@@ -25,13 +25,13 @@
   },
   "homepage": "https://github.com/123jimin/tooltool",
   "devDependencies": {
-    "@eslint/js": "^9.27.0",
+    "@eslint/js": "^9.28.0",
     "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.10",
     "chai": "^5.2.0",
-    "eslint": "^9.27.0",
+    "eslint": "^9.28.0",
     "mocha": "^11.5.0",
     "typescript": "^5.8.3",
-    "typescript-eslint": "^8.32.1"
+    "typescript-eslint": "^8.33.1"
   }
 }
