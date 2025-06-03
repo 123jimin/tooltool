@@ -1,4 +1,4 @@
-import type { Nullable, NullLike } from "@/type/index.js";
+import type { Nullable, NullLike } from "../type/index.js";
 
 /**
  * Crop the left side of a string, from the beginning to the end of the first occurrence of the needle.

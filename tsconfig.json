@@ -7,10 +7,7 @@
         "sourceMap": false,
         "strict": true,
         "moduleResolution": "node",
-        "isolatedModules": true,
-        "paths": {
-            "@/*": ["./src/*"]
-        }
+        "isolatedModules": true
     },
     "include": ["src/**/*.ts"]
 }

@@ -1,4 +1,4 @@
-import type { Nullable } from "@/type";
+import type { Nullable } from "../type/index.js";
 
 /**
  * Iterate over an array in batches.
