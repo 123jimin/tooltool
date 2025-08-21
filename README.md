@@ -32,6 +32,10 @@ npm install @jiminp/tooltool
 
 - Various utility functions for iterators.
 
+### Math
+
+- Utility functions related to math, such as `clamp`, `lerp`, or `ceilDiv`.
+
 ### String
 
 - Utility functions useful for manual HTML parsing, etc.
