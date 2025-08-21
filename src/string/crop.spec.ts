@@ -1,7 +1,5 @@
-//@ts-check
-
 import { assert } from 'chai';
-import { cropBefore, cropAfter, cropString } from "../../dist/string/crop.js";
+import { cropBefore, cropAfter, cropString } from "./crop.js";
 
 describe("cropBefore", function() {
     it("should return null if the string is null", function() {

@@ -1,7 +1,5 @@
-//@ts-check
-
 import { assert } from 'chai';
-import { getRowCol } from "../../dist/string/debug.js";
+import { getRowCol } from "./debug.js";
 
 describe("getRowCol", function() {
     it("should always return [0, 0] when the index is zero", function() {

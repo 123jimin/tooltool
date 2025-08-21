@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 
 const config = tseslint.config([
     {
-        ignores: ["dist/**", "test/**"],
+        ignores: ["dist/**"],
     },
     eslint.configs.recommended,
     tseslint.configs.strict,
