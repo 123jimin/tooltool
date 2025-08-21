@@ -2,7 +2,7 @@
 
 tooltool is a simple utility library for TypeScript.
 
-Currently, tooltool is intended to be used for personal projects, and no backward compatibility is guaranteed.
+Currently, tooltool is intended to be used for personal projects of mine, and no backward compatibility is guaranteed.
 More specifically, some parts of tooltool may be separated into their own packages in the future.
 
 ## Installation
@@ -10,8 +10,6 @@ More specifically, some parts of tooltool may be separated into their own packag
 ```bash
 npm install @jiminp/tooltool
 ```
-
-(The package is not published yet.)
 
 ## Features
 
