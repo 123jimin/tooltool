@@ -65,13 +65,6 @@ export async function* toAsyncGenerator<Y, R, T=unknown>(executor: (callbacks: A
  * @param onYeet Optional function to be called each time the generator yields.
  */
 export async function generatorToPromise<Y, R>(gen: AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): Promise<R> {
-    if(onYeet) {
-        for await (const y of gen) { onYeet(y); }
-    } else {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        for await (const _ of gen) { /* nop */ }
-    }
-
     while(true) {
         const {value, done}: IteratorResult<Y, R> = await gen.next();
         if(done) return value;
