@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { clamp, lerp } from "./index.js";
+import { clamp, lerp, ceilDiv } from "./index.js";
 
 describe("clamp", function () {
     describe("number overload", function () {
@@ -129,5 +129,86 @@ describe("lerp", function () {
         // Close to the mathematically correct values
         assert.approximately(v1, a + (b - a) * t1, 1e-6);
         assert.approximately(v2, a + (b - a) * t2, 1e-6);
+    });
+});
+
+describe("ceilDiv", function () {
+    describe("number overload", function () {
+        it("handles positive dividends and divisors", function () {
+            assert.strictEqual(ceilDiv(10, 3), 4, "10 / 3");
+            assert.strictEqual(ceilDiv(9, 3), 3, "9 / 3 (exact)");
+            assert.strictEqual(ceilDiv(1, 100), 1, "1 / 100");
+        });
+
+        it("handles negative dividends", function () {
+            assert.strictEqual(ceilDiv(-10, 3), -3, "-10 / 3");
+            assert.strictEqual(ceilDiv(-9, 3), -3, "-9 / 3 (exact)");
+        });
+
+        it("handles negative divisors", function () {
+            assert.strictEqual(ceilDiv(10, -3), -3, "10 / -3");
+            assert.strictEqual(ceilDiv(9, -3), -3, "9 / -3 (exact)");
+        });
+
+        it("handles both negative dividends and divisors", function () {
+            assert.strictEqual(ceilDiv(-10, -3), 4, "-10 / -3");
+            assert.strictEqual(ceilDiv(-9, -3), 3, "-9 / -3 (exact)");
+        });
+
+        it("handles zero dividend", function () {
+            assert.strictEqual(ceilDiv(0, 5), 0);
+            assert.strictEqual(ceilDiv(0, -5), 0);
+        });
+
+        it("throws on division by zero", function () {
+            assert.throws(() => ceilDiv(10, 0), RangeError, /by zero/);
+        });
+
+        it("throws on non-safe integer inputs", function () {
+            assert.throws(() => ceilDiv(1.5, 1), TypeError, /safe integer/);
+            assert.throws(() => ceilDiv(1, 1.5), TypeError, /safe integer/);
+            assert.throws(() => ceilDiv(Number.MAX_SAFE_INTEGER + 1, 1), TypeError, /safe integer/);
+        });
+    });
+
+    describe("bigint overload", function () {
+        it("handles positive dividends and divisors", function () {
+            assert.strictEqual(ceilDiv(10n, 3n), 4n, "10n / 3n");
+            assert.strictEqual(ceilDiv(9n, 3n), 3n, "9n / 3n (exact)");
+            assert.strictEqual(ceilDiv(1n, 100n), 1n, "1n / 100n");
+        });
+
+        it("handles negative dividends", function () {
+            assert.strictEqual(ceilDiv(-10n, 3n), -3n, "-10n / 3n");
+            assert.strictEqual(ceilDiv(-9n, 3n), -3n, "-9n / 3n (exact)");
+        });
+
+        it("handles negative divisors", function () {
+            assert.strictEqual(ceilDiv(10n, -3n), -3n, "10n / -3n");
+            assert.strictEqual(ceilDiv(9n, -3n), -3n, "9n / -3n (exact)");
+        });
+
+        it("handles both negative dividends and divisors", function () {
+            assert.strictEqual(ceilDiv(-10n, -3n), 4n, "-10n / -3n");
+            assert.strictEqual(ceilDiv(-9n, -3n), 3n, "-9n / -3n (exact)");
+        });
+
+        it("handles zero dividend", function () {
+            assert.strictEqual(ceilDiv(0n, 5n), 0n);
+            assert.strictEqual(ceilDiv(0n, -5n), 0n);
+        });
+
+        it("throws on division by zero", function () {
+            assert.throws(() => ceilDiv(10n, 0n), RangeError, /by zero/);
+        });
+    });
+
+    describe("type errors", function () {
+        it("throws when types are mixed", function () {
+            // @ts-expect-error Testing invalid types
+            assert.throws(() => ceilDiv(10, 3n), TypeError, /same type/);
+            // @ts-expect-error Testing invalid types
+            assert.throws(() => ceilDiv(10n, 3), TypeError, /same type/);
+        });
     });
 });
