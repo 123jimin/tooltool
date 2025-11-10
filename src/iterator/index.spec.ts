@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { toAsyncGenerator, asyncGeneratorToPromise } from './index.js';
+import { toAsyncGenerator, runGenerator } from './index.js';
 
 describe('toAsyncGenerator', function () {
     it('should yield and return values correctly', async function () {
@@ -69,7 +69,7 @@ describe('toAsyncGenerator', function () {
     });
 });
 
-describe('asyncGeneratorToPromise', function () {
+describe('runGenerator', function () {
     async function* testGenerator(): AsyncGenerator<number, string> {
         yield 1;
         yield 2;
@@ -77,13 +77,13 @@ describe('asyncGeneratorToPromise', function () {
     }
 
     it('should resolve with the return value of the generator', async function () {
-        const result = await asyncGeneratorToPromise(testGenerator());
+        const result = await runGenerator(testGenerator());
         assert.strictEqual(result, 'done');
     });
 
     it('should call onYeet for each yielded value and resolve with the return value', async function () {
         const yields: number[] = [];
-        const result = await asyncGeneratorToPromise(testGenerator(), (y) => yields.push(y));
+        const result = await runGenerator(testGenerator(), (y) => yields.push(y));
 
         assert.deepStrictEqual(yields, [1, 2]);
         assert.strictEqual(result, 'done');
@@ -99,7 +99,7 @@ describe('asyncGeneratorToPromise', function () {
         }
 
         try {
-            await asyncGeneratorToPromise(failingGenerator(), (y) => yields.push(y));
+            await runGenerator(failingGenerator(), (y) => yields.push(y));
             assert.fail('should have rejected');
         } catch (e) {
             assert.deepStrictEqual(yields, [1, 2]);
@@ -116,7 +116,7 @@ describe('asyncGeneratorToPromise', function () {
         };
 
         try {
-            await asyncGeneratorToPromise(testGenerator(), onYeet);
+            await runGenerator(testGenerator(), onYeet);
             assert.fail('should have rejected');
         } catch (e) {
             assert.strictEqual(e, onYeetError);

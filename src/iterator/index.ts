@@ -59,15 +59,33 @@ export async function* toAsyncGenerator<Y, R, T=unknown>(executor: (callbacks: A
     }
 }
 
+export function isAsyncIterable<T, TReturn, TNext>(it: Iterable<T, TReturn, TNext>|AsyncIterable<T, TReturn, TNext>): it is AsyncIterable<T, TReturn, TNext> {
+    return Symbol.asyncIterator in it && (typeof it[Symbol.asyncIterator] === 'function');
+}
+
 /**
- * Converts an async generator to a promise.
+ * Converts a generator to a promise.
  * @param gen Original generator.
  * @param onYeet Optional function to be called each time the generator yields.
  */
-export async function asyncGeneratorToPromise<Y, R>(gen: AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): Promise<R> {
-    while(true) {
-        const {value, done}: IteratorResult<Y, R> = await gen.next();
-        if(done) return value;
-        if(value) onYeet?.(value);
+export function runGenerator<Y, R>(gen: Generator<Y, R>, onYeet?: (y: Y) => void): R;
+export function runGenerator<Y, R>(gen: AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): Promise<R>;
+export function runGenerator<Y, R>(gen: Generator<Y, R>|AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): R|Promise<R> {
+    if(isAsyncIterable(gen)) {
+        while(true) {
+            return (async(): Promise<R> => {
+                while(true) {
+                    const {value, done}: IteratorResult<Y, R> = await gen.next();
+                    if(done) return value;
+                    if(value) onYeet?.(value);
+                }
+            })();
+        }
+    } else {
+        while(true) {
+            const {value, done}: IteratorResult<Y, R> = gen.next();
+            if(done) return value;
+            if(value) onYeet?.(value);
+        }
     }
 }
