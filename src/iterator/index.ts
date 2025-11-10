@@ -64,7 +64,7 @@ export async function* toAsyncGenerator<Y, R, T=unknown>(executor: (callbacks: A
  * @param gen Original generator.
  * @param onYeet Optional function to be called each time the generator yields.
  */
-export async function generatorToPromise<Y, R>(gen: AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): Promise<R> {
+export async function asyncGeneratorToPromise<Y, R>(gen: AsyncGenerator<Y, R>, onYeet?: (y: Y) => void): Promise<R> {
     while(true) {
         const {value, done}: IteratorResult<Y, R> = await gen.next();
         if(done) return value;
