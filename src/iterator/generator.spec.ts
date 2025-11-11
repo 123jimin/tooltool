@@ -2,8 +2,10 @@ import { assert } from 'chai';
 import { toAsyncGenerator, runGenerator } from "./generator.js";
 
 describe("iterator/generator", () => {
-    describe('toAsyncGenerator', () => {
-        it('should yield and return values correctly', async function () {
+    describe('toAsyncGenerator', function () {
+        this.slow(100);
+        
+        it('should yield and return values correctly', async() => {
             const gen = toAsyncGenerator<number, string>(({ yeet, done }) => {
                 yeet(1);
                 yeet(2);
@@ -15,7 +17,7 @@ describe("iterator/generator", () => {
             assert.deepStrictEqual(await gen.next(), { value: 'finished', done: true });
         });
 
-        it('should handle asynchronous events', async function () {
+        it('should handle asynchronous events',  async() => {
             const gen = toAsyncGenerator<string, number>(({ yeet, done }) => {
                 setTimeout(() => yeet('a'), 10);
                 setTimeout(() => yeet('b'), 20);
