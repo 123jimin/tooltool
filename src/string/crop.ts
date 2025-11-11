@@ -1,4 +1,4 @@
-import type { Nullable, NullLike } from "../type/index.js";
+import type { Nullable, Nullish } from "../type/index.js";
 
 /**
  * Crop the left side of a string, from the beginning to the end of the first occurrence of the needle.
@@ -6,7 +6,7 @@ import type { Nullable, NullLike } from "../type/index.js";
  * @param start Needle to crop to.
  * @returns Cropped string, or null if the needle is not found. The result does not include the needle. 
  */
-export function cropBefore(s: NullLike, start: string|RegExp): null;
+export function cropBefore(s: Nullish, start: string|RegExp): null;
 export function cropBefore(s: Nullable<string>, start: string|RegExp): string|null;
 export function cropBefore(s: Nullable<string>, start: string|RegExp): string|null {
     if(s == null) return null;
@@ -28,7 +28,7 @@ export function cropBefore(s: Nullable<string>, start: string|RegExp): string|nu
  * @param end Needle to crop from.
  * @returns Cropped string, or null if the needle is not found. The result does not include the needle.
  */
-export function cropAfter(s: NullLike, end: string|RegExp): null;
+export function cropAfter(s: Nullish, end: string|RegExp): null;
 export function cropAfter(s: Nullable<string>, start: string|RegExp): string|null;
 export function cropAfter(s: Nullable<string>, end: string|RegExp): string|null {
     if(s == null) return null;
@@ -51,7 +51,7 @@ export function cropAfter(s: Nullable<string>, end: string|RegExp): string|null 
  * @param end Needle to crop from.
  * @returns Cropped string, or null if either needle is not found. The result does not include the needles.
  */
-export function cropString(s: NullLike, start: string|RegExp, end: string|RegExp): null;
+export function cropString(s: Nullish, start: string|RegExp, end: string|RegExp): null;
 export function cropString(s: Nullable<string>, start: string|RegExp, end: string|RegExp): string|null;
 export function cropString(s: Nullable<string>, start: string|RegExp, end: string|RegExp): string|null {
     return cropAfter(cropBefore(s, start), end);

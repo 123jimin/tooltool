@@ -5,8 +5,8 @@
  * and then the value is appended. If the key already exists, the value is appended to
  * the existing array.
  * 
- * @template K The type of keys in the map.
- * @template V The type of values stored in the multimap.
+ * @typeParam K The type of keys in the map.
+ * @typeParam V The type of values stored in the multimap.
  * 
  * @param m - A `Map` where each key maps to an array of values.
  * @param k - The key under which the value should be inserted.

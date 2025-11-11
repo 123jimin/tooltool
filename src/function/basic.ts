@@ -23,7 +23,7 @@ export async function sleep(time_ms: number): Promise<void> {
  * Useful as a default callback, placeholder function, or when working with
  * higher-order functions that require an identity mapping.
  *
- * @template T
+ * @typeParam T
  * @param {T} t - The value to return.
  * @returns {T} The same value that was passed in.
  *

@@ -7,7 +7,7 @@ import type { Nullable } from "../type/index.js";
  *   elements and processed sequentially.
  * - If `batch_size === 0`, the entire array is passed as a single batch (with `index = 0`).
  *
- * @template T
+ * @typeParam T
  * @param {T[]} arr - The array to iterate over.
  * @param {number} batch_size - Items per batch. `0` means "use the entire array as one batch".
  *   Must be a non-negative safe integer.
@@ -56,8 +56,8 @@ export async function batchedForEach<T>(
  * - an array of output items, which are appended to the final result, or
  * - `null` / `undefined`, which is simply treated as an empty array (`[]`).
  *
- * @template T - Type of input items.
- * @template U - Type of mapped output items.
+ * @typeParam T - Type of input items.
+ * @typeParam U - Type of mapped output items.
  *
  * @param {T[]} arr - The array to map.
  * @param {number} batch_size - Items per batch. `0` means “use the entire array as one batch”.
