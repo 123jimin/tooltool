@@ -1,6 +1,5 @@
 {
-    "plugin": ["typedoc-theme-oxide"],
-    "theme": "oxide",
+    "theme": "default",
     "entryPoints": ["src/*/index.ts"],
     "entryPointStrategy": "expand",
     "exclude": ["**/*.spec.ts"],
