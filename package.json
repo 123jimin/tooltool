@@ -43,7 +43,6 @@
     "mocha": "^11.7.5",
     "rimraf": "^6.1.0",
     "typedoc": "^0.28.14",
-    "typedoc-theme-oxide": "^0.2.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.3"
   }
