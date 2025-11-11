@@ -1,3 +1,15 @@
+/**
+ * Describes the page interval covered by the current batch in {@link paginated}.
+ *
+ * This object is provided as the second argument to the `fn` callback inside
+ * {@link paginated}, and indicates:
+ *
+ * - `start` — **inclusive** zero-based index of the first page in the batch.
+ * - `end` — **exclusive** zero-based index one past the last page in the batch.
+ * - `max` — **exclusive** upper bound on all pages (i.e., total page count).
+ *
+ * All indices follow **zero-based**, **half-open** conventions (`[start, end)`).
+ */
 export interface PageRangeInfo {
     start: number;
     end: number;
