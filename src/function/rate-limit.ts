@@ -25,7 +25,18 @@ export interface RateLimitedFunction<ArgsType extends unknown[], ReturnType> {
      * The current number of queued, not-yet-executed calls.
      */
     get wait_count(): number;
+    
+    /**
+     * The current number of calls being processed.
+     */
+    get processing_count(): number;
 }
+
+interface RateLimitedQueueItem<ArgsType extends unknown[], T> {
+    args: ArgsType;
+    resolve: (value: T|PromiseLike<T>) => void;
+    reject: (reason?: unknown) => void;
+};
 
 /**
  * Wraps an asynchronous function so that it is executed at most once every
@@ -56,44 +67,61 @@ export function rateLimited<ArgsType extends unknown[], T>(
     fn: (...args: ArgsType) => Promise<T>,
     duration_ms: number | (() => number),
 ): RateLimitedFunction<ArgsType, T> {
-    let last_call_time: number|null = null;
-    let timer: ReturnType<typeof setTimeout>|null = null;
-
-    type QueueItem = () => void;
+    type QueueItem = RateLimitedQueueItem<ArgsType, T>;
     const queue: QueueItem[] = [];
 
-    const getDuration = (): number => {
-        if(typeof duration_ms === "number") return duration_ms;
-        return duration_ms();
-    }
+    let last_start_time: number|null = null;
+    let timer: ReturnType<typeof setTimeout>|null = null;
+    
+    let processing_count = 0;
 
-    const processQueue = async() => {
-        if(queue.length === 0) {
+    const getDuration: () => number =
+        typeof duration_ms === 'number' ? () => duration_ms : duration_ms;
+
+    const processQueue = () => {
+        // Only one at a time for now.
+        if(processing_count > 0) return;
+
+        const item = queue.shift();
+        if(item == null) {
             timer = null;
             return;
         }
 
-        last_call_time = performance.now();
-        timer = setTimeout(processQueue, getDuration());
-        
-        const next = queue.shift();
-        if(next) next();
+        ++processing_count;
+        last_start_time = performance.now();
+
+        Promise.resolve()
+            .then(() => fn(...item.args))
+            .then(item.resolve, item.reject)
+            .finally(() => {
+                const now = performance.now();
+                const started_at = last_start_time ?? now;
+                const elapsed_since_start = now - started_at;
+                const remaining = Math.max(0, getDuration() - elapsed_since_start);
+
+                --processing_count;
+
+                if(queue.length === 0) {
+                    timer = null;
+                    return;
+                }
+
+                timer = setTimeout(() => {
+                    timer = null;
+                    processQueue();
+                }, remaining);
+            });
     };
 
     const wrappedFunction = (...args: ArgsType): Promise<T> => new Promise<T>((resolve, reject) => {
-        queue.push(() => {
-            fn(...args).then(resolve).catch(reject);
-        });
-
-        if(timer != null) return;
-
-        const now = performance.now();
-        const wait = (last_call_time == null ? 0 : Math.max(0, getDuration() - (now - last_call_time)));
-        timer = setTimeout(processQueue, wait);
+        queue.push({args, resolve, reject});
+        if(processing_count === 0 && timer == null) processQueue();
     });
 
     Object.defineProperty(wrappedFunction, "limit_duration_ms", { enumerable: true, get: getDuration });
     Object.defineProperty(wrappedFunction, "wait_count", { enumerable: true, get: () => queue.length });
+    Object.defineProperty(wrappedFunction, "processing_count", { enumerable: true, get: () => processing_count });
 
     return wrappedFunction as RateLimitedFunction<ArgsType, T>;
 }

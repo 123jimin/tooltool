@@ -8,7 +8,8 @@ const TOLERANCE_MS = 10;
 describe("function/rate-limit", () => {
     describe("rateLimited", () => {
         context("fixed duration", async function () {
-            this.slow(250);
+            this.slow(500);
+            this.timeout(5000);
 
             it("should expose documented getters", () => {
                 const limited = rateLimited(async () => 42, 50);
@@ -38,11 +39,14 @@ describe("function/rate-limit", () => {
                 const p2 = limited();
                 const p3 = limited();
 
-                assert.strictEqual(limited.wait_count, 3);
+                assert.strictEqual(limited.wait_count, 2);
+                assert.strictEqual(limited.processing_count, 1);
 
                 const results = await Promise.all([p1, p2, p3]);
                 
                 assert.strictEqual(limited.wait_count, 0);
+                assert.strictEqual(limited.processing_count, 0);
+
                 assert.strictEqual(processed, 3);
                 assert.deepStrictEqual(results, ["ok", "ok", "ok"]);
             });
@@ -63,8 +67,6 @@ describe("function/rate-limit", () => {
             });
 
             it("should enforce a minimum delay between call starts (no overlap)", async function () {
-                this.timeout(5000);
-
                 const duration = 60;
                 const starts: number[] = [];
                 let concurrent = 0;
@@ -119,7 +121,10 @@ describe("function/rate-limit", () => {
             });
         });
 
-        context("dynamic duration", () => {
+        context("dynamic duration", function () {
+            this.slow(500);
+            this.timeout(5000);
+
             it("should reflect dynamic limit via the getter", async () => {
                 let d = 25;
                 const limited = rateLimited(async () => {}, () => d);
@@ -130,30 +135,43 @@ describe("function/rate-limit", () => {
             });
 
             it("should respect changing durations between calls", async function () {
-                this.timeout(5000);
-
-                // Sequence of durations we want to apply between starts: 30ms then 70ms
-                const durations = [30, 70];
-                let idx = 0;
-                const limited = rateLimited(async () => { await sleep(10); }, () => durations[Math.min(idx, durations.length - 1)]);
-
+                let d = 40;
                 const starts: number[] = [];
-                const wrapped = async () => {
+
+                const fn = async () => {
                     starts.push(performance.now());
-                    await limited();
-                    ++idx; // advance duration for the next scheduling point
                 };
 
-                await wrapped(); // first call (no enforced gap before it)
-                await wrapped(); // gap ≈ 30ms
-                await wrapped(); // gap ≈ 70ms
+                const limited = rateLimited(fn, () => d);
 
-                // Verify spacing for the two enforced gaps with tolerance
-                const gap1 = starts[1] - starts[0];
-                const gap2 = starts[2] - starts[1];
+                await limited();
 
-                assert.isAtLeast(gap1 + TOLERANCE_MS, 30, `gap1 should be >=30ms (got ~${gap1}ms)`);
-                assert.isAtLeast(gap2 + TOLERANCE_MS, 70, `gap2 should be >=70ms (got ~${gap2}ms)`);
+                d = 80;
+                await limited();
+
+                d = 20;
+                await limited();
+
+                const delta1 = starts[1] - starts[0];
+                const delta2 = starts[2] - starts[1];
+
+                assert.isAtLeast(
+                    delta1 + TOLERANCE_MS,
+                    80,
+                    `second call should start >=80ms after first (got ~${delta1}ms)`
+                );
+
+                assert.isAtLeast(
+                    delta2 + TOLERANCE_MS,
+                    20,
+                    `third call should start >=20ms after second (got ~${delta2}ms)`
+                );
+
+                assert.isAtMost(
+                    delta2 - TOLERANCE_MS,
+                    50,
+                    `third call should start not much more than 20ms after second (got ~${delta2}ms)`
+                )
             });
         });
 
