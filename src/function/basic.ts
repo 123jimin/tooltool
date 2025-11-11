@@ -42,7 +42,7 @@ export function identity<T>(t: T): T {
  * Useful as a placeholder callback or default implementation when a function
  * signature must be satisfied.
  *
- * @param {...unknown} _args - Arguments that will be ignored.
+ * @param {...unknown} args - Arguments that will be ignored.
  * @returns {void}
  *
  * @example
@@ -51,4 +51,4 @@ export function identity<T>(t: T): T {
  * nop("a", true);  // also does nothing
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function nop(..._args: unknown[]): void {}
+export function nop(...args: unknown[]): void {}
