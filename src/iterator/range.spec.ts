@@ -1,7 +1,7 @@
 import { assert } from "chai";
 import { range } from "./range.js";
 
-describe("function/range", () => {
+describe("iterator/range", () => {
     describe("range", () => {
         it("should return an empty generator when the only argument is 0", () => {
             assert.deepStrictEqual([...range(0)], []);
