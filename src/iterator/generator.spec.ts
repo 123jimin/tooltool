@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { toAsyncGenerator, runGenerator } from "./generator.js";
+import { toAsyncGenerator, runGenerator, isAsyncIterable } from "./generator.js";
 
 describe("iterator/generator", () => {
     describe('toAsyncGenerator', function () {
@@ -69,6 +69,13 @@ describe("iterator/generator", () => {
             });
 
             assert.deepStrictEqual(await gen.next(), { value: 'immediate', done: true });
+        });
+    });
+
+    describe('isAsyncIterable', () => {
+        it("should work as advertised", () => {
+            assert.isFalse(isAsyncIterable((function*() { yield 1; })()));
+            assert.isTrue(isAsyncIterable((async function*() { yield 1; })()));
         });
     });
 
