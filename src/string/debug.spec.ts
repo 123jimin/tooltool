@@ -3,6 +3,16 @@ import { getRowCol } from "./debug.js";
 
 describe("string/debug", () => {
     describe("getRowCol", () => {
+        it("should work as advertised", () => {
+            const text = "hello\nworld";
+
+            assert.deepStrictEqual(getRowCol(text, 0), [0, 0]);
+            assert.deepStrictEqual(getRowCol(text, 5), [0, 5]);
+            assert.deepStrictEqual(getRowCol(text, 6), [1, 0]);
+            assert.deepStrictEqual(getRowCol(text, 11), [1, 5]);
+            assert.strictEqual(getRowCol(text, 6, true), "2:1");
+        });
+
         it("should always return [0, 0] when the index is zero", () => {
             for(const s of [
                 "",
