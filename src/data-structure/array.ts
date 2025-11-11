@@ -1,5 +1,6 @@
 /**
  * Partition an array into two arrays based on a predicate.
+ * 
  * @param arr Array to partition.
  * @param predicate Predicate function to partition by.
  * @returns A tuple of `[falsey, truthy]`, where `falsey` contains all elements for which `predicate` returned falsey, and `truthy` contains all elements for which `predicate` returned truthy.
@@ -25,7 +26,7 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
  * @param index
  * @param default_value
  */
-export function arrayAtOrExtend<T extends NonNullable<object>>(arr: T[], index: number, default_value: T): T {
+export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index: number, default_value: T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");
     if(index < arr.length) return arr[index];
 
@@ -44,7 +45,7 @@ export function arrayAtOrExtend<T extends NonNullable<object>>(arr: T[], index: 
  * @param index 
  * @param f 
  */
-export function arrayAtOrExtendWith<T extends NonNullable<object>>(arr: T[], index: number, f: (index: number) => T): T {
+export function arrayGetOrExtendWith<T extends NonNullable<object>>(arr: T[], index: number, f: (index: number) => T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");
     if(index < arr.length) return arr[index];
 
