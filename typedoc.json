@@ -1,0 +1,12 @@
+{
+    "theme": "default",
+    "entryPointStrategy": "expand",
+    "exclude": ["**/*.spec.ts"],
+    "groupReferencesByType": true,
+    "customCss": "./theme/custom.css",
+    "navigationLinks": {
+        "GitHub": "https://github.com/123jimin/tooltool",
+    },
+    "navigation": {
+    }
+}

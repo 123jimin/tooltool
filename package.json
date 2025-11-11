@@ -15,7 +15,8 @@
     "prepare": "npm run build",
     "build": "npx tsc",
     "build:watch": "npx tsc --watch",
-    "build-docs": "npx typedoc src/index.ts",
+    "build-docs": "npx typedoc ./src/",
+    "build-docs:watch": "npx typedoc ./src/ --watch",
     "lint": "npx eslint src/",
     "pretest": "pnpm build",
     "test": "npx mocha \"dist/**/*.spec.js\""
