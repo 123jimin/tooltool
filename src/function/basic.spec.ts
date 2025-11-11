@@ -22,6 +22,7 @@ describe("function/basic", () => {
 
         it("should return undefined", () => {
             assert.strictEqual(nop(), (void 0));
+            assert.strictEqual(nop(1, 2, 3), (void 0));
             assert.notStrictEqual(nop(), null);
         });
     });
