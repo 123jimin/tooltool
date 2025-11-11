@@ -8,13 +8,13 @@ on:
 
 jobs:
   build-test:
-    uses: "./.github/workflows/reusable/build-test.yaml"
+    uses: "./.github/workflows/build-test.yaml"
     with:
       pnpm-version: "10.17"
   build-docs:
     needs: build-test
     if: ${{ github.ref == 'refs/heads/main' }}
-    uses: "./.github/workflows/reusable/build-docs.yaml"
+    uses: "./.github/workflows/build-docs.yaml"
     permissions:
       contents: read
       pages: write
