@@ -1,8 +1,23 @@
 name: CI
 
 on:
-  push
+  push:
+    paths-ignore:
+     - "docs/**"
+  workflow_dispatch:
 
 jobs:
   build-test:
-   uses: "./.github/workflows/build-test.yaml"
+    uses: "./.github/workflows/reusable/build-test.yaml"
+    with:
+      pnpm-version: "10.17"
+  build-docs:
+    needs: build-test
+    if: ${{ github.ref == 'refs/heads/main' }}
+    uses: "./.github/workflows/reusable/build-docs.yaml"
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    with:
+      pnpm-version: "10.17"
