@@ -1,0 +1,8 @@
+name: CI
+
+on:
+  push
+
+jobs:
+  build-test:
+   uses: "./.github/workflows/build-test.yaml"
