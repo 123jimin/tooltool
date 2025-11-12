@@ -1,8 +1,10 @@
-# tooltool
+# Instructions for Working on This Codebase
 
-tooltool is a dependency-free collection of TypeScript utilities for Node.js and modern browsers.
+This codebase is the repository for the `tooltool` library.
 
 ## Summary
+
+tooltool is a dependency-free collection of TypeScript utilities for Node.js and modern browsers.
 
 ### Tech Stacks
 
@@ -44,6 +46,9 @@ describe("module-name/file-name", () => {
 
 - Use `context` if applicable.
 - Always use strict equality for comparison.
+- Test cases should be based on JSDoc and function signature, and not body code (actual implementation).
+- Titles for tests should be enclosed within double quotes (`""`), not single quotes (`''`).
+- If the function to test has attached examples via JSDoc, put those as the first test: `it("should work as advertised", () => { ... })` 
 
 ## Coding Style
 
@@ -61,7 +66,12 @@ describe("module-name/file-name", () => {
 - Nullish values:
   - For values *to* users, `null` is preferred over `undefined`.
   - For values *from* users, use `Nullish` and `Nullable<T>`. Use `x == null` for whether a value is nullish.
-- JSDoc should be comprehensive and easy-to-read, but avoid verbose or repetitive descriptions.
+- JSDoc:
+  - It should be comprehensive and easy-to-read, but avoid verbose or repetitive descriptions.
+  - Try including following information:
+    - Example use-cases.
+    - Potential gotchas (if applicable), via `@remarks`.
+    - Example codes, using `@example`. Keep example codes short yet diverse.
 
 ### Architecture
 
