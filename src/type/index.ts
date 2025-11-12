@@ -40,7 +40,7 @@ export type Nullable<T> = T | Nullish;
  * ```
  */
 export function isNullish(value: unknown): value is Nullish {
-  return value === null || value === undefined;
+  return value == null;
 }
 
 /**

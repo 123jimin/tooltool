@@ -6,25 +6,25 @@ tooltool is a dependency-free collection of TypeScript utilities for Node.js and
 
 ### Tech Stacks
 
-(TODO: tech stacks tooltool utilizes)
-
-- Language:
-- Package Manager:
-- Testing:
-- Documentation:
-- CI:
+- Language: TypeScript 5.9, ES2024, targeting Node.js and modern browsers.
+- Package Manager: `pnpm`; use `pnpm test` for build+test.
+- Testing: Mocha + Chai assertions.
+- Linting: ESLint 9 with `typescript-eslint` strict config.
+- Documentation: TypeDoc (`pnpm build-docs`).
 
 ### File Structure
 
-(TODO: file structures)
-
-`src/index.ts` re-exports domain-specific modules.
-
-- `src/data-structure/`:
-
-Unit tests live beside their source modules as `.spec.ts` files and run from the compiled `dist/**/*.spec.js`.
+- `src/index.ts` re-exports the public surface of each domain package. Update this file whenever you add a new top-level utility.
+  - `src/data-structure/`
+  - `src/function/`
+  - `src/iterator/`
+  - `src/math/`
+  - `src/string/`
+  - `src/type/`
 
 ## Testing
+
+Unit tests are written to `src/**/*.spec.ts` and transpiled to `dist/**/*.spec.js`, which gets executed.
 
 When creating a new spec file, use the following template:
 
@@ -47,4 +47,22 @@ describe("module-name/file-name", () => {
 
 ## Coding Style
 
-(TODO: important coding styles including TS strictness and naming conventions)
+### Naming
+
+- `snake_case` for variables
+- `camelCase` for functions (including variables with function types)
+- `PascalCase` for classes and types
+- `kebab-case` for file names.
+- Prefer short names that are self-descriptive.
+
+### TypeScript
+
+- Strictness should be enforced; `any` is not allowed under any circumstances.
+- Nullish values:
+  - For values *to* users, `null` is preferred over `undefined`.
+  - For values *from* users, use `Nullish` and `Nullable<T>`. Use `x == null` for whether a value is nullish.
+- JSDoc should be comprehensive and easy-to-read, but avoid verbose or repetitive descriptions.
+
+### Architecture
+
+- Prefer free, modular functions with composition over classes and inheritance.
