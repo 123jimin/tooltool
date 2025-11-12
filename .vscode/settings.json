@@ -1,8 +1,10 @@
 {
     "cSpell.words": [
+        "Deque",
         "dotenv",
         "eslintcache",
         "falsey",
+        "inds",
         "Jimin",
         "jiminp",
         "jscoverage",
@@ -11,6 +13,7 @@
         "multimap",
         "Nuxt",
         "pids",
+        "Retryable",
         "stylelintcache",
         "tooltool",
         "vuepress",

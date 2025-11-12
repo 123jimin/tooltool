@@ -69,7 +69,7 @@ export type AsyncEvent<Y, R, T=unknown> = AsyncYieldEvent<Y> | AsyncReturnEvent<
  * 
  * @see {@link toAsyncGenerator}
  */
-export interface AsyncGeneratorExecutor<Y, R, T=unknown> {
+export interface AsyncGeneratorExecutor<Y, R=void, T=unknown> {
     /**
      * Yields a value from the generator.
      * 
@@ -141,7 +141,7 @@ export interface AsyncGeneratorExecutor<Y, R, T=unknown> {
  * @see {@link AsyncGeneratorExecutor}
  * @see {@link runGenerator}
  */
-export async function* toAsyncGenerator<Y, R, T=unknown>(executor: (callbacks: AsyncGeneratorExecutor<Y, R, T>) => void): AsyncGenerator<Y ,R> {
+export async function* toAsyncGenerator<Y, R=void, T=unknown>(executor: (callbacks: AsyncGeneratorExecutor<Y, R, T>) => void): AsyncGenerator<Y ,R> {
     const queue: Array<AsyncEvent<Y, R, T>> = [];
 
     let resolveNext: Nullable<(() => void)> = null;

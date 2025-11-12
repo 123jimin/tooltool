@@ -38,7 +38,7 @@ describe("iterator/generator", () => {
             const error = new Error('test error');
             const gen = toAsyncGenerator(({ fail, done }) => {
                 fail(error);
-                done(null);
+                done();
             });
 
             try {
