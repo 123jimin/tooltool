@@ -98,20 +98,20 @@ describe("function/fetch-pages", function() {
         });
 
         it("should process pages out of order due to network delay", async () => {
-            const pages = [["a"], ["b"], ["c"]];
-            const fetcher = createMockFetcher(pages, { delays_ms: [300, 100, 200] });
+            const pages = [["a"], ["b"], ["c"], ["d"]];
+            const fetcher = createMockFetcher(pages, { delays_ms: [0, 300, 100, 200] });
             const call_order: number[] = [];
 
             await forEachPage(fetcher, (_page, index) => {
                 call_order.push(index);
             });
 
-            assert.deepEqual(call_order, [1, 2, 0]);
+            assert.deepEqual(call_order, [0, 2, 3, 1]);
         });
 
         it("should throw if the first fetch to complete fails", async () => {
-            const pages: Array<string[]|'error'> = [["a"], "error", ["c"]];
-            const fetcher = createMockFetcher(pages, { delays_ms: [200, 100, 300] }); // error happens first
+            const pages: Array<string[]|'error'> = [["a"], ["b"], "error", ["d"]];
+            const fetcher = createMockFetcher(pages, { delays_ms: [0, 200, 100, 300] });
             const collected_pages: { index: number; page: string[] }[] = [];
 
             try {
@@ -121,12 +121,12 @@ describe("function/fetch-pages", function() {
                 assert.fail("should have thrown");
             } catch (err) {
                 assert.instanceOf(err, Error);
-                assert.strictEqual((err as Error).message, "Failed to fetch page 1");
+                assert.strictEqual((err as Error).message, "Failed to fetch page 2");
             }
 
             // wait a bit for other promises to potentially resolve and call callback
             await sleep(50);
-            assert.strictEqual(collected_pages.length, 0);
+            assert.strictEqual(collected_pages.length, 1);
         });
 
         it("should handle the case with 0 pages", async () => {
@@ -194,20 +194,20 @@ describe("function/fetch-pages", function() {
         });
 
         it("should yield pages out of order due to network delay", async () => {
-            const pages = [["a"], ["b"], ["c"]];
-            const fetcher = createMockFetcher(pages, { delays_ms: [300, 100, 200] });
+            const pages = [["a"], ["b"], ["c"], ["d"]];
+            const fetcher = createMockFetcher(pages, { delays_ms: [0, 300, 100, 200] });
             const yield_order: number[] = [];
 
             for await (const { index } of fetchPages(fetcher)) {
                 yield_order.push(index);
             }
 
-            assert.deepEqual(yield_order, [1, 2, 0]);
+            assert.deepEqual(yield_order, [0, 2, 3, 1]);
         });
 
-        it("should throw if the first fetch to complete fails", async () => {
-            const pages: Array<string[]|'error'> = [["a"], "error", ["c"]];
-            const fetcher = createMockFetcher(pages, { delays_ms: [200, 100, 300] });
+        it("should throw if the second fetch to complete fails", async () => {
+            const pages: Array<string[]|'error'> = [["a"], ["b"], "error", ["d"]];
+            const fetcher = createMockFetcher(pages, { delays_ms: [0, 200, 100, 300] });
             const collected_pages: { index: number; page: string[] }[] = [];
 
             try {
@@ -217,10 +217,10 @@ describe("function/fetch-pages", function() {
                 assert.fail("should have thrown");
             } catch (err) {
                 assert.instanceOf(err, Error);
-                assert.strictEqual((err as Error).message, "Failed to fetch page 1");
+                assert.strictEqual((err as Error).message, "Failed to fetch page 2");
             }
 
-            assert.strictEqual(collected_pages.length, 0);
+            assert.strictEqual(collected_pages.length, 1);
         });
 
         it("should handle the case with 0 pages", async () => {

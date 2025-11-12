@@ -88,6 +88,8 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
             if(page != null) callback(page, index);
             onFetchSuccess(num_pages);
         } catch(err) {
+            if(onSuccess == null) return;
+
             onSuccess = null;
             onFail?.(err);
         }
