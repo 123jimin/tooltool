@@ -1,9 +1,18 @@
 /**
- * Clamps `value` to be between `min` and `max`.
- * 
- * @param value The number to clamp.
- * @param min The minimum allowable value.
- * @param max The maximum allowable value.
+ * Clamps `value` so that it falls within the inclusive range `min ... max`.
+ *
+ * @typeParam T - A primitive numeric type (`number` or `bigint`).
+ * @param value - The number to clamp.
+ * @param min - The inclusive lower bound.
+ * @param max - The inclusive upper bound.
+ * @returns `min` when `value` is lower than `min`, `max` when it is higher than
+ *          `max`, and the original `value` otherwise.
+ *
+ * @example
+ * ```ts
+ * clamp(15, 0, 10); // => 10
+ * clamp(-2n, -1n, 5n); // => -1n
+ * ```
  */
 export function clamp(value: number, min: number, max: number): number;
 export function clamp(value: bigint, min: bigint, max: bigint): bigint;
@@ -15,11 +24,19 @@ export function clamp<T extends number|bigint>(value: T, min: T, max: T): T {
 
 /**
  * Performs linear interpolation between two values.
- * 
- * @param a The start value.
- * @param b The end value.
- * @param t The interpolation factor.
- * @returns The interpolated value between `a` and `b`: `a + (b-a)*t`.
+ *
+ * @param a - The start value.
+ * @param b - The end value.
+ * @param t - The interpolation factor. Values in the range `[0, 1]` move from `a`
+ *           to `b`, but any real number is accepted.
+ * @returns The interpolated value between `a` and `b` computed as
+ *          `a + (b - a) * t`.
+ *
+ * @example
+ * ```ts
+ * lerp(0, 10, 0.25); // => 2.5
+ * lerp(0, 10, 1.5);  // => 15
+ * ```
  */
 export function lerp(a: number, b: number, t: number): number {
     if (t < 0.5) {
@@ -30,12 +47,25 @@ export function lerp(a: number, b: number, t: number): number {
 }
 
 /**
- * Computes the ceiling of the division `n/d`.
- * 
- * @param n The dividend (numerator), which must be an integer.
- * @param d The divisor (denominator), which must be a non-zero integer.
- * @returns The ceiling of the division `n/d`.
- * @throws {Error} If `d` is zero.
+ * Computes the ceiling of the division `n / d` for both `number` and `bigint` inputs.
+ *
+ * @remarks
+ * When using `number` arguments, both values must be safe integers so that the
+ * computation stays exact.
+ *
+ * @param n - The dividend (numerator).
+ * @param d - The divisor (denominator). Must not be zero.
+ * @returns The smallest integer that is greater than or equal to `n / d`.
+ *
+ * @throws {RangeError} When `d` is zero.
+ * @throws {TypeError} When arguments are not both safe integers, not both
+ *         `bigint`, or are of different primitive numeric types.
+ *
+ * @example
+ * ```ts
+ * ceilDiv(7, 3);    // => 3
+ * ceilDiv(-7n, 3n); // => -2n
+ * ```
  */
 export function ceilDiv(n: number, d: number): number;
 export function ceilDiv(n: bigint, d: bigint): bigint;
