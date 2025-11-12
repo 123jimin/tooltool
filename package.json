@@ -1,6 +1,6 @@
 {
   "name": "@jiminp/tooltool",
-  "version": "0.3.0",
+  "version": "0.3.0-alpha-1",
   "description": "Simple Utility Library for TypeScript",
   "type": "module",
   "main": "dist/index.js",
@@ -38,12 +38,12 @@
     "@eslint/js": "^9.39.1",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "chai": "^6.2.0",
+    "chai": "^6.2.1",
     "eslint": "^9.39.1",
     "mocha": "^11.7.5",
     "rimraf": "^6.1.0",
     "typedoc": "^0.28.14",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.46.3"
+    "typescript-eslint": "^8.46.4"
   }
 }
