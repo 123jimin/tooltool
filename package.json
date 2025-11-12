@@ -19,7 +19,7 @@
     "build-docs:watch": "npx typedoc --watch",
     "lint": "npx eslint src/",
     "pretest": "pnpm build",
-    "test": "npx mocha \"dist/**/*.spec.js\""
+    "test": "npx mocha \"dist/**/*.spec.js\" --parallel"
   },
   "keywords": [
     "utility"
