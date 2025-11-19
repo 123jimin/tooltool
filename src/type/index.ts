@@ -1,4 +1,5 @@
 export * from "./nullable.js";
+export * from "./result.js";
 
 /**
  * Compile-time assertion that two types are exactly equal.
