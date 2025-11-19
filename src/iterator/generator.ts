@@ -1,3 +1,4 @@
+import { Deque } from "../data-structure/deque.js";
 import { Nullable } from "../type/index.js";
 
 /**
@@ -142,7 +143,7 @@ export interface AsyncGeneratorExecutor<Y, R=void, T=unknown> {
  * @see {@link runGenerator}
  */
 export async function* toAsyncGenerator<Y, R=void, T=unknown>(executor: (callbacks: AsyncGeneratorExecutor<Y, R, T>) => void): AsyncGenerator<Y ,R> {
-    const queue: Array<AsyncEvent<Y, R, T>> = [];
+    const queue = new Deque<AsyncEvent<Y, R, T>>();
 
     let resolveNext: Nullable<(() => void)> = null;
 

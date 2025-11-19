@@ -1,3 +1,5 @@
+import { Deque } from "../data-structure/deque";
+
 /**
  * A function wrapper returned by {@link rateLimited} that enforces
  * a minimum delay between consecutive executions.
@@ -68,7 +70,7 @@ export function rateLimited<ArgsType extends unknown[], T>(
     duration_ms: number | (() => number),
 ): RateLimitedFunction<ArgsType, T> {
     type QueueItem = RateLimitedQueueItem<ArgsType, T>;
-    const queue: QueueItem[] = [];
+    const queue = new Deque<QueueItem>();
 
     let last_start_time: number|null = null;
     let timer: ReturnType<typeof setTimeout>|null = null;
