@@ -1,5 +1,5 @@
 /**
- * Interface representing the wrapped function with caching capabilities.
+ * A function wrapper returned by {@link cached} representing the wrapped function with caching capabilities.
  */
 export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
     /**
@@ -15,13 +15,26 @@ export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
 
 
 /**
- * Wraps an asynchronous function to cache its results based on arguments.
+ * Creates a memoized version of an asynchronous function.
+ * 
+ * The wrapper stores the in-flight `Promise` keyed by the provided arguments. Any
+ * subsequent call with the same cache key receives the original promise, which
+ * prevents duplicate work while the result is pending and after it resolves.
+ * If the promise rejects, the cache entry is removed automatically so the next
+ * invocation can retry.
  *
- * @param fn - The asynchronous function to be cached.
- * @param keyGenerator - Optional function to generate cache keys.
- *                       Defaults to `JSON.stringify(args[0])` if one argument is passed,
- *                       otherwise `JSON.stringify(args)`.
- * @returns A cached version of the function with a `.clearCache()` method.
+ * @param fn - The asynchronous function to memoize.
+ * @param keyGenerator - Optional function to derive cache keys. When omitted,
+ * `JSON.stringify(args)` is used, so prefer providing a custom key when
+ * arguments contain non-serializable values.
+ * @returns A cached version of the function that exposes a `.clearCache()`
+ * method for manual cache invalidation.
+ *
+ * @example
+ * const cachedFetchUser = cached(async (id: string) => fetch(`/users/${id}`).then(r => r.json()));
+ * await cachedFetchUser("42"); // executes the underlying fetch
+ * await cachedFetchUser("42"); // returns the cached promise
+ * cachedFetchUser.clearCache(); // remove all cached entries
  */
 export function cached<ArgsType extends unknown[], T, K = string>(
     fn: (...args: ArgsType) => Promise<T>,
@@ -53,9 +66,14 @@ export function cached<ArgsType extends unknown[], T, K = string>(
         return result_promise;
     };
 
+    const clearCache = (): void => {
+        cache_map.clear();
+    };
+
     Object.defineProperty(wrappedFunction, "clearCache", {
         enumerable: true,
-        get: cache_map.clear.bind(cache_map),
+        writable: false,
+        value: clearCache,
     });
     
     return wrappedFunction as CachedFunction<ArgsType, T>;
