@@ -48,12 +48,12 @@ export function* batched<T>(
         return asyncBatched(gen, n);
     }
 
-    const batch: T[] = [];
+    let batch: T[] = [];
     for (const item of gen) {
         batch.push(item);
         if (batch.length === n) {
             yield batch;
-            batch.length = 0;
+            batch = [];
         }
     }
 
