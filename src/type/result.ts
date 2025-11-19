@@ -25,3 +25,11 @@ export function resultUnwrap<T, E = Error>(result: Result<T, E>): T {
         throw result.error;
     }
 }
+
+export function resultUnwrapOr<T, E = Error, U = T>(result: Result<T, E>, fallback: U): T|U {
+    return result.ok ? result.value : fallback;
+}
+
+export function resultUnwrapOrElse<T, E = Error, U = T>(result: Result<T, E>, fallback: (error: E) => U): T|U {
+    return result.ok ? result.value : fallback(result.error);
+}
