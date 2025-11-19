@@ -1,4 +1,4 @@
-import { Deque } from "../data-structure/deque";
+import { Deque } from "../data-structure/deque.js";
 
 /**
  * A function wrapper returned by {@link rateLimited} that enforces
