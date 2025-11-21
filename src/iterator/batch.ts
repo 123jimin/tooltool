@@ -4,12 +4,30 @@ async function* asyncBatched<T>(
     gen: AsyncGenerator<T>,
     n: number,
 ): AsyncGenerator<T[]> {
-    const batch: T[] = [];
+    let batch: T[] = [];
     for await (const item of gen) {
         batch.push(item);
         if (batch.length === n) {
             yield batch;
-            batch.length = 0;
+            batch = [];
+        }
+    }
+
+    if (batch.length > 0) {
+        yield batch;
+    }
+}
+
+function* syncBatched<T>(
+    gen: Generator<T>,
+    n: number,
+): Generator<T[]> {
+    let batch: T[] = [];
+    for (const item of gen) {
+        batch.push(item);
+        if (batch.length === n) {
+            yield batch;
+            batch = [];
         }
     }
 
@@ -40,24 +58,13 @@ export function batched<T>(
     gen: AsyncGenerator<T>,
     n: number,
 ): AsyncGenerator<T[]>;
-export function* batched<T>(
+export function batched<T>(
     gen: Generator<T> | AsyncGenerator<T>,
     n: number,
 ): Generator<T[]> | AsyncGenerator<T[]> {
     if (isAsyncIterable(gen)) {
         return asyncBatched(gen, n);
-    }
-
-    let batch: T[] = [];
-    for (const item of gen) {
-        batch.push(item);
-        if (batch.length === n) {
-            yield batch;
-            batch = [];
-        }
-    }
-
-    if (batch.length > 0) {
-        yield batch;
+    } else {
+        return syncBatched(gen, n);
     }
 }
