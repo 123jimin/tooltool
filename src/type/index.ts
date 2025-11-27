@@ -26,3 +26,6 @@ export * from "./result.js";
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function assertEqualType<T, U extends T>(..._: [T] extends [U] ? [] : [never]): void {}
+
+export type NestedArrayElement<T> = T | NestedArray<T>;
+export type NestedArray<T> = NestedArrayElement<T>[];

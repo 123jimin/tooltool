@@ -4,3 +4,4 @@ export * from "./cache.js";
 export * from "./fetch-pages.js";
 export * from "./rate-limit.js";
 export * from "./retry.js";
+export * from "./transform.js";
