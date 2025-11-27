@@ -27,5 +27,26 @@ export * from "./result.js";
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function assertEqualType<T, U extends T>(..._: [T] extends [U] ? [] : [never]): void {}
 
+/**
+ * Represents a single element within a {@link NestedArray}.
+ * 
+ * This type is either the leaf value of type `T` or a nested array structure.
+ * 
+ * @template T - The type of the leaf values.
+ */
 export type NestedArrayElement<T> = T | NestedArray<T>;
+
+/**
+ * Represents an array that can be nested to an arbitrary depth.
+ * 
+ * This structure is commonly used when dealing with recursive data or flat-map operations.
+ * 
+ * @template T - The type of the leaf values found within the structure.
+ * 
+ * @example
+ * ```ts
+ * const flat: NestedArray<number> = [1, 2, 3];
+ * const deep: NestedArray<number> = [1, [2, [3, 4]], 5];
+ * ```
+ */
 export type NestedArray<T> = NestedArrayElement<T>[];
