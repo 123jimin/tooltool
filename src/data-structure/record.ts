@@ -18,10 +18,12 @@
  */
 export function recordAccess<T = unknown>(
     obj: Record<string, unknown>,
-    path: string[],
+    ...path: Array<string|string[]>
 ): [T | undefined, (value: T) => void] {
+    const flat_path = path.flat();
+
     let current: unknown = obj;
-    for (const key of path) {
+    for (const key of flat_path) {
         if (current == null || typeof current !== 'object') {
             current = (void 0);
             break;
@@ -30,21 +32,21 @@ export function recordAccess<T = unknown>(
     }
 
     const setValue = (value: T): void => {
-        if (path.length === 0) {
+        if (flat_path.length === 0) {
             return;
         }
 
         let target: Record<string, unknown> = obj;
 
-        for (let i = 0; i < path.length-1; i++) {
-            const key = path[i];
+        for (let i = 0; i < flat_path.length-1; i++) {
+            const key = flat_path[i];
             if (target[key] == null || typeof target[key] !== 'object') {
                 target[key] = {};
             }
             target = target[key] as Record<string, unknown>;
         }
 
-        target[path[path.length-1]] = value;
+        target[flat_path[flat_path.length-1]] = value;
     };
 
     return [current as T | undefined, setValue];
