@@ -11,9 +11,6 @@ export * from "./result.js";
  * @template T - The first type to compare
  * @template U - The second type to compare
  * 
- * @remarks
- * This utility is useful in tests or when verifying type relationships at compile time.
- * 
  * @example
  * ```ts
  * type A = { name: string };

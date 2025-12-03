@@ -80,12 +80,10 @@ export function applyTransforms<T>(obj: T, ...fns: NestedArray<TransformFunction
  * - Return a new transformed value (pure transformation)
  * - Modify the value in-place and return `undefined` (impure transformation)
  * 
- * Both synchronous and asynchronous transform functions can be mixed in the same call.
- * 
  * @typeParam T - The type of the value being transformed.
  * @param obj - The initial value to transform.
  * @param fns - Transform functions to apply, which can be arbitrarily nested in arrays
- *              for organizational purposes. Nested arrays are flattened during execution.
+ *              for organizational purposes.
  * @returns A promise that resolves to the final transformed value after all transform
  *          functions have been applied.
  * 

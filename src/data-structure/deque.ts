@@ -113,13 +113,12 @@ export class Deque<T> {
     
     /**
      * Retrieves the item at the provided position.
+     * 
+     * An index of `-1` returns the tail item, `0` returns the head, and any
+     * non-integer input is truncated toward zero.
      *
      * @param index - Requested position inside the deque.
      * @returns The referenced item or `null` when the position is out of range.
-     *
-     * @remarks
-     * An index of `-1` returns the tail item, `0` returns the head, and any
-     * non-integer input is truncated toward zero.
      *
      * @example
      * const deque = new Deque<number>();
