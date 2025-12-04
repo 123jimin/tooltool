@@ -1,5 +1,5 @@
-import { Nullable } from "../type/index.js";
-import { toAsyncGenerator } from "../iterator/generator.js";
+import type { Nullable } from "../type/index.ts";
+import { toAsyncGenerator } from "../iterator/generator.ts";
 
 /**
  * A function that fetches a single page of data.

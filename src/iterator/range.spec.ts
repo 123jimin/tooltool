@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { range } from "./range.js";
+import { range } from "./range.ts";
 
 describe("iterator/range", () => {
     describe("range", () => {

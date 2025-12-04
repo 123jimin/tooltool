@@ -1,4 +1,4 @@
-import { isAsyncIterable } from "./generator.js";
+import { isAsyncIterable } from "./generator.ts";
 
 async function* asyncBatched<T>(
     gen: AsyncGenerator<T>,

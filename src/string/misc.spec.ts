@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { trimIndented } from "./misc.js";
+import { trimIndented } from "./misc.ts";
 
 describe("string/misc", () => {
     describe("trimIndented", () => {

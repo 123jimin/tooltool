@@ -1,6 +1,6 @@
-export * from "./json.js";
-export * from "./nullable.js";
-export * from "./result.js";
+export * from "./json.ts";
+export * from "./nullable.ts";
+export * from "./result.ts";
 
 /**
  * Compile-time assertion that two types are exactly equal.

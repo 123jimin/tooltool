@@ -1,5 +1,5 @@
-import { Deque } from "../data-structure/deque.js";
-import { Nullable } from "../type/index.js";
+import { Deque } from "../data-structure/deque.ts";
+import type { Nullable } from "../type/index.ts";
 
 /**
  * Represents a yield event in an async generator execution.

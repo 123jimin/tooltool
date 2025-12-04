@@ -1,4 +1,4 @@
-import { NestedArray } from "../type";
+import type { NestedArray } from "../type/index.ts";
 
 /**
  * A synchronous transform function that takes a value and optionally returns a transformed value.

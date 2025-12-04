@@ -32,7 +32,7 @@ When creating a new spec file, use the following template:
 
 ```ts
 import { assert } from "chai";
-import { someUtility } from "./module.js";
+import { someUtility } from "./module.ts";
 
 describe("module-name/file-name", () => {
     describe("someUtility", () => {

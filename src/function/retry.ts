@@ -1,4 +1,4 @@
-import { sleep } from "./basic.js";
+import { sleep } from "./basic.ts";
 
 export interface RetryInfo {
     attempts: number;

@@ -1,4 +1,4 @@
-import type { Nullable, Nullish } from "../type/index.js";
+import type { Nullable, Nullish } from "../type/index.ts";
 
 /**
  * Returns the substring after the first occurrence of the delimiter.

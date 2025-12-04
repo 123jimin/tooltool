@@ -1,6 +1,6 @@
 import { assert } from "chai";
-import { forEachPage, fetchPages, type PageFetcher } from "./fetch-pages.js";
-import { sleep } from "./basic.js";
+import { forEachPage, fetchPages, type PageFetcher } from "./fetch-pages.ts";
+import { sleep } from "./basic.ts";
 
 const createMockFetcher = (
     page_contents: Array<string[] | null | undefined | "error">,

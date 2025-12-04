@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+
 /**
  * Partition an array into two arrays based on a predicate.
  * 
@@ -12,7 +14,7 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
     const truthy: T[] = [];
 
     for(let i = 0; i < arr.length; ++i) {
-        (predicate(arr[i], i, arr) ? truthy : falsey).push(arr[i]);
+        (predicate(arr[i]!, i, arr) ? truthy : falsey).push(arr[i]!);
     }
 
     return [falsey, truthy];
@@ -28,13 +30,13 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
  */
 export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index: number, default_value: T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");
-    if(index < arr.length) return arr[index];
+    if(index < arr.length) return arr[index]!;
 
     for(let i = arr.length; i <= index; ++i) {
         arr.push({...default_value});
     }
 
-    return arr[index];
+    return arr[index]!;
 }
 
 /**
@@ -47,11 +49,11 @@ export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index:
  */
 export function arrayGetOrExtendWith<T extends NonNullable<object>>(arr: T[], index: number, f: (index: number) => T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");
-    if(index < arr.length) return arr[index];
+    if(index < arr.length) return arr[index]!;
 
     for(let i = arr.length; i <= index; ++i) {
         arr.push(f(i));
     }
 
-    return arr[index];
+    return arr[index]!;
 }

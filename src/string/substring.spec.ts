@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 
-import { substringAfter, substringBefore, substringBetween } from "./substring.js";
+import { substringAfter, substringBefore, substringBetween } from "./substring.ts";
 
 describe("string/substring", () => {
     describe("substringAfter", () => {

@@ -10,7 +10,7 @@ jobs:
   build-test:
     uses: "./.github/workflows/build-test.yaml"
     with:
-      pnpm-version: "10.17"
+      pnpm-version: "10.24"
   build-docs:
     needs: build-test
     if: ${{ github.ref == 'refs/heads/main' }}
@@ -20,4 +20,4 @@ jobs:
       pages: write
       id-token: write
     with:
-      pnpm-version: "10.17"
+      pnpm-version: "10.24"

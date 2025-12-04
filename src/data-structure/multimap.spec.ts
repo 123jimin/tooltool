@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { multimapAdd } from "./multimap.js";
+import { multimapAdd } from "./multimap.ts";
 
 describe("data-structure/multimap", () => {
     describe("multimapAdd", () => {

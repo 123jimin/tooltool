@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { getRowCol } from "./debug.js";
+import { getRowCol } from "./debug.ts";
 
 describe("string/debug", () => {
     describe("getRowCol", () => {

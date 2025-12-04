@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { recordAccess } from "./record.js";
+import { recordAccess } from "./record.ts";
 
 describe("data-structure/record", () => {
     describe("recordAccess", () => {
@@ -9,7 +9,7 @@ describe("data-structure/record", () => {
                 const [value, setValue] = recordAccess<number>(obj, ["a", "b", "c"]);
                 assert.strictEqual(value, 42);
                 setValue(100);
-                assert.strictEqual((obj.a.b as Record<string, unknown>).c, 100);
+                assert.strictEqual(obj.a.b.c, 100);
             });
 
             it("should return value at single-level path", () => {
@@ -63,10 +63,10 @@ describe("data-structure/record", () => {
 
         describe("setting values", () => {
             it("should set value at existing path", () => {
-                const obj: Record<string, unknown> = { a: { b: 1 } };
+                const obj = { a: { b: 1 } };
                 const [, setValue] = recordAccess<number>(obj, ["a", "b"]);
                 setValue(99);
-                assert.strictEqual((obj.a as Record<string, unknown>).b, 99);
+                assert.strictEqual(obj.a.b, 99);
             });
 
             it("should create intermediate objects for non-existent path", () => {
@@ -77,14 +77,14 @@ describe("data-structure/record", () => {
             });
 
             it("should set value at single-level path", () => {
-                const obj: Record<string, unknown> = {};
+                const obj: {foo?: "bar"} = {};
                 const [, setValue] = recordAccess<string>(obj, ["foo"]);
                 setValue("bar");
                 assert.strictEqual(obj.foo, "bar");
             });
 
             it("should overwrite existing value", () => {
-                const obj: Record<string, unknown> = { x: "old" };
+                const obj ={ x: "old" };
                 const [oldValue, setValue] = recordAccess<string>(obj, ["x"]);
                 assert.strictEqual(oldValue, "old");
                 setValue("new");
@@ -99,7 +99,7 @@ describe("data-structure/record", () => {
             });
 
             it("should allow multiple setValue calls", () => {
-                const obj: Record<string, unknown> = {};
+                const obj: {x?: number} = {};
                 const [, setValue] = recordAccess<number>(obj, ["x"]);
                 setValue(1);
                 assert.strictEqual(obj.x, 1);
@@ -108,21 +108,21 @@ describe("data-structure/record", () => {
             });
 
             it("should handle setting array values", () => {
-                const obj: Record<string, unknown> = {};
+                const obj: {data?: number[]} = {};
                 const [, setValue] = recordAccess<number[]>(obj, ["data"]);
                 setValue([1, 2, 3]);
                 assert.deepStrictEqual(obj.data, [1, 2, 3]);
             });
 
             it("should handle setting object values", () => {
-                const obj: Record<string, unknown> = {};
+                const obj: {config?: unknown} = {};
                 const [, setValue] = recordAccess<{ nested: boolean }>(obj, ["config"]);
                 setValue({ nested: true });
                 assert.deepStrictEqual(obj.config, { nested: true });
             });
 
             it("should handle setting null and undefined", () => {
-                const obj: Record<string, unknown> = { a: 1, b: 2 };
+                const obj = { a: 1, b: 2 };
 
                 recordAccess<null>(obj, ["a"])[1](null);
                 assert.isNull(obj.a);

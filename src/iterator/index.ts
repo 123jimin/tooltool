@@ -1,4 +1,4 @@
 // TODO: Enable after adding tests.
-// export * from "./batch.js";
-export * from "./generator.js";
-export * from "./range.js";
+// export * from "./batch.ts";
+export * from "./generator.ts";
+export * from "./range.ts";

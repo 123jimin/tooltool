@@ -1,7 +1,7 @@
 import { assert } from "chai";
-import { rateLimited } from "./rate-limit.js";
+import { rateLimited } from "./rate-limit.ts";
 
-import { sleep } from "./basic.js";
+import { sleep } from "./basic.ts";
 
 const TOLERANCE_MS = 10;
 
@@ -90,7 +90,8 @@ describe("function/rate-limit", () => {
 
                 // Check minimum spacing between starts is at least `duration`
                 for (let i = 1; i < starts.length; i++) {
-                    const delta = starts[i] - starts[i - 1];
+                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                    const delta = starts[i]! - starts[i - 1]!;
                     assert.isAtLeast(
                         delta + TOLERANCE_MS,
                         duration,
@@ -152,8 +153,11 @@ describe("function/rate-limit", () => {
                 d = 20;
                 await limited();
 
-                const delta1 = starts[1] - starts[0];
-                const delta2 = starts[2] - starts[1];
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const delta1 = starts[1]! - starts[0]!;
+                
+                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                const delta2 = starts[2]! - starts[1]!;
 
                 assert.isAtLeast(
                     delta1 + TOLERANCE_MS,

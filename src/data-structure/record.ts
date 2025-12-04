@@ -39,14 +39,16 @@ export function recordAccess<T = unknown>(
         let target: Record<string, unknown> = obj;
 
         for (let i = 0; i < flat_path.length-1; i++) {
-            const key = flat_path[i];
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            const key = flat_path[i]!;
             if (target[key] == null || typeof target[key] !== 'object') {
                 target[key] = {};
             }
             target = target[key] as Record<string, unknown>;
         }
 
-        target[flat_path[flat_path.length-1]] = value;
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        target[flat_path[flat_path.length-1]!] = value;
     };
 
     return [current as T | undefined, setValue];

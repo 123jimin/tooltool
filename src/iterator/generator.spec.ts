@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import { toAsyncGenerator, runGenerator, isAsyncIterable } from "./generator.js";
+import { toAsyncGenerator, runGenerator, isAsyncIterable } from "./generator.ts";
 
 describe("iterator/generator", () => {
     describe('toAsyncGenerator', function () {

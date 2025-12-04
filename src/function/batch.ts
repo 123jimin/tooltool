@@ -1,4 +1,4 @@
-import type { Nullable } from "../type/index.js";
+import type { Nullable } from "../type/index.ts";
 
 /**
  * Asynchronously iterate over an array in batches.

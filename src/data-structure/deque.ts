@@ -59,7 +59,8 @@ export class Deque<T> {
      */
     unshift(...items: T[]): number {
         for (let index = items.length - 1; index >= 0; --index) {
-            this.#item_map.set(--this.#head_index, items[index]);
+            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            this.#item_map.set(--this.#head_index, items[index]!);
         }
 
         return this.length;
