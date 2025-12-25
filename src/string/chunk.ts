@@ -1,3 +1,22 @@
+export function chunkText(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): string[] {
+    if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`chunkText: invalid max_length=${max_length}`);
+    if(text.length === 0) return [];
+    if(max_length === 1) return text.split('');
+
+    const chunks: string[] = [];
+
+    while(text.length > max_length) {
+        const split_length = getNextChunkLength(text, max_length, separators);
+        const chunk = text.slice(0, split_length).trimEnd();
+        text = text.slice(split_length).trimStart();
+
+        if(chunk) chunks.push(chunk);
+    }
+
+    if(text) chunks.push(text);
+    return chunks;
+}
+
 /**
  * Determines the optimal length for the next text chunk, ensuring it does not exceed the specified maximum length.
  *
@@ -11,23 +30,9 @@
  * @param separators - A list of characters or substrings to split by, in order of preference. Defaults to `['\n', ' ', '.']`.
  * @returns The calculated length of the next chunk.
  * @throws {RangeError} If `max_length` is not a positive safe integer.
- *
- * @example
- * ```ts
- * const text = "Hello world. This is a test.";
- *
- * // Splits at space after 'Hello' (index 5 + 1)
- * getNextSplitLength(text, 10); // -> 6 ("Hello ")
- *
- * // Splits at period (index 11 + 1)
- * getNextSplitLength(text, 15); // -> 12 ("Hello world.")
- *
- * // No separator found in comfortable range, returns max_length
- * getNextSplitLength("1234567890", 5); // -> 5
- * ```
  */
-export function getNextSplitLength(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): number {
-    if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`getNextSplitLength: invalid max_length=${max_length}`);
+export function getNextChunkLength(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): number {
+    if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`getNextChunkLength: invalid max_length=${max_length}`);
     if(text.length === 0) return 0;
     if(text.length <= max_length) return text.length;
     if(max_length === 1) return 1;
