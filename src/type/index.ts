@@ -48,3 +48,17 @@ export type NestedArrayElement<T> = T | NestedArray<T>;
  * ```
  */
 export type NestedArray<T> = NestedArrayElement<T>[];
+
+/**
+ * Recursively makes all properties of type `T` optional.
+ * 
+ * Unlike the standard `Partial<T>`, this type traverses down the object structure,
+ * making every nested property optional as well. Useful for patch objects or
+ * configuration overrides where you don't want to specify the full structure.
+ * 
+ * @template T - The type to be made recursively partial.
+ */
+export type RecursivePartial<T> =
+    [T] extends [Array<infer U>] ? Array<RecursivePartial<U>> :
+    [T] extends [object] ? {[P in keyof T]?: RecursivePartial<T[P]>} :
+    T;

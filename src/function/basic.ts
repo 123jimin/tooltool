@@ -52,3 +52,14 @@ export function identity<T>(t: T): T {
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function nop(...args: unknown[]): void {}
+
+/**
+ * Invokes the provided function immediately and returns its result.
+ *
+ * @typeParam ReturnType - The type of the value returned by the function.
+ * @param fn - The function to execute.
+ * @returns {ReturnType} The result of the executed function.
+ */
+export function invoke<ReturnType>(fn: () => ReturnType): ReturnType {
+    return fn();
+}

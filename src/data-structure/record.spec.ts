@@ -1,5 +1,5 @@
 import { assert } from "chai";
-import { recordAccess } from "./record.ts";
+import { recordAccess, recursiveMerge } from "./record.ts";
 
 describe("data-structure/record", () => {
     describe("recordAccess", () => {
@@ -166,6 +166,90 @@ describe("data-structure/record", () => {
                 const [value] = recordAccess<number>(obj, ["a", "1"]);
                 assert.strictEqual(value, 2);
             });
+        });
+    });
+
+    describe("recursiveMerge", () => {
+        it("should work as advertised", () => {
+            const base: Record<string, unknown> = { a: 1, b: { c: 2 } };
+            const patch: Record<string, unknown> = { b: { d: 3 }, e: 4 };
+            
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { a: 1, b: { c: 2, d: 3 }, e: 4 });
+        });
+
+        it("should return the base object reference if patch is null or undefined", () => {
+            const base = { a: 1 };
+            assert.strictEqual(recursiveMerge(base, undefined), base);
+            assert.strictEqual(recursiveMerge(base, null), base);
+        });
+
+        it("should overwrite primitive values in base with values from patch", () => {
+            const base = { a: 1, b: "hello" };
+            const patch = { a: 2, b: "world" };
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { a: 2, b: "world" });
+        });
+
+        it("should overwrite arrays completely instead of merging them", () => {
+            const base = { list: [1, 2, 3] };
+            const patch = { list: [4, 5] };
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { list: [4, 5] });
+        });
+
+        it("should merge nested objects recursively", () => {
+            const base = {
+                user: {
+                    name: "User",
+                    settings: { theme: "dark", notifications: true }
+                }
+            };
+            const patch = {
+                user: {
+                    settings: { notifications: false }
+                }
+            };
+            const result = recursiveMerge(base, patch);
+            
+            assert.deepStrictEqual(result, {
+                user: {
+                    name: "User",
+                    settings: { theme: "dark", notifications: false }
+                }
+            });
+        });
+
+        it("should ignore properties explicitly set to undefined in patch", () => {
+            const base: Record<string, unknown> = { a: 1, b: 2 };
+            const patch: Record<string, unknown> = { a: undefined, b: 3 };
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { a: 1, b: 3 });
+        });
+
+        it("should overwrite properties with null if set to null in patch", () => {
+            const base: { a: number | null, b: number } = { a: 1, b: 2 };
+            const patch = { a: null };
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { a: null, b: 2 });
+        });
+
+        it("should not mutate the original base or patch objects", () => {
+            const base: Record<string, unknown> = { nested: { a: 1 } };
+            const patch: Record<string, unknown> = { nested: { b: 2 } };
+            
+            recursiveMerge(base, patch);
+
+            assert.deepStrictEqual(base, { nested: { a: 1 } }, "Base should remain unchanged");
+            assert.deepStrictEqual(patch, { nested: { b: 2 } }, "Patch should remain unchanged");
+        });
+
+        it("should handle disjoint keys correctly", () => {
+            const base: Record<string, unknown> = { a: 1 };
+            const patch: Record<string, unknown> = { b: 2 };
+
+            const result = recursiveMerge(base, patch);
+            assert.deepStrictEqual(result, { a: 1, b: 2 });
         });
     });
 });

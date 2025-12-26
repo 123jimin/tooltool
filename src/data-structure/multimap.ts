@@ -85,3 +85,43 @@ export function multimapAdd<K extends PropertyKey, V>(
         return arr;
     }
 }
+
+/**
+ * Partitions an array into a `Map`-based multimap using a key extractor function.
+ *
+ * Each element in the array is mapped to a key via the provided function.
+ * The result is a `Map` where each key holds an array of all elements that produced that key.
+ *
+ * @typeParam T - The type of elements in the input array.
+ * @typeParam U - The type of keys in the resulting map.
+ *
+ * @param arr - The array of elements to partition.
+ * @param key - A function that produces a key from an element.
+ *
+ * @returns A `Map` grouping elements by their extracted keys.
+ *
+ * @example
+ * const numbers = [1, 2, 3, 4, 5];
+ * const parity = partitionToMultimap(numbers, (n) => n % 2 === 0 ? "even" : "odd");
+ *
+ * console.log(parity.get("odd"));
+ * // → [1, 3, 5]
+ * console.log(parity.get("even"));
+ * // → [2, 4]
+ *
+ * @example
+ * const words = ["apple", "banana", "avocado", "cherry"];
+ * const byFirstChar = partitionToMultimap(words, (w) => w[0]);
+ *
+ * console.log(byFirstChar.get("a"));
+ * // → ["apple", "avocado"]
+ */
+export function partitionToMultimap<T, U>(arr: T[], key: (t: T) => U): Map<U, T[]> {
+    const map = new Map<U, T[]>();
+
+    for (const item of arr) {
+        multimapAdd(map, key(item), item);
+    }
+
+    return map;
+}
