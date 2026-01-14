@@ -81,6 +81,7 @@ export function recordAccess<T = unknown>(
  */
 export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch: Nullable<RecursivePartial<T>>): T {
     if(patch == null || base === patch) return base;
+    if(base == null) return patch as T;
 
     const patched: Record<string, unknown> = {...base};
     for(const [k, v] of Object.entries(patch)) {
@@ -95,7 +96,8 @@ export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch
             continue;
         }
 
-        patched[k] = recursiveMerge(patched[k] as Record<string, unknown>, v);
+        const orig = patched[k] as Record<string, unknown>;
+        patched[k] = recursiveMerge(orig, v);
     }
 
     return patched as T;
