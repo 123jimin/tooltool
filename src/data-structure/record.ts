@@ -1,4 +1,4 @@
-import type { RecursivePartial } from "../type/index.ts";
+import type { Nullable, RecursivePartial } from "../type/index.ts";
 
 /**
  * Accesses a nested record at the given path, returning both the current value and a setter function.
@@ -79,8 +79,8 @@ export function recordAccess<T = unknown>(
  * - Properties with `undefined` values in `patch` are ignored.
  * - Properties with `null` values in `patch` overwrite the values in `base`.
  */
-export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch: undefined|null|RecursivePartial<T>): T {
-    if(patch == null) return base;
+export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch: Nullable<RecursivePartial<T>>): T {
+    if(patch == null || base === patch) return base;
 
     const patched: Record<string, unknown> = {...base};
     for(const [k, v] of Object.entries(patch)) {
