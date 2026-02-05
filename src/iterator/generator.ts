@@ -142,7 +142,7 @@ export interface AsyncGeneratorExecutor<Y, R=void, T=unknown> {
  * @see {@link AsyncGeneratorExecutor}
  * @see {@link runGenerator}
  */
-export async function* toAsyncGenerator<Y, R=void, T=unknown>(executor: (callbacks: AsyncGeneratorExecutor<Y, R, T>) => void): AsyncGenerator<Y ,R> {
+export async function* toAsyncGenerator<Y, R=void, T=unknown>(handleExecutor: (callbacks: AsyncGeneratorExecutor<Y, R, T>) => void): AsyncGenerator<Y ,R> {
     const queue = new Deque<AsyncEvent<Y, R, T>>();
 
     let resolveNext: Nullable<(() => void)> = null;
@@ -157,7 +157,7 @@ export async function* toAsyncGenerator<Y, R=void, T=unknown>(executor: (callbac
     };
 
     try {
-        executor({
+        handleExecutor({
             yeet(y) { push({type: 'yield', value: y}); },
             done(r) { push({type: 'return', value: r}); },
             fail(e) { push({type: 'throw', value: e}); },
