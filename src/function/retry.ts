@@ -99,8 +99,10 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
 /**
  * Creates an exponential backoff delay function for use with {@link retryWithDelay}.
  *
- * @param options - Backoff configuration. If `max_attempts` is provided, returns a
- *                  {@link DelayFunctionWithForfeit} that forfeits after the limit.
+ * @param options - Backoff configuration. If `max_attempts` is provided and positive,
+ *                  returns a {@link DelayFunctionWithForfeit} that forfeits after the limit.
+ *                  If `max_attempts` is 0 or negative, it's ignored and a {@link DelayFunction}
+ *                  is returned (infinite retries).
  * @returns A delay function.
  *
  * @example

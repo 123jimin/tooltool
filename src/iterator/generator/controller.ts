@@ -12,11 +12,12 @@ import type { AsyncEvent } from './type.ts';
  * @see {@link toAsyncGenerator}
  */
 export interface GeneratorController<Y, R=void, T=unknown> {
-        /** Yields a value. */
+    /** Yields a value. */
     yeet(y: Y): void;
 
     /** Completes the generator with a return value. */
-    done(r: R): void;
+    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+    done(...args: [R] extends [undefined|void] ? [] | [R] : [R]): void;
 
     /** Throws an error from the generator. */
     fail(t: T): void;
@@ -77,7 +78,10 @@ export function createGeneratorController<Y, R=void, T=unknown>(): GeneratorCont
 
     return {
         yeet(y: Y): void { push({type: 'yield', value: y}); },
-        done(r: R): void { push({type: 'return', value: r}); },
+        done(...args): void {
+            const r = (args.length > 0 ? args[0] : (void 0)) as R;
+            push({type: 'return', value: r});
+        },
         fail(t: T): void { push({type: 'throw', value: t}); },
         entries(): AsyncIterable<Y, R> {
             return (async function*(): AsyncGenerator<Y, R> {

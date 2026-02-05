@@ -57,6 +57,9 @@ export class Deque<T> {
      * Removes and returns the tail item.
      *
      * @returns The removed item, or `null` if empty.
+     *
+     * @remarks
+     * Returns `null` (not `undefined`) when empty, diverging from native `Array.pop()`.
      */
     pop(): T | null {
         if (this.length === 0) {
@@ -75,6 +78,9 @@ export class Deque<T> {
      * Removes and returns the head item.
      *
      * @returns The removed item, or `null` if empty.
+     *
+     * @remarks
+     * Returns `null` (not `undefined`) when empty, diverging from native `Array.shift()`.
      */
     shift(): T | null {
         if (this.length === 0) {

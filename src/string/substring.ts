@@ -6,12 +6,17 @@ import type { Nullable, Nullish } from "../type/index.ts";
  * @param s - Input string, or `null`/`undefined`.
  * @param delimiter - String or regex marking where to start.
  * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
- * @returns The substring after the delimiter, or `on_missing`.
+ * @returns The substring after the delimiter (may be empty string), or `on_missing`.
+ *
+ * @remarks
+ * If the delimiter is found at the end of the string, an empty string is returned
+ * (not `on_missing`).
  *
  * @example
  * ```ts
  * substringAfter("path/to/file.txt", '/');     // "to/file.txt"
  * substringAfter("abc123xyz", /\d+/);          // "xyz"
+ * substringAfter("abc123", /\d+/);             // "" (empty string)
  * substringAfter(undefined, ':');              // null
  * substringAfter("no-needle", ':', 'default'); // 'default'
  * ```

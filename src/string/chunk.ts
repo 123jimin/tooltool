@@ -8,12 +8,16 @@
  * @throws {RangeError} If `max_length` is not a positive safe integer.
  *
  * @remarks
- * Separators are only considered in the latter half of each chunk to avoid tiny chunks.
+ * - Separators are only considered in the latter half of each chunk to avoid tiny chunks.
+ * - Each chunk is trimmed (leading/trailing whitespace removed) before being added to results.
+ * - Empty chunks (after trimming) are skipped.
  *
  * @example
  * ```ts
- * chunkText('hello world', 5); // ['hello', 'world']
- * chunkText('a b c d e', 3);   // ['a b', 'c d', 'e']
+ * chunkText('hello world', 5);     // ['hello', 'world']
+ * chunkText('hello world', 7);     // ['hello', 'world']
+ * chunkText('abcdefghij', 5);      // ['abcde', 'fghij']
+ * chunkText('a b c d e', 4);       // ['a b', 'c d', 'e']
  * ```
  */
 export function chunkText(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): string[] {
