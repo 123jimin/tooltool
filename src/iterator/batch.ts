@@ -37,21 +37,17 @@ function* syncBatched<T>(
 }
 
 /**
- * Creates a generator that yields elements of the given generator in batches of `n`.
+ * Yields elements from a generator in batches of size `n`.
+ *
+ * @typeParam T - Element type.
+ * @param gen - The source generator (sync or async).
+ * @param n - Batch size.
+ * @returns A generator yielding arrays of up to `n` elements.
  *
  * @example
  * ```ts
- * import { batched } from "./batch";
- * import { range } from "./range";
- *
- * const a = batched(range(10), 3);
- * console.log([...a]);
- * // => [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
+ * [...batched(range(10), 3)]; // [[0, 1, 2], [3, 4, 5], [6, 7, 8], [9]]
  * ```
- *
- * @param gen A generator to process.
- * @param n A size of the batch.
- * @returns A new generator that yields arrays of elements from the given generator.
  */
 export function batched<T>(gen: Generator<T>, n: number): Generator<T[]>;
 export function batched<T>(

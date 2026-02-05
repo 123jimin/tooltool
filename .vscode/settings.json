@@ -11,6 +11,7 @@
         "lerp",
         "Microbundle",
         "multimap",
+        "nums",
         "Nuxt",
         "pids",
         "repr",
@@ -19,6 +20,7 @@
         "tooltool",
         "vuepress",
         "wscript",
+        "Xcom",
         "yeet"
     ]
 }

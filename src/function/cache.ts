@@ -1,45 +1,41 @@
 /**
- * A function wrapper returned by {@link cached} representing the wrapped function with caching capabilities.
+ * A function wrapper returned by {@link cached} with caching capabilities.
+ *
+ * @typeParam ArgsType - Tuple of the wrapped function's parameter types.
+ * @typeParam ReturnType - The resolved type of the wrapped function.
  */
 export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
-    /**
-     * Executes the underlying function or returns the existing in-flight/resolved promise.
-     */
+    /** Executes the function or returns the cached promise. */
     (...args: ArgsType): Promise<ReturnType>;
 
-    /**
-     * Clears the internal cache of the function.
-     */
+    /** Clears all cached entries. */
     clearCache(): void;
 }
 
 
 /**
- * Creates a memoized version of an asynchronous function to deduplicate requests and cache results.
+ * Creates a memoized async function that deduplicates in-flight requests and caches results.
  *
- * The wrapper stores the `Promise` keyed by the provided arguments. Any subsequent call with the
- * same cache key receives the original promise, preventing duplicate work while the result is
- * pending (request coalescing) and after it resolves.
+ * Subsequent calls with the same cache key receive the original promise (request coalescing).
+ * If the promise rejects, the entry is evicted so the next call can retry.
  *
- * If the promise rejects, the cache entry is removed immediately so the next invocation can retry.
- *
- * @param fn - The asynchronous function to memoize.
- * @param keyGenerator - Optional function to derive cache keys. When omitted, `JSON.stringify(args)`
- * is used. Provide a specific generator if arguments are complex objects or non-serializable.
- * @returns A callable object that behaves like the original function but includes a `.clearCache()` method.
+ * @typeParam ArgsType - Tuple of the function's parameter types.
+ * @typeParam T - The resolved return type.
+ * @typeParam K - The cache key type.
+ * @param fn - The async function to memoize.
+ * @param keyGenerator - Derives a cache key from arguments. Defaults to `JSON.stringify`.
+ * @returns A {@link CachedFunction} with an additional `.clearCache()` method.
  *
  * @remarks
- * Because this function evicts keys on rejection, it does not "cache failures" by default.
- * If you wish to cache a negative result (e.g., "User Not Found" to prevent repeated lookup),
- * ensure `fn` resolves with a `Result<T, E>` or `null` instead of rejecting.
- * 
- * @see {@link CachedFunction}
+ * Rejections are not cached. To cache negative results, resolve with `Result<T, E>` or `null`.
  *
  * @example
- * const cachedFetchUser = cached(async (id: string) => fetch(`/users/${id}`).then(r => r.json()));
- * await cachedFetchUser("42"); // executes the underlying fetch
- * await cachedFetchUser("42"); // returns the cached promise
- * cachedFetchUser.clearCache(); // remove all cached entries
+ * ```ts
+ * const cachedFetch = cached(async (id: string) => fetch(`/users/${id}`).then(r => r.json()));
+ * await cachedFetch("42"); // executes fetch
+ * await cachedFetch("42"); // returns cached promise
+ * cachedFetch.clearCache();
+ * ```
  */
 export function cached<ArgsType extends unknown[], T, K = unknown>(
     fn: (...args: ArgsType) => Promise<T>,

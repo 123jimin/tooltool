@@ -41,67 +41,31 @@ function* _rangeBigInt(start: bigint, end: bigint, raw_step?: bigint): Generator
 }
 
 /**
- * Creates a generator that yields a sequence of numbers or bigints.
+ * Creates a lazy generator yielding a sequence of numbers or bigints (like Python's `range()`).
  *
- * This function behaves similarly to Python's `range()`. It's lazy, returning a
- * `Generator` that produces values on demand. The `end` value is exclusive.
+ * - `range(end)` — `[0, end)`
+ * - `range(start, end)` — `[start, end)`
+ * - `range(start, end, step)` — `[start, end)` with custom step
  *
- * It can be called in three ways:
- * 1. `range(end)`: Creates a sequence from `0` up to (but not including) `end`.
- * 2. `range(start, end)`: Creates a sequence from `start` up to (but not including) `end`.
- * 3. `range(start, end, step)`: Creates a sequence from `start` with a given `step`.
+ * Default step is `1` (or `1n`). For descending ranges, provide a negative step.
  *
- * The default step is always `1` (or `1n`). To count down, an explicit negative step must be provided.
+ * @param start - Start of sequence (or `end` if only one argument).
+ * @param end - End of sequence (exclusive).
+ * @param step - Increment (default: `1` or `1n`).
+ * @returns A `Generator` yielding the sequence.
+ * @throws {Error} If `step` is `0` or `0n`.
  *
  * @remarks
- * **Warning on Floating-Point Numbers:**
- * While this function accepts floating-point numbers for `start`, `end`, and `step`,
- * their use can lead to unexpected behavior due to the inherent imprecision of
- * floating-point arithmetic. Accumulating a fractional `step` may result in values
- * that are slightly off, potentially causing the sequence to include an extra
- * element or miss the last one. For predictable and reliable sequences, it is
- * strongly recommended to use integers.
- * 
- * @param start - The start of the sequence. If `end` is not provided, this value is treated as `end`, and `start` defaults to `0` or `0n`.
- * @param end - The end of the sequence (exclusive).
- * @param step - The increment between numbers. Defaults to `1` (or `1n`).
- * @returns A `Generator` that yields numbers in the specified range.
- * @throws {Error} If the provided `step` is `0` or `0n`.
+ * Floating-point arguments may cause imprecise results due to accumulation errors.
+ * Use integers for reliable sequences.
  *
- * @example Basic usage
+ * @example
  * ```ts
- * [...range(5)];
- * //> [0, 1, 2, 3, 4]
- * ```
- *
- * @example With a start and end
- * ```ts
- * [...range(5, 10)];
- * //> [5, 6, 7, 8, 9]
- * ```
- *
- * @example With a positive step
- * ```ts
- * [...range(0, 10, 2)];
- * //> [0, 2, 4, 6, 8]
- * ```
- *
- * @example Counting down requires an explicit negative step
- * ```ts
- * [...range(5, 0, -1)];
- * //> [5, 4, 3, 2, 1]
- * ```
- *
- * @example An empty range
- * ```ts
- * [...range(5, 0)]; // Default step is 1, so this yields nothing.
- * //> []
- * ```
- *
- * @example Using bigints
- * ```ts
- * [...range(0n, 5n)];
- * //> [0n, 1n, 2n, 3n, 4n]
+ * [...range(5)];           // [0, 1, 2, 3, 4]
+ * [...range(5, 10)];       // [5, 6, 7, 8, 9]
+ * [...range(0, 10, 2)];    // [0, 2, 4, 6, 8]
+ * [...range(5, 0, -1)];    // [5, 4, 3, 2, 1]
+ * [...range(0n, 5n)];      // [0n, 1n, 2n, 3n, 4n]
  * ```
  */
 export function range(start: number, end?: number, step?: number): Generator<number>;

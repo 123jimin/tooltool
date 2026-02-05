@@ -1,41 +1,33 @@
 /**
- * Represents a double-ended queue (deque) with amortized O(1) insertion and removal at both ends.
- * The implementation stores items inside a sparse index map so the head and tail can grow independently without costly array shifts.
+ * A double-ended queue with amortized O(1) insertion and removal at both ends.
  *
- * @typeParam T - Type of item stored inside the deque.
+ * Uses a sparse index map so head and tail grow independently without array shifts.
+ *
+ * @typeParam T - Item type.
  *
  * @example
+ * ```ts
  * const deque = new Deque<number>();
  * deque.push(1, 2);
  * deque.unshift(0);
  * deque.pop(); // 2
+ * ```
  */
 export class Deque<T> {
     #item_map = new Map<number, T>();
     #head_index = 0;
     #tail_index = 0;
 
-    /**
-     * Current number of items held by the deque.
-     *
-     * @example
-     * const deque = new Deque<string>();
-     * deque.push("a");
-     * deque.length; // 1
-     */
+    /** Number of items in the deque. */
     get length(): number {
         return this.#tail_index - this.#head_index;
     }
 
     /**
-     * Appends items to the tail of the deque.
+     * Appends items to the tail.
      *
-     * @param items - Items to append, in the order they should appear.
-     * @returns The updated deque length.
-     *
-     * @example
-     * const deque = new Deque<number>();
-     * deque.push(1, 2); // 2
+     * @param items - Items to append (in order).
+     * @returns The new length.
      */
     push(...items: T[]): number {
         for (const item of items) {
@@ -47,15 +39,10 @@ export class Deque<T> {
     }
     
     /**
-     * Inserts items at the head of the deque.
+     * Inserts items at the head.
      *
-     * @param items - Items to insert, where the first argument becomes the new head.
-     * @returns The updated deque length.
-     *
-     * @example
-     * const deque = new Deque<number>();
-     * deque.unshift(2, 3); // 2
-     * deque.unshift(1); // 3
+     * @param items - Items to insert; first argument becomes the new head.
+     * @returns The new length.
      */
     unshift(...items: T[]): number {
         for (let index = items.length - 1; index >= 0; --index) {
@@ -67,14 +54,9 @@ export class Deque<T> {
     }
     
     /**
-     * Removes and returns the item at the tail of the deque.
+     * Removes and returns the tail item.
      *
-     * @returns The removed item, or `null` if the deque is empty.
-     *
-     * @example
-     * const deque = new Deque<number>();
-     * deque.push(1, 2);
-     * deque.pop(); // 2
+     * @returns The removed item, or `null` if empty.
      */
     pop(): T | null {
         if (this.length === 0) {
@@ -90,14 +72,9 @@ export class Deque<T> {
     }
 
     /**
-     * Removes and returns the item at the head of the deque.
+     * Removes and returns the head item.
      *
-     * @returns The removed item, or `null` if the deque is empty.
-     *
-     * @example
-     * const deque = new Deque<number>();
-     * deque.push(1, 2);
-     * deque.shift(); // 1
+     * @returns The removed item, or `null` if empty.
      */
     shift(): T | null {
         if (this.length === 0) {
@@ -113,18 +90,12 @@ export class Deque<T> {
     }
     
     /**
-     * Retrieves the item at the provided position.
-     * 
-     * An index of `-1` returns the tail item, `0` returns the head, and any
-     * non-integer input is truncated toward zero.
+     * Retrieves the item at the given index.
      *
-     * @param index - Requested position inside the deque.
-     * @returns The referenced item or `null` when the position is out of range.
+     * Supports negative indices (`-1` = tail). Non-integers are truncated toward zero.
      *
-     * @example
-     * const deque = new Deque<number>();
-     * deque.push(10, 20, 30);
-     * deque.at(-1); // 30
+     * @param index - Position in the deque.
+     * @returns The item, or `null` if out of range.
      */
     at(index: number): T | null {
         const size = this.length;

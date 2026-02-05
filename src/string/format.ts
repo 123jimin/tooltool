@@ -1,16 +1,17 @@
 /**
  * Formats an integer as a fixed-point decimal string.
  *
- * It treats the input integer `n` as if it were multiplied by `10**fractions`.
- * Useful for formatting currency or other fixed-point values stored as integers.
+ * Treats `n` as if multiplied by `10 ** fractions`. Useful for currency formatting.
  *
- * @param n - The integer value to format.
- * @param fractions - The number of decimal places.
- * @returns A string representation of the fixed-point number.
+ * @param n - The integer value.
+ * @param fractions - Number of decimal places.
+ * @returns The formatted string.
  *
  * @example
+ * ```ts
  * formatFixedFloat(1234, 2); // "12.34"
- * formatFixedFloat(100, 2); // "1.00"
+ * formatFixedFloat(100, 2);  // "1.00"
+ * ```
  */
 export function formatFixedFloat(n: number, fractions: number): string {
     if(fractions <= 0) return `${n}`;
@@ -23,21 +24,20 @@ export function formatFixedFloat(n: number, fractions: number): string {
 }
 
 /**
- * Formats a number with an explicit sign prefix (+, -, or ±).
+ * Formats a number with an explicit sign prefix (`+`, `-`, or `±` for zero).
  *
  * @param n - The number to format.
- * @param min_len - The minimum length of the numeric part (padding applied to absolute value).
- * @param fill_string - The string used to pad the numeric part (default: ' ').
- * @returns The formatted string including the sign.
- *
- * @remarks
- * Zero (0) is denoted with '±'.
+ * @param min_len - Minimum length of the numeric part (pads absolute value).
+ * @param fill_string - Padding string (default: `' '`).
+ * @returns The formatted string with sign prefix.
  *
  * @example
- * formatSignedInt(42); // "+42"
- * formatSignedInt(-5); // "-5"
- * formatSignedInt(0); // "±0"
+ * ```ts
+ * formatSignedInt(42);        // "+42"
+ * formatSignedInt(-5);        // "-5"
+ * formatSignedInt(0);         // "±0"
  * formatSignedInt(5, 3, '0'); // "+005"
+ * ```
  */
 export function formatSignedInt(n: number, min_len?: number, fill_string?: string) {
     let abs_n: string = (n < 0 ? -n : n).toString();

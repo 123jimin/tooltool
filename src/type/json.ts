@@ -1,19 +1,11 @@
-/**
- * Represents a JSON scalar value.
- */
+/** A JSON scalar: `null`, `boolean`, `number`, or `string`. */
 export type JSONScalar = null | boolean | number | string;
 
-/**
- * Represents a JSON array.
- */
+/** A JSON array. */
 export type JSONArray = JSONValue[];
 
-/**
- * Represents a JSON object.
- */
+/** A JSON object. */
 export type JSONObject = { [key: string]: JSONValue };
 
-/**
- * Represents any valid JSON value.
- */
+/** Any valid JSON value. */
 export type JSONValue = JSONScalar | JSONArray | JSONObject;

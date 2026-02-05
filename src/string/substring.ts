@@ -3,23 +3,17 @@ import type { Nullable, Nullish } from "../type/index.ts";
 /**
  * Returns the substring after the first occurrence of the delimiter.
  *
- * @param s - String (or `null`/`undefined`) to find the substring of.
- * @param delimiter - Needle that marks where the cropped string should start.
- * @param on_missing - Value to return when `s` is nullish or delimiter is not found (defaults to `null`).
- *
- * @returns
- * - The substring that follows the first occurrence of `delimiter`.
- * - `on_missing` if `s` is `null`/`undefined` or if the delimiter cannot be found.
+ * @param s - Input string, or `null`/`undefined`.
+ * @param delimiter - String or regex marking where to start.
+ * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
+ * @returns The substring after the delimiter, or `on_missing`.
  *
  * @example
  * ```ts
- * substringAfter("path/to/file.txt", '/');       // "to/file.txt"
- * substringAfter("abc123", /\d+/);               // ''
- * substringAfter("abc123xyz", /\d+/);            // "xyz"
- * substringAfter(undefined, ':');                // null
- * substringAfter("no-needle", ':');              // null
- * substringAfter("no-needle", ':', 'default');   // 'default'
- * substringAfter(null, ':', '');                 // ''
+ * substringAfter("path/to/file.txt", '/');     // "to/file.txt"
+ * substringAfter("abc123xyz", /\d+/);          // "xyz"
+ * substringAfter(undefined, ':');              // null
+ * substringAfter("no-needle", ':', 'default'); // 'default'
  * ```
  */
 export function substringAfter<T extends string|null = null>(s: Nullish,          delimiter: string|RegExp, on_missing?: T): T;
@@ -41,22 +35,17 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
 /**
  * Returns the substring before the first occurrence of the delimiter.
  *
- * @param s - String (or `null`/`undefined`) to find the substring of.
- * @param delimiter - Needle that marks where the cropped string should end.
- * @param on_missing - Value to return when `s` is nullish or delimiter is not found (defaults to `null`).
- *
- * @returns
- * - The substring that precedes the first occurrence of `delimiter`.
- * - `on_missing` if `s` is `null`/`undefined` or if the delimiter cannot be found.
+ * @param s - Input string, or `null`/`undefined`.
+ * @param delimiter - String or regex marking where to end.
+ * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
+ * @returns The substring before the delimiter, or `on_missing`.
  *
  * @example
  * ```ts
- * substringBefore("path/to/file.txt", '/');       // "path"
- * substringBefore("abc123xyz", /\d+/);            // "abc"
- * substringBefore(undefined, ':');                // null
- * substringBefore("no-needle", ':');              // null
- * substringBefore("no-needle", ':', 'default');   // 'default'
- * substringBefore(null, ':', '');                 // ''
+ * substringBefore("path/to/file.txt", '/');     // "path"
+ * substringBefore("abc123xyz", /\d+/);          // "abc"
+ * substringBefore(undefined, ':');              // null
+ * substringBefore("no-needle", ':', 'default'); // 'default'
  * ```
  */
 export function substringBefore<T extends string|null = null>(s: Nullish,          delimiter: string|RegExp, on_missing?: T): T;
@@ -76,30 +65,22 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
 }
 
 /**
- * Returns the substring between the first `start` and the first `end` that follows it.
+ * Returns the substring between the first `start` and the first `end` after it.
  *
- * @param s - String (or `null`/`undefined`) to find the substring of.
- * @param start - Needle that marks where the cropped string should start.
- * @param end - Needle that marks where the cropped string should end.
- * @param on_missing - Value to return when `s` is nullish or delimiters are not found (defaults to `null`).
- *
- * @returns
- * - The substring between the first occurrence of `start` and the subsequent first occurrence of `end`.
- * - `on_missing` if `s` is `null`/`undefined` or if the delimiters cannot be found in order.
+ * @param s - Input string, or `null`/`undefined`.
+ * @param start - String or regex marking where to start.
+ * @param end - String or regex marking where to end.
+ * @param on_missing - Returned if `s` is nullish or delimiters not found (default: `null`).
+ * @returns The substring between delimiters, or `on_missing`.
  *
  * @remarks
- * The search for `end` begins after the first `start` is found. Any occurrence of `end` before the first `start` is ignored.
+ * Search for `end` begins after `start`. Occurrences of `end` before `start` are ignored.
  *
  * @example
  * ```ts
- * substringBetween("<a>b</a>", "<a>", "</a>");       // "b"
- * substringBetween("<a><b></a>", "<a>", "</a>");     // "<b>"
+ * substringBetween("<a>b</a>", "<a>", "</a>");     // "b"
  * substringBetween("yabbadabbadoo", "abba", "doo"); // "dabba"
- * substringBetween("a1b2a", "b", "a");              // "2"
- * substringBetween("<a>b", "<a>", "</a>");           // null
- * substringBetween("ab</a>", "<a>", "</a>");         // null
- * substringBetween(undefined, "<a>", "</a>");        // null
- * substringBetween("<a>b</a>", "<c>", "</c>", "");   // ""
+ * substringBetween("<a>b", "<a>", "</a>");         // null
  * ```
  */
 export function substringBetween<T extends string|null = null>(s: Nullish,          start: string|RegExp, end: string|RegExp, on_missing?: T): T;

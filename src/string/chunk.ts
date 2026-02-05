@@ -1,3 +1,21 @@
+/**
+ * Splits text into chunks with a maximum length, preferring to split at separators.
+ *
+ * @param text - The text to split.
+ * @param max_length - Maximum chunk length (positive safe integer).
+ * @param separators - Split points in order of preference (default: `['\n', ' ', '.']`).
+ * @returns Array of text chunks.
+ * @throws {RangeError} If `max_length` is not a positive safe integer.
+ *
+ * @remarks
+ * Separators are only considered in the latter half of each chunk to avoid tiny chunks.
+ *
+ * @example
+ * ```ts
+ * chunkText('hello world', 5); // ['hello', 'world']
+ * chunkText('a b c d e', 3);   // ['a b', 'c d', 'e']
+ * ```
+ */
 export function chunkText(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): string[] {
     if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`chunkText: invalid max_length=${max_length}`);
     if(text.length === 0) return [];
@@ -18,17 +36,15 @@ export function chunkText(text: string, max_length: number, separators: string[]
 }
 
 /**
- * Determines the optimal length for the next text chunk, ensuring it does not exceed the specified maximum length.
+ * Calculates the optimal length for the next text chunk.
  *
- * It attempts to split the text at the last occurrence of a separator within the `max_length`.
- * To avoid creating excessively small chunks, it only considers separators found in the latter half of the potential chunk (defined as `max_length >> 1`).
+ * Splits at the last separator within `max_length`, considering only separators
+ * in the latter half to avoid tiny chunks.
  *
- * If no suitable separator is found, or if the text is shorter than `max_length`, it returns `max_length` (or the text length).
- *
- * @param text - The text to be split.
- * @param max_length - The hard limit for the chunk length. Must be a positive integer.
- * @param separators - A list of characters or substrings to split by, in order of preference. Defaults to `['\n', ' ', '.']`.
- * @returns The calculated length of the next chunk.
+ * @param text - The text to split.
+ * @param max_length - Maximum chunk length (positive safe integer).
+ * @param separators - Split points in order of preference (default: `['\n', ' ', '.']`).
+ * @returns The calculated chunk length.
  * @throws {RangeError} If `max_length` is not a positive safe integer.
  */
 export function getNextChunkLength(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): number {

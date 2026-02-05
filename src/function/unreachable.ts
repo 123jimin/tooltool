@@ -1,27 +1,24 @@
 /**
- * Asserts that a code path is unreachable and throws if executed.
- * 
- * Use this for exhaustiveness checking in switch statements and conditional branches.
- * TypeScript will produce a compile error if all cases aren't handled.
- * 
- * This is particularly useful when avoiding `default` cases in switch statements,
- * as `default` would mask missing cases when new values are added to a union type.
- * 
- * @param value - A value that should be `never` if all cases are handled.
- * @throws Always throws an error indicating unreachable code was executed.
- * 
+ * Asserts that a code path is unreachable; throws if executed.
+ *
+ * Use for exhaustiveness checking in switch statements. TypeScript will error
+ * if all cases aren't handled.
+ *
+ * @param value - Should be `never` if all cases are handled.
+ * @throws Always throws with the unexpected value.
+ *
  * @example
- * type Fruit = 'apple' | 'banana' | 'cherry';
- * 
- * function getFruitColor(fruit: Fruit): string {
+ * ```ts
+ * type Fruit = 'apple' | 'banana';
+ *
+ * function getColor(fruit: Fruit): string {
  *     switch (fruit) {
  *         case 'apple': return 'red';
  *         case 'banana': return 'yellow';
- *         case 'cherry': return 'red';
  *     }
- *
- *     return unreachable(fruit);
+ *     return unreachable(fruit); // Compile error if case missing
  * }
+ * ```
  */
 export function unreachable(value: never): never {
     const unk_value = value as unknown;

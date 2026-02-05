@@ -1,17 +1,16 @@
 /**
- * Clamps `value` so that it falls within the inclusive range `min ... max`.
+ * Clamps a value to the inclusive range `[min, max]`.
  *
- * @typeParam T - A primitive numeric type (`number` or `bigint`).
- * @param value - The number to clamp.
- * @param min - The inclusive lower bound.
- * @param max - The inclusive upper bound.
- * @returns `min` when `value` is lower than `min`, `max` when it is higher than
- *          `max`, and the original `value` otherwise.
+ * @typeParam T - `number` or `bigint`.
+ * @param value - The value to clamp.
+ * @param min - Lower bound (inclusive).
+ * @param max - Upper bound (inclusive).
+ * @returns The clamped value.
  *
  * @example
  * ```ts
- * clamp(15, 0, 10); // => 10
- * clamp(-2n, -1n, 5n); // => -1n
+ * clamp(15, 0, 10);    // 10
+ * clamp(-2n, -1n, 5n); // -1n
  * ```
  */
 export function clamp(value: number, min: number, max: number): number;
@@ -23,19 +22,17 @@ export function clamp<T extends number|bigint>(value: T, min: T, max: T): T {
 }
 
 /**
- * Performs linear interpolation between two values.
+ * Linearly interpolates between two values.
  *
- * @param a - The start value.
- * @param b - The end value.
- * @param t - The interpolation factor. Values in the range `[0, 1]` move from `a`
- *           to `b`, but any real number is accepted.
- * @returns The interpolated value between `a` and `b` computed as
- *          `a + (b - a) * t`.
+ * @param a - Start value.
+ * @param b - End value.
+ * @param t - Interpolation factor (`[0, 1]` for normal range; any real accepted).
+ * @returns `a + (b - a) * t`.
  *
  * @example
  * ```ts
- * lerp(0, 10, 0.25); // => 2.5
- * lerp(0, 10, 1.5);  // => 15
+ * lerp(0, 10, 0.25); // 2.5
+ * lerp(0, 10, 1.5);  // 15
  * ```
  */
 export function lerp(a: number, b: number, t: number): number {
@@ -47,24 +44,19 @@ export function lerp(a: number, b: number, t: number): number {
 }
 
 /**
- * Computes the ceiling of the division `n / d` for both `number` and `bigint` inputs.
+ * Computes the ceiling of integer division `n / d`.
  *
- * @remarks
- * When using `number` arguments, both values must be safe integers so that the
- * computation stays exact.
+ * @param n - Dividend.
+ * @param d - Divisor (non-zero).
+ * @returns Smallest integer ≥ `n / d`.
  *
- * @param n - The dividend (numerator).
- * @param d - The divisor (denominator). Must not be zero.
- * @returns The smallest integer that is greater than or equal to `n / d`.
- *
- * @throws {RangeError} When `d` is zero.
- * @throws {TypeError} When arguments are not both safe integers, not both
- *         `bigint`, or are of different primitive numeric types.
+ * @throws {RangeError} If `d` is zero.
+ * @throws {TypeError} If arguments are not both safe integers or both bigints.
  *
  * @example
  * ```ts
- * ceilDiv(7, 3);    // => 3
- * ceilDiv(-7n, 3n); // => -2n
+ * ceilDiv(7, 3);    // 3
+ * ceilDiv(-7n, 3n); // -2n
  * ```
  */
 export function ceilDiv(n: number, d: number): number;

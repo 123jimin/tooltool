@@ -1,34 +1,24 @@
+/** A tuple of `[row, col]` (0-indexed). */
 export type RowCol = [row: number, col: number];
 
 /**
- * Get the row and column position of a character in a string.
- * 
- * @param s - The target string to search within.
- * @param ind - The zero-based index of the character. Must satisfy `0 <= ind && ind <= s.length`.
- *              When `ind === s.length`, returns the position after the last character.
- * @param pretty - If `true`, returns a human-readable string "row:col" (1-based).
- *                 If `false` or omitted, returns a tuple `[row, col]` (0-based).
- * 
- * @returns 
- * - When `pretty` is `false`: A tuple `[row, col]` where both values are 0-based.
- * - When `pretty` is `true`: A string in the format "row:col" where both values are 1-based.
- * 
- * @throws {RangeError} If `ind` is negative or greater than `s.length`.
- * 
+ * Calculates the row and column of a character index in a string.
+ *
+ * @param s - The string.
+ * @param ind - Zero-based character index (`s.length` returns position after last char).
+ * @param pretty - If `true`, returns 1-based `"row:col"`; otherwise 0-based tuple.
+ * @returns `[row, col]` tuple or `"row:col"` string.
+ * @throws {RangeError} If `ind` is out of bounds.
+ *
  * @remarks
- * - Line breaks are determined by the newline character (`\n`).
- * - Carriage returns (`\r`) are treated as regular characters, not line breaks.
- * 
+ * Line breaks are `\n` only; `\r` is treated as a regular character.
+ *
  * @example
  * ```ts
  * const text = "hello\nworld";
- * 
- * getRowCol(text, 0);        // [0, 0] - 'h' at row 0, col 0
- * getRowCol(text, 5);        // [0, 5] - '\n' at row 0, col 5
- * getRowCol(text, 6);        // [1, 0] - 'w' at row 1, col 0
- * getRowCol(text, 11);       // [1, 5] - position after 'd'
- * 
- * getRowCol(text, 6, true);  // "2:1" - 'w' at row 2, col 1 (1-based)
+ * getRowCol(text, 0);       // [0, 0]
+ * getRowCol(text, 6);       // [1, 0]
+ * getRowCol(text, 6, true); // "2:1"
  * ```
  */
 export function getRowCol(s: string, ind: number, pretty?: false): RowCol;

@@ -1,23 +1,21 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**
- * Locates the insertion point for `target` in `sorted_arr` to maintain sorted order.
- * If `target` is already present, the insertion point is to the left of any existing entries.
+ * Finds the leftmost insertion point for `target` in a sorted array.
  *
- * @param sorted_arr - The sorted array to search. Must be sorted in ascending order.
- * @param target - The value to locate.
- * @returns The index where `target` should be inserted.
+ * If `target` exists, returns the index before any equal entries. (Like Python's `bisect_left`.)
+ *
+ * @param sorted_arr - Sorted array (ascending).
+ * @param target - Value to locate.
+ * @returns Insertion index.
  *
  * @remarks
- * - The time complexity is O(log n).
- * - If the array is not sorted, the result is undefined.
- * - This corresponds to Python's `bisect_left`.
+ * O(log n). Behavior is undefined if array is not sorted.
  *
  * @example
  * ```ts
- * const arr = [1, 2, 4, 4, 6;
- * bisectLeft(arr, 4); // Returns 2
- * bisectLeft(arr, 3); // Returns 2
+ * bisectLeft([1, 2, 4, 4, 6], 4); // 2
+ * bisectLeft([1, 2, 4, 4, 6], 3); // 2
  * ```
  */
 export function bisectLeft(sorted_arr: Array<number|bigint>, target: number): number {
@@ -37,23 +35,21 @@ export function bisectLeft(sorted_arr: Array<number|bigint>, target: number): nu
 }
 
 /**
- * Locates the insertion point for `target` in `sorted_arr` to maintain sorted order.
- * If `target` is already present, the insertion point is to the right of any existing entries.
+ * Finds the rightmost insertion point for `target` in a sorted array.
  *
- * @param sorted_arr - The sorted array to search. Must be sorted in ascending order.
- * @param target - The value to locate.
- * @returns The index where `target` should be inserted.
+ * If `target` exists, returns the index after any equal entries. (Like Python's `bisect_right`.)
+ *
+ * @param sorted_arr - Sorted array (ascending).
+ * @param target - Value to locate.
+ * @returns Insertion index.
  *
  * @remarks
- * - The time complexity is O(log n).
- * - If the array is not sorted, the result is undefined.
- * - This corresponds to Python's `bisect_right`.
+ * O(log n). Behavior is undefined if array is not sorted.
  *
  * @example
  * ```ts
- * const arr = [1, 2, 4, 4, 6];
- * bisectRight(arr, 4); // Returns 4
- * bisectRight(arr, 3); // Returns 2
+ * bisectRight([1, 2, 4, 4, 6], 4); // 4
+ * bisectRight([1, 2, 4, 4, 6], 3); // 2
  * ```
  */
 export function bisectRight(sorted_arr: Array<number|bigint>, target: number): number {
@@ -72,4 +68,5 @@ export function bisectRight(sorted_arr: Array<number|bigint>, target: number): n
     return left;
 }
 
+/** Alias for {@link bisectRight}. */
 export const bisect = bisectRight;

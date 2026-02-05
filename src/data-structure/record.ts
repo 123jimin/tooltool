@@ -1,22 +1,22 @@
 import type { Nullable, RecursivePartial } from "../type/index.ts";
 
 /**
- * Accesses a nested record at the given path, returning both the current value and a setter function.
+ * Accesses a nested record at the given path, returning a value and setter.
  *
- * @typeParam T The type of the value to be accessed.
- * 
- * @param obj The nested record to access
- * @param path An array of strings representing the path to the desired value
- * @returns A tuple containing:
- *   - `value`: The value at the path, or `undefined` if the path does not exist
- *   - `setValue`: A function that sets a new value at the path, creating intermediate objects as needed
+ * @typeParam T - The value type.
+ * @param obj - The nested record.
+ * @param path - Path segments (strings or arrays of strings).
+ * @returns `[value, setValue]` — value is `undefined` if path doesn't exist;
+ *          setter creates intermediate objects as needed.
  *
  * @example
+ * ```ts
  * const obj = { a: { b: { c: 42 } } };
  * const [value, setValue] = recordAccess<number>(obj, ['a', 'b', 'c']);
- * console.log(value); // 42
+ * value;       // 42
  * setValue(100);
- * console.log(obj.a.b.c); // 100
+ * obj.a.b.c;   // 100
+ * ```
  */
 export function recordAccess<T = unknown>(
     obj: Record<string, unknown>,
@@ -57,27 +57,26 @@ export function recordAccess<T = unknown>(
 }
 
 /**
- * Recursively merges a patch object into a base object.
+ * Recursively merges a patch into a base object (deep merge).
  *
- * This function performs a deep merge for nested records. Arrays and primitive types
- * in the `patch` object will overwrite the corresponding values in `base`.
+ * Arrays and primitives in `patch` overwrite `base`. Nested records are merged recursively.
  *
- * @typeParam T - The type of the base record.
- * @param base - The initial record object.
- * @param patch - The partial record containing updates. If `null` or `undefined`, `base` is returned as-is.
- * @returns A new object containing the merged properties.
- *
- * @example
- * const base = { a: 1, b: { c: 2 } };
- * const patch = { b: { d: 3 }, e: 4 };
- * const result = recursiveMerge(base, patch);
- * // { a: 1, b: { c: 2, d: 3 }, e: 4 }
+ * @typeParam T - The record type.
+ * @param base - The base object.
+ * @param patch - Partial updates. If nullish, `base` is returned.
+ * @returns A new merged object.
  *
  * @remarks
- * - This function is pure; it does not modify `base` or `patch`.
- * - In some cases, the original `base` will be returned, so take care when modifying the result.
- * - Properties with `undefined` values in `patch` are ignored.
- * - Properties with `null` values in `patch` overwrite the values in `base`.
+ * - Does not mutate `base` or `patch`.
+ * - May return `base` directly if `patch` is nullish.
+ * - `undefined` values in `patch` are ignored; `null` values overwrite.
+ *
+ * @example
+ * ```ts
+ * const base = { a: 1, b: { c: 2 } };
+ * const patch = { b: { d: 3 }, e: 4 };
+ * recursiveMerge(base, patch); // { a: 1, b: { c: 2, d: 3 }, e: 4 }
+ * ```
  */
 export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch: Nullable<RecursivePartial<T>>): T {
     if(patch == null || base === patch) return base;

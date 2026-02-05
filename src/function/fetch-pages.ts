@@ -3,71 +3,36 @@ import { toAsyncGenerator } from "../iterator/generator/index.ts";
 
 /**
  * A function that fetches a single page of data.
- * 
- * @typeParam Page - The type of data contained in a page
- * @param page - Zero-based page index to fetch
- * @returns A promise resolving to an object containing:
- *   - `num_pages`: Total number of pages available (may change between calls)
- *   - `page`: The page data, or `null`/`undefined` if the page is empty/unavailable
- * 
- * @example
- * ```ts
- * const fetcher: PageFetcher<User[]> = async (page) => {
- *   const response = await api.getUsers({ page, limit: 100 });
- *   return {
- *     num_pages: response.totalPages,
- *     page: response.users
- *   };
- * };
- * ```
+ *
+ * @typeParam Page - The page data type.
+ * @returns An object with `num_pages` (total pages) and `page` (data, or `null`/`undefined` if empty).
  */
 export type PageFetcher<Page> = (page: number) => Promise<{num_pages: number; page?: Nullable<Page>}>;
 
 /**
- * Fetches multiple pages in parallel and invokes a callback for each non-null page.
- * 
+ * Fetches multiple pages in parallel and invokes a callback for each non-nullish page.
+ *
+ * @typeParam Page - The page data type.
+ * @param fetcher - Fetches a page by zero-based index.
+ * @param callback - Called for each non-nullish page (may be out-of-order).
+ * @returns Resolves when all pages are fetched.
+ *
  * @remarks
- * **Concurrency:** All pages are fetched in parallel with no concurrency limit.
- * It is highly recommended to use {@link rateLimited} or similar rate-limiting utilities 
- * to wrap the fetcher function to avoid overwhelming the server.
- * 
- * **Dynamic page counts:** The function starts by fetching page 0. If subsequent pages 
- * report a higher `num_pages`, additional pages are automatically fetched. If `num_pages` 
- * decreases during execution, previously started fetches may continue.
- * 
- * @typeParam Page - The type of data contained in a page
- * @param fetcher - Function to fetch individual pages; called with zero-based page indices
- * @param callback - Invoked for each non-null page with the page data and its index; 
- *                   may be called out-of-order relative to page indices
- * @returns A promise that resolves when all pages have been fetched and processed
- * 
- * @throws
- * If any fetch fails, the promise rejects immediately with the error from the failed fetch.
- * Other in-flight fetches may continue running in the background, but their results are 
- * ignored and their callbacks will not be invoked.
- * 
- * @example Basic usage
+ * All pages are fetched in parallel with no concurrency limit; consider using
+ * {@link rateLimited} to wrap the fetcher. If a page reports a higher `num_pages`,
+ * additional pages are fetched automatically.
+ *
+ * @throws Rejects immediately if any fetch fails; in-flight fetches continue but are ignored.
+ *
+ * @example
  * ```ts
  * await forEachPage(
- *   async (page) => ({ num_pages: 5, page: await fetchUsers(page) }),
- *   (users, index) => console.log(`Page ${index}:`, users)
+ *   async (i) => ({ num_pages: 5, page: await fetchUsers(i) }),
+ *   (users, i) => console.log(`Page ${i}:`, users),
  * );
  * ```
- * 
- * @example Dynamic page count
- * ```ts
- * // If page 0 returns num_pages=2, but page 1 returns num_pages=3,
- * // page 2 will be automatically fetched
- * await forEachPage(fetcher, callback);
- * ```
- * 
- * @example With rate limiting
- * ```ts
- * const limitedFetcher = rateLimited(fetcher, 100);
- * await forEachPage(limitedFetcher, processPage);
- * ```
- * 
- * @see {@link fetchPages} for an async generator alternative
+ *
+ * @see {@link fetchPages} for an async generator alternative.
  */
 export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (page: NonNullable<Page>, index: number) => void) {
     let unresolved_count = 0;
@@ -125,29 +90,23 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
 }
 
 /**
- * Fetches pages as an async generator, yielding each non-null page with its index.
- * 
- * @remarks
- * This is an async generator wrapper around {@link forEachPage}, providing a more 
- * functional approach to page iteration. Pages may be yielded out-of-order relative 
- * to their indices due to parallel fetching.
- * 
- * Like {@link forEachPage}, this function fetches all pages in parallel with no 
- * concurrency limit. Consider rate-limiting the fetcher function.
- * 
- * @typeParam Page - The type of data contained in a page
- * @param fetcher - Function to fetch individual pages
- * @yields Objects containing the page data and its zero-based index
- * @throws If any fetch fails, the generator throws and terminates
- * 
- * @example Basic iteration
+ * Fetches pages as an async generator, yielding each non-nullish page with its index.
+ *
+ * Wrapper around {@link forEachPage}. Pages may yield out-of-order due to parallel fetching.
+ *
+ * @typeParam Page - The page data type.
+ * @param fetcher - Fetches a page by zero-based index.
+ * @yields `{ page, index }` for each non-nullish page.
+ * @throws If any fetch fails.
+ *
+ * @example
  * ```ts
  * for await (const { page, index } of fetchPages(fetcher)) {
  *   console.log(`Page ${index}:`, page);
  * }
  * ```
- * 
- * @see {@link forEachPage} for a callback-based alternative
+ *
+ * @see {@link forEachPage} for a callback-based alternative.
  */
 export async function* fetchPages<Page>(fetcher: PageFetcher<Page>): AsyncGenerator<{index: number, page: NonNullable<Page>}> {
     yield* toAsyncGenerator(async ({yeet, done, fail}) => {

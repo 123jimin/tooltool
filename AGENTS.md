@@ -72,6 +72,20 @@ describe("module-name/file-name", () => {
     - Example use-cases.
     - Potential gotchas (if applicable), via `@remarks`.
     - Example codes, using `@example`. Keep example codes short yet diverse.
+  - Formatting rules:
+    - Omit types in `@param` and `@returns` tags; rely on TypeScript inference.
+    - Use fenced code blocks with `ts` language tag for `@example`.
+    - Keep `@returns` descriptions brief (one line when possible).
+    - Use `@typeParam` with a dash before the description: `@typeParam T - Description`.
+    - Document exceptions with `@throws {ErrorType}` when applicable.
+    - Use `@see {@link otherFunction}` to reference related utilities.
+  - Nullish terminology:
+    - Spell out `` `null` or `undefined` `` when describing input parameter types.
+    - Use "nullish" when describing operations or conditions (e.g., "returns `on_missing` if `s` is nullish").
+  - Style:
+    - Start with a single-line summary (imperative verb preferred: "Creates...", "Returns...", "Applies...").
+    - Use backticks for inline code, types, and parameter references.
+    - Avoid redundant phrases like "This function..." or "A promise that resolves to...".
 
 ### Architecture
 

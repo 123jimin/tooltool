@@ -1,36 +1,22 @@
 import { Deque } from "../data-structure/deque.ts";
 
 /**
- * A function wrapper returned by {@link rateLimited} that enforces
- * a minimum delay between consecutive executions.
+ * A function wrapper returned by {@link rateLimited} enforcing a minimum delay between calls.
  *
- * @typeParam ArgsType - The tuple type of the wrapped function's parameters.
- * @typeParam ReturnType - The resolved type returned by the wrapped function.
+ * @typeParam ArgsType - Tuple of the wrapped function's parameter types.
+ * @typeParam ReturnType - The resolved return type.
  */
 export interface RateLimitedFunction<ArgsType extends unknown[], ReturnType> {
-    /**
-     * Invokes the wrapped function. If the rate limit is currently active,
-     * the call is queued and executed in first-come first-served order.
-     *
-     * @returns A promise resolving to the wrapped function's return value.
-     */
+    /** Invokes the function; queued if rate limit is active (FIFO order). */
     (...args: ArgsType): Promise<ReturnType>;
 
-    /**
-     * The current delay (in milliseconds) enforced between calls.
-     * If a dynamic duration provider was given to {@link rateLimited},
-     * this value is computed on demand.
-     */
+    /** Current delay (ms) between calls. */
     get limit_duration_ms(): number;
 
-    /**
-     * The current number of queued, not-yet-executed calls.
-     */
+    /** Number of queued calls awaiting execution. */
     get wait_count(): number;
-    
-    /**
-     * The current number of calls being processed.
-     */
+
+    /** Number of calls currently being processed. */
     get processing_count(): number;
 }
 
@@ -41,28 +27,21 @@ interface RateLimitedQueueItem<ArgsType extends unknown[], T> {
 };
 
 /**
- * Wraps an asynchronous function so that it is executed at most once every
- * `duration_ms` milliseconds. Additional calls are queued and processed
- * sequentially following a strict FIFO (first-come first-served) order.
+ * Wraps an async function to enforce a minimum delay between consecutive executions.
  *
- * This is useful when throttling API calls or expensive operations.
+ * Additional calls are queued and processed in FIFO order. Useful for throttling API calls.
  *
- * @typeParam ArgsType - Parameter tuple type of the wrapped function.
- * @typeParam T - Resolved return type of the wrapped function.
- *
- * @param fn - The asynchronous function to rate-limit.
- * @param duration_ms - Either a fixed number of milliseconds, or a function
- * that returns the delay dynamically at each scheduling point.
- *
- * @returns A {@link RateLimitedFunction} instance that enforces the rate limit.
+ * @typeParam ArgsType - Tuple of the function's parameter types.
+ * @typeParam T - The resolved return type.
+ * @param fn - The async function to rate-limit.
+ * @param duration_ms - Minimum delay (ms), or a function returning the delay dynamically.
+ * @returns A {@link RateLimitedFunction}.
  *
  * @example
  * ```ts
  * const limitedFetch = rateLimited(fetchJson, 500);
- *
  * await limitedFetch("/endpoint"); // executes immediately
- * await limitedFetch("/endpoint"); // queued and executed ≥500ms later
- * console.log(limitedFetch.wait_count); // number of queued calls
+ * await limitedFetch("/endpoint"); // queued, executes ≥500ms later
  * ```
  */
 export function rateLimited<ArgsType extends unknown[], T>(

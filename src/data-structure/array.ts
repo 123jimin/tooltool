@@ -1,11 +1,17 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 
 /**
- * Partition an array into two arrays based on a predicate.
- * 
- * @param arr Array to partition.
- * @param predicate Predicate function to partition by.
- * @returns A tuple of `[falsey, truthy]`, where `falsey` contains all elements for which `predicate` returned falsey, and `truthy` contains all elements for which `predicate` returned truthy.
+ * Partitions an array into two arrays based on a predicate.
+ *
+ * @typeParam T - Element type.
+ * @param arr - Array to partition.
+ * @param predicate - Predicate function.
+ * @returns `[falsey, truthy]` tuple.
+ *
+ * @example
+ * ```ts
+ * partition([1, 2, 3, 4], (n) => n % 2 === 0); // [[1, 3], [2, 4]]
+ * ```
  */
 export function partition<T, U extends T>(arr: T[], predicate: (value: T, index: number, array: T[]) => value is U): [falsey: Exclude<T, U>[], truthy: U[]];
 export function partition<T>(arr: T[], predicate: (value: T, index: number, array: T[]) => boolean): [falsey: T[], truthy: T[]];
@@ -21,12 +27,14 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
 }
 
 /**
- * Gets the element at the given index.
- * If the index is out of bounds, the array will be extended with shallow copies of `default_value`.
- * 
- * @param arr
- * @param index
- * @param default_value
+ * Gets the element at the given index, extending with shallow copies if out of bounds.
+ *
+ * @typeParam T - Element type.
+ * @param arr - The array.
+ * @param index - Non-negative index.
+ * @param default_value - Template for new entries (shallow-copied).
+ * @returns The element at `index`.
+ * @throws {RangeError} If `index` is negative.
  */
 export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index: number, default_value: T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");
@@ -40,12 +48,14 @@ export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index:
 }
 
 /**
- * Gets the element at the given index.
- * If the index is out of bounds, the array will be extended with the result of `f(index)`.
- * 
- * @param arr 
- * @param index 
- * @param f 
+ * Gets the element at the given index, extending via a factory function if out of bounds.
+ *
+ * @typeParam T - Element type.
+ * @param arr - The array.
+ * @param index - Non-negative index.
+ * @param f - Factory called with index to create new entries.
+ * @returns The element at `index`.
+ * @throws {RangeError} If `index` is negative.
  */
 export function arrayGetOrExtendWith<T extends NonNullable<object>>(arr: T[], index: number, f: (index: number) => T): T {
     if(index < 0) throw new RangeError("Index must be non-negative");

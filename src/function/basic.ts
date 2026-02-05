@@ -1,15 +1,13 @@
 /**
  * Pauses execution for the specified duration.
  *
- * This function returns a `Promise` that resolves after the given number of
- * milliseconds. It is commonly used to introduce delays in asynchronous
- * workflows.
- *
- * @param {number} time_ms - The number of milliseconds to sleep.
- * @returns {Promise<void>} A promise that resolves once the delay has elapsed.
+ * @param time_ms - Duration in milliseconds.
+ * @returns A promise that resolves after the delay.
  *
  * @example
+ * ```ts
  * await sleep(500); // waits for 500 ms
+ * ```
  */
 export async function sleep(time_ms: number): Promise<void> {
     return new Promise<void>((resolve) => {
@@ -20,35 +18,34 @@ export async function sleep(time_ms: number): Promise<void> {
 /**
  * Returns the provided value unchanged.
  *
- * Useful as a default callback, placeholder function, or when working with
- * higher-order functions that require an identity mapping.
+ * Useful as a default callback or placeholder in higher-order functions.
  *
- * @typeParam T
- * @param {T} t - The value to return.
- * @returns {T} The same value that was passed in.
+ * @typeParam T - The value type.
+ * @param t - The value to return.
+ * @returns The same value.
  *
  * @example
+ * ```ts
  * identity(42);        // 42
  * identity("hello");   // "hello"
+ * ```
  */
 export function identity<T>(t: T): T {
     return t;
 }
 
 /**
- * A no-operation function.
+ * A no-operation function that accepts any arguments and returns `undefined`.
  *
- * Invoking this function has no side effects and always returns `undefined`.
- * Useful as a placeholder callback or default implementation when a function
- * signature must be satisfied.
+ * Useful as a placeholder callback or default implementation.
  *
- * @param {...unknown} args - Arguments that will be ignored.
- * @returns {void}
+ * @param args - Ignored.
  *
  * @example
+ * ```ts
  * nop();           // does nothing
  * nop(1, 2, 3);    // still does nothing
- * nop("a", true);  // also does nothing
+ * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function nop(...args: unknown[]): void {}
@@ -56,9 +53,14 @@ export function nop(...args: unknown[]): void {}
 /**
  * Invokes the provided function immediately and returns its result.
  *
- * @typeParam ReturnType - The type of the value returned by the function.
+ * @typeParam ReturnType - The return type of the function.
  * @param fn - The function to execute.
- * @returns {ReturnType} The result of the executed function.
+ * @returns The function's return value.
+ *
+ * @example
+ * ```ts
+ * const value = invoke(() => 42); // 42
+ * ```
  */
 export function invoke<ReturnType>(fn: () => ReturnType): ReturnType {
     return fn();
