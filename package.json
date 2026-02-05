@@ -11,7 +11,7 @@
     "!**/*.tsbuildinfo"
   ],
   "scripts": {
-    "clean": "npx rimraf dist",
+    "clean": "npx rimraf dist tsconfig.tsbuildinfo",
     "prepare": "npm run build",
     "build": "npx tsc",
     "build:watch": "npx tsc --watch",
