@@ -23,7 +23,7 @@ export interface GeneratorController<Y, R=void, T=unknown> {
     fail(t: T): void;
 
     /** Returns the async iterable of yielded values. */
-    entries(): AsyncIterable<Y, R>;
+    entries(): AsyncGenerator<Y, R>;
 
     /** Returns a promise resolving to the final return value. */
     result(): Promise<R>;
@@ -83,7 +83,7 @@ export function createGeneratorController<Y, R=void, T=unknown>(): GeneratorCont
             push({type: 'return', value: r});
         },
         fail(t: T): void { push({type: 'throw', value: t}); },
-        entries(): AsyncIterable<Y, R> {
+        entries(): AsyncGenerator<Y, R> {
             return (async function*(): AsyncGenerator<Y, R> {
                 let position = 0;
 
