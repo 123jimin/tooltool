@@ -7,9 +7,9 @@ describe("iterator/generator/controller", () => {
         it("should work as advertised", async () => {
             const controller = createGeneratorController<number, string>();
             
-            controller.yeet(1);
-            controller.yeet(2);
-            controller.done("finished");
+            controller.next(1);
+            controller.next(2);
+            controller.complete("finished");
             
             const gen = controller.entries()[Symbol.asyncIterator]()
             assert.deepStrictEqual(await gen.next(), { value: 1, done: false });
@@ -22,10 +22,10 @@ describe("iterator/generator/controller", () => {
             
             (async () => {
                 await sleep(10);
-                ctrl.yeet(1);
+                ctrl.next(1);
                 await sleep(10);
-                ctrl.yeet(2);
-                ctrl.done();
+                ctrl.next(2);
+                ctrl.complete();
             })();
             
             const vals: number[] = [];
@@ -38,8 +38,8 @@ describe("iterator/generator/controller", () => {
             const ctrl = createGeneratorController<number, void, Error>();
             const err = new Error("test error");
             
-            ctrl.yeet(1);
-            ctrl.fail(err);
+            ctrl.next(1);
+            ctrl.error(err);
             
             const gen = ctrl.entries()[Symbol.asyncIterator]()
             assert.deepStrictEqual(await gen.next(), { value: 1, done: false });
@@ -65,9 +65,9 @@ describe("iterator/generator/controller", () => {
             const c2 = collect();
             
             await sleep(10);
-            ctrl.yeet(1);
-            ctrl.yeet(2);
-            ctrl.done();
+            ctrl.next(1);
+            ctrl.next(2);
+            ctrl.complete();
             
             assert.deepStrictEqual(await c1, [1, 2]);
             assert.deepStrictEqual(await c2, [1, 2]);
@@ -75,7 +75,7 @@ describe("iterator/generator/controller", () => {
 
         it("should handle immediate done", async () => {
             const ctrl = createGeneratorController<never, string>();
-            ctrl.done("immediate");
+            ctrl.complete("immediate");
             
             const gen = ctrl.entries()[Symbol.asyncIterator]()
             assert.deepStrictEqual(await gen.next(), { value: "immediate", done: true });
@@ -84,10 +84,10 @@ describe("iterator/generator/controller", () => {
         it("should buffer events before consumption", async () => {
             const ctrl = createGeneratorController<number>();
             
-            ctrl.yeet(1);
-            ctrl.yeet(2);
-            ctrl.yeet(3);
-            ctrl.done();
+            ctrl.next(1);
+            ctrl.next(2);
+            ctrl.next(3);
+            ctrl.complete();
             
             await sleep(10);
             
@@ -109,12 +109,12 @@ describe("iterator/generator/controller", () => {
             })();
             
             await sleep(10);
-            ctrl.yeet(1);
+            ctrl.next(1);
             await sleep(10);
-            ctrl.yeet(2);
+            ctrl.next(2);
             await sleep(10);
-            ctrl.yeet(3);
-            ctrl.done();
+            ctrl.next(3);
+            ctrl.complete();
             
             assert.deepStrictEqual(await consumer, [1, 2, 3]);
         });
@@ -124,7 +124,7 @@ describe("iterator/generator/controller", () => {
             const ctrl = createGeneratorController<number, void, Error>();
             const err = new Error("immediate failure");
             
-            ctrl.fail(err);
+            ctrl.error(err);
             
             const gen = ctrl.entries()[Symbol.asyncIterator]()
             
@@ -138,7 +138,7 @@ describe("iterator/generator/controller", () => {
 
         it("should handle empty generator", async () => {
             const ctrl = createGeneratorController<never>();
-            ctrl.done();
+            ctrl.complete();
             
             const gen = ctrl.entries()[Symbol.asyncIterator]()
             const result = await gen.next();
@@ -150,8 +150,8 @@ describe("iterator/generator/controller", () => {
         it("should allow late consumers", async () => {
             const ctrl = createGeneratorController<number>();
             
-            ctrl.yeet(1);
-            ctrl.yeet(2);
+            ctrl.next(1);
+            ctrl.next(2);
             
             await sleep(10);
             
@@ -161,8 +161,8 @@ describe("iterator/generator/controller", () => {
                 return vals;
             })();
             
-            ctrl.yeet(3);
-            ctrl.done();
+            ctrl.next(3);
+            ctrl.complete();
             
             assert.deepStrictEqual(await consumer, [1, 2, 3]);
         });

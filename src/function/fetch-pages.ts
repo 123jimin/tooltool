@@ -109,13 +109,13 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
  * @see {@link forEachPage} for a callback-based alternative.
  */
 export async function* fetchPages<Page>(fetcher: PageFetcher<Page>): AsyncGenerator<{index: number, page: NonNullable<Page>}> {
-    yield* toAsyncGenerator(async ({yeet, done, fail}) => {
+    yield* toAsyncGenerator(async ({next, complete, error}) => {
         try {
-            await forEachPage(fetcher, (page, index) => yeet({page, index}));
+            await forEachPage(fetcher, (page, index) => next({page, index}));
         } catch(err) {
-            fail(err);
+            error(err);
         }
 
-        done();
+        complete();
     });
 }

@@ -13,14 +13,14 @@ import type { AsyncEvent } from './type.ts';
  */
 export interface GeneratorController<Y, R=void, T=unknown> {
     /** Yields a value. */
-    yeet(y: Y): void;
+    next(y: Y): void;
 
     /** Completes the generator with a return value. */
     // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    done(...args: [R] extends [undefined|void] ? [] | [R] : [R]): void;
+    complete(...args: [R] extends [undefined|void] ? [] | [R] : [R]): void;
 
     /** Throws an error from the generator. */
-    fail(t: T): void;
+    error(t: T): void;
 
     /** Returns the async iterable of yielded values. */
     entries(): AsyncGenerator<Y, R>;
@@ -40,9 +40,9 @@ export interface GeneratorController<Y, R=void, T=unknown> {
  * @example
  * ```ts
  * const ctrl = createGeneratorController<number, string>();
- * ctrl.yeet(1);
- * ctrl.yeet(2);
- * ctrl.done("finished");
+ * ctrl.next(1);
+ * ctrl.next(2);
+ * ctrl.complete("finished");
  *
  * for await (const v of ctrl.entries()) console.log(v); // 1, 2
  * ```
@@ -77,12 +77,12 @@ export function createGeneratorController<Y, R=void, T=unknown>(): GeneratorCont
     };
 
     return {
-        yeet(y: Y): void { push({type: 'yield', value: y}); },
-        done(...args): void {
+        next(y: Y): void { push({type: 'yield', value: y}); },
+        complete(...args): void {
             const r = (args.length > 0 ? args[0] : (void 0)) as R;
             push({type: 'return', value: r});
         },
-        fail(t: T): void { push({type: 'throw', value: t}); },
+        error(t: T): void { push({type: 'throw', value: t}); },
         entries(): AsyncGenerator<Y, R> {
             return (async function*(): AsyncGenerator<Y, R> {
                 let position = 0;
@@ -123,10 +123,10 @@ export function createGeneratorController<Y, R=void, T=unknown>(): GeneratorCont
  *
  * @example
  * ```ts
- * const gen = toAsyncGenerator<number>(({ yeet, done }) => {
- *   yeet(1);
- *   yeet(2);
- *   done();
+ * const gen = toAsyncGenerator<number>(({ next, complete }) => {
+ *   next(1);
+ *   next(2);
+ *   complete();
  * });
  * for await (const v of gen) console.log(v); // 1, 2
  * ```
@@ -137,7 +137,7 @@ export async function* toAsyncGenerator<Y, R=void, T=unknown>(handleController: 
     try {
         handleController(controller);
     } catch(err) {
-        controller.fail(err as T);
+        controller.error(err as T);
     }
 
     yield* controller.entries();
