@@ -62,3 +62,26 @@ export type RecursivePartial<T> =
     [T] extends [Array<infer U>] ? Array<RecursivePartial<U>> :
     [T] extends [object] ? {[P in keyof T]?: RecursivePartial<T[P]>} :
     T;
+
+    
+/**
+ * Converts a type into a tuple that is optional when `T` is `void` or `undefined`.
+ *
+ * Designed for use with rest parameters in generic functions, allowing callers
+ * to omit the argument entirely when the type indicates no value is expected.
+ *
+ * @template T - The type to evaluate for optionality.
+ *
+ * @example
+ * ```ts
+ * function dispatch<T>(action: string, ...payload: OptionalIfVoid<T>): void {
+ *     // ...
+ * }
+ *
+ * dispatch<void>('reset');           // ✓ OK — payload omitted
+ * dispatch<number>('increment', 5);  // ✓ OK — payload required
+ * dispatch<number>('increment');     // ✗ Error — missing argument
+ * ```
+ */
+// eslint-disable-next-line @typescript-eslint/no-invalid-void-type
+export type OptionalIfVoid<T> = [T] extends [undefined|void] ? []|[T] : [T];

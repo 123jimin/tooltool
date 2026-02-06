@@ -1,4 +1,5 @@
 
+import type { OptionalIfVoid } from '../../type/index.ts';
 import type { AsyncEvent } from './type.ts';
 
 /**
@@ -16,8 +17,7 @@ export interface GeneratorController<Y, R=void, T=unknown> {
     next(y: Y): void;
 
     /** Completes the generator with a return value. */
-    // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-    complete(...args: [R] extends [undefined|void] ? [] | [R] : [R]): void;
+    complete(...args: OptionalIfVoid<R>): void;
 
     /** Throws an error from the generator. */
     error(t: T): void;
