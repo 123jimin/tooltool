@@ -1,7 +1,7 @@
 import { assert } from "chai";
 
 import { sleep } from "../../function/basic.ts";
-import { createAsyncChannel } from "./create.ts";
+import { createAsyncChannel } from "./channel.ts";
 
 describe("iterator/channel/create", () => {
     describe("createAsyncChannel", () => {
