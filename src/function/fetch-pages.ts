@@ -1,5 +1,5 @@
 import type { Nullable } from "../type/index.ts";
-import { toAsyncGenerator } from "../iterator/generator/index.ts";
+import { createAsyncChannel } from "../iterator/index.ts";
 
 /**
  * A function that fetches a single page of data.
@@ -109,13 +109,13 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
  * @see {@link forEachPage} for a callback-based alternative.
  */
 export async function* fetchPages<Page>(fetcher: PageFetcher<Page>): AsyncGenerator<{index: number, page: NonNullable<Page>}> {
-    yield* toAsyncGenerator(async ({next, complete, error}) => {
-        try {
-            await forEachPage(fetcher, (page, index) => next({page, index}));
-        } catch(err) {
-            error(err);
-        }
+    const channel = createAsyncChannel<{index: number, page: NonNullable<Page>}>();
+    
+    try {
+        void forEachPage(fetcher, (page, index) => channel.next({page, index})).catch(channel.error.bind(channel)).then(channel.complete.bind(channel));
+    } catch(err) {
+        channel.error(err);
+    }
 
-        complete();
-    });
+    yield* channel;
 }
