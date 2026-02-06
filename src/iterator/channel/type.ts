@@ -9,9 +9,3 @@ export interface AsyncSink<Y, R=void, T=unknown> {
 export interface AsyncChannel<Y, R=void, T=unknown> extends AsyncSink<Y, R, T>, AsyncIterable<Y, R> {
     result(): Promise<R>;
 }
-
-/*
-export function f<Y, R=void, T=unknown>(source: AsyncIterable<Y, R>, sink: AsyncSink<Y, R, T>);
-export function f<Y, R=void, T=unknown>(source: AsyncIterator<Y, R>, sink: AsyncSink<Y, R, T>);
-export function f<Y, R=void, T=unknown>(source: Promise<R>, sink: AsyncSink<Y, R, T>);
-*/
