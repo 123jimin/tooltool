@@ -65,6 +65,27 @@ export type RecursivePartial<T> =
 
     
 /**
+ * Represents a value that may or may not be wrapped in a `Promise`.
+ *
+ * Convenient for APIs that accept both synchronous and asynchronous return
+ * values, avoiding the need for callers to wrap synchronous results.
+ *
+ * @template T - The underlying value type.
+ *
+ * @example
+ * ```ts
+ * async function process(input: Promisable<string>): Promise<number> {
+ *     const value = await input;
+ *     return value.length;
+ * }
+ *
+ * process('hello');                  // ✓ OK — synchronous
+ * process(Promise.resolve('hello')); // ✓ OK — asynchronous
+ * ```
+ */
+export type Promisable<T> = T | Promise<T>;
+
+/**
  * Converts a type into a tuple that is optional when `T` is `void` or `undefined`.
  *
  * Designed for use with rest parameters in generic functions, allowing callers
