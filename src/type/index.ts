@@ -84,4 +84,4 @@ export type RecursivePartial<T> =
  * ```
  */
 // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
-export type OptionalIfVoid<T> = [T] extends [undefined|void] ? []|[T] : [T];
+export type OptionalIfVoid<T> = [T] extends [undefined|void] ? [t?: T] : [T];
