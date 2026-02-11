@@ -1,7 +1,7 @@
-import { assert } from "chai";
-import { rateLimited } from "./rate-limit.ts";
+import {assert} from "chai";
+import {rateLimited} from "./rate-limit.ts";
 
-import { sleep } from "./basic.ts";
+import {sleep} from "./basic.ts";
 
 const TOLERANCE_MS = 10;
 
@@ -18,14 +18,14 @@ describe("function/rate-limit", () => {
                 assert.strictEqual(limited.wait_count, 0);
             });
 
-            it("should return the wrapped function's resolved value and forward args", async() => {
-                const fn = async(a: number, b: number) => a + b;
+            it("should return the wrapped function's resolved value and forward args", async () => {
+                const fn = async (a: number, b: number) => a + b;
                 const limited = rateLimited(fn, 30);
                 const result = await limited(2, 3);
                 assert.strictEqual(result, 5);
             });
 
-            it("should queue calls and reflect wait_count while queued", async() => {
+            it("should queue calls and reflect wait_count while queued", async () => {
                 let processed = 0;
                 const fn = async () => {
                     ++processed;
@@ -43,7 +43,7 @@ describe("function/rate-limit", () => {
                 assert.strictEqual(limited.processing_count, 1);
 
                 const results = await Promise.all([p1, p2, p3]);
-                
+
                 assert.strictEqual(limited.wait_count, 0);
                 assert.strictEqual(limited.processing_count, 0);
 
@@ -66,7 +66,7 @@ describe("function/rate-limit", () => {
                 assert.deepStrictEqual(seen, [1, 2, 3]);
             });
 
-            it("should enforce a minimum delay between call starts (no overlap)", async function () {
+            it("should enforce a minimum delay between call starts (no overlap)", async () => {
                 const duration = 60;
                 const starts: number[] = [];
                 let concurrent = 0;
@@ -76,7 +76,7 @@ describe("function/rate-limit", () => {
                     starts.push(Date.now());
                     ++concurrent;
                     max_concurrent = Math.max(max_concurrent, concurrent);
-                    
+
                     await sleep(90);
                     --concurrent;
                 };
@@ -89,13 +89,12 @@ describe("function/rate-limit", () => {
                 assert.strictEqual(max_concurrent, 1, "tasks must not overlap (sequential execution)");
 
                 // Check minimum spacing between starts is at least `duration`
-                for (let i = 1; i < starts.length; i++) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                for(let i = 1; i < starts.length; i++) {
                     const delta = starts[i]! - starts[i - 1]!;
                     assert.isAtLeast(
                         delta + TOLERANCE_MS,
                         duration,
-                        `start #${i} should be >= ${duration}ms after previous start (got ~${delta}ms)`
+                        `start #${i} should be >= ${duration}ms after previous start (got ~${delta}ms)`,
                     );
                 }
             });
@@ -117,7 +116,7 @@ describe("function/rate-limit", () => {
                 assert.isBelow(
                     delay,
                     duration/2,
-                    `first call should begin promptly (observed ~${delay}ms)`
+                    `first call should begin promptly (observed ~${delay}ms)`,
                 );
             });
         });
@@ -135,7 +134,7 @@ describe("function/rate-limit", () => {
                 assert.strictEqual(limited.limit_duration_ms, 40);
             });
 
-            it("should respect changing durations between calls", async function () {
+            it("should respect changing durations between calls", async () => {
                 let d = 40;
                 const starts: number[] = [];
 
@@ -153,29 +152,27 @@ describe("function/rate-limit", () => {
                 d = 20;
                 await limited();
 
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
                 const delta1 = starts[1]! - starts[0]!;
-                
-                // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+
                 const delta2 = starts[2]! - starts[1]!;
 
                 assert.isAtLeast(
                     delta1 + TOLERANCE_MS,
                     80,
-                    `second call should start >=80ms after first (got ~${delta1}ms)`
+                    `second call should start >=80ms after first (got ~${delta1}ms)`,
                 );
 
                 assert.isAtLeast(
                     delta2 + TOLERANCE_MS,
                     20,
-                    `third call should start >=20ms after second (got ~${delta2}ms)`
+                    `third call should start >=20ms after second (got ~${delta2}ms)`,
                 );
 
                 assert.isAtMost(
                     delta2 - TOLERANCE_MS,
                     50,
-                    `third call should start not much more than 20ms after second (got ~${delta2}ms)`
-                )
+                    `third call should start not much more than 20ms after second (got ~${delta2}ms)`,
+                );
             });
         });
 
@@ -191,7 +188,7 @@ describe("function/rate-limit", () => {
                     assert.strictEqual(e, err);
                 }
             });
-                
+
             it("should propagate synchronous throws from the wrapped function", async () => {
                 const limited = rateLimited((): Promise<void> => { throw new Error("sync"); }, 10);
                 try {

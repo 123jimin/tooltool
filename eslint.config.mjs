@@ -1,4 +1,4 @@
 // @ts-check
 
-import configs from "./eslint/index.mjs";
+import configs from "@jiminp/eslint-config";
 export default configs;

@@ -36,7 +36,7 @@ export function clamp<T extends number|bigint>(value: T, min: T, max: T): T {
  * ```
  */
 export function lerp(a: number, b: number, t: number): number {
-    if (t < 0.5) {
+    if(t < 0.5) {
         return a + (b-a) * t;
     } else {
         return b - (b-a) * (1-t);
@@ -62,25 +62,25 @@ export function lerp(a: number, b: number, t: number): number {
 export function ceilDiv(n: number, d: number): number;
 export function ceilDiv(n: bigint, d: bigint): bigint;
 export function ceilDiv(n: number | bigint, d: number | bigint): number|bigint {
-	if (d === 0 || d === 0n) {
-		throw new RangeError("Division by zero");
-	}
-	
-	if (typeof n === "number" && typeof d === "number") {
-		if(!(Number.isSafeInteger(n) && Number.isSafeInteger(d))) {
-			throw new TypeError("Arguments must be safe integers");
-		}
+    if(d === 0 || d === 0n) {
+        throw new RangeError("Division by zero");
+    }
 
-		const q = Math.trunc(n / d);
-		const r = n % d;
-		if(r === 0) return q;
+    if(typeof n === "number" && typeof d === "number") {
+        if(!(Number.isSafeInteger(n) && Number.isSafeInteger(d))) {
+            throw new TypeError("Arguments must be safe integers");
+        }
 
-		return q + (n > 0 === d > 0 ? 1 : 0);
-	} else if (typeof n === "bigint" && typeof d === "bigint") {
-		const q = n / d;
-		const r = n % d;
-		return r === 0n ? q : q + (n > 0n === d > 0n ? 1n : 0n);
-	}
-	
-	throw new TypeError("Both arguments must be of the same type");
+        const q = Math.trunc(n / d);
+        const r = n % d;
+        if(r === 0) return q;
+
+        return q + (n > 0 === d > 0 ? 1 : 0);
+    } else if(typeof n === "bigint" && typeof d === "bigint") {
+        const q = n / d;
+        const r = n % d;
+        return r === 0n ? q : q + (n > 0n === d > 0n ? 1n : 0n);
+    }
+
+    throw new TypeError("Both arguments must be of the same type");
 }

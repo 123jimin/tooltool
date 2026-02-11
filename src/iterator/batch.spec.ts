@@ -1,6 +1,6 @@
-import { assert } from "chai";
-import { batched } from "./batch.ts";
-import { range } from "./range.ts";
+import {assert} from "chai";
+import {batched} from "./batch.ts";
+import {range} from "./range.ts";
 
 describe("iterator/batch", () => {
     describe("batched", () => {
@@ -62,7 +62,7 @@ describe("iterator/batch", () => {
 
         context("async generators", () => {
             async function* asyncRange(n: number): AsyncGenerator<number> {
-                for (let i = 0; i < n; i++) {
+                for(let i = 0; i < n; i++) {
                     yield i;
                 }
             }

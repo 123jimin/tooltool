@@ -30,14 +30,14 @@ export class Deque<T> {
      * @returns The new length.
      */
     push(...items: T[]): number {
-        for (const item of items) {
+        for(const item of items) {
             this.#item_map.set(this.#tail_index, item);
             this.#tail_index += 1;
         }
 
         return this.length;
     }
-    
+
     /**
      * Inserts items at the head.
      *
@@ -45,14 +45,13 @@ export class Deque<T> {
      * @returns The new length.
      */
     unshift(...items: T[]): number {
-        for (let index = items.length - 1; index >= 0; --index) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for(let index = items.length - 1; index >= 0; --index) {
             this.#item_map.set(--this.#head_index, items[index]!);
         }
 
         return this.length;
     }
-    
+
     /**
      * Removes and returns the tail item.
      *
@@ -62,7 +61,7 @@ export class Deque<T> {
      * Returns `null` (not `undefined`) when empty, diverging from native `Array.pop()`.
      */
     pop(): T | null {
-        if (this.length === 0) {
+        if(this.length === 0) {
             return null;
         }
 
@@ -83,7 +82,7 @@ export class Deque<T> {
      * Returns `null` (not `undefined`) when empty, diverging from native `Array.shift()`.
      */
     shift(): T | null {
-        if (this.length === 0) {
+        if(this.length === 0) {
             return null;
         }
 
@@ -94,7 +93,7 @@ export class Deque<T> {
 
         return value;
     }
-    
+
     /**
      * Retrieves the item at the given index.
      *
@@ -105,7 +104,7 @@ export class Deque<T> {
      */
     at(index: number): T | null {
         const size = this.length;
-        if (size === 0) {
+        if(size === 0) {
             return null;
         }
 
@@ -115,7 +114,7 @@ export class Deque<T> {
             : Math.trunc(numeric_index);
         const relative_index = integer_index < 0 ? size + integer_index : integer_index;
 
-        if (relative_index < 0 || relative_index >= size) {
+        if(relative_index < 0 || relative_index >= size) {
             return null;
         }
 

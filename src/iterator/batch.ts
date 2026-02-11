@@ -1,4 +1,4 @@
-import { isAsyncIterable } from "./util.ts";
+import {isAsyncIterable} from "./util.ts";
 
 async function* asyncBatched<T>(
     gen: AsyncGenerator<T>,
@@ -7,13 +7,13 @@ async function* asyncBatched<T>(
     let batch: T[] = [];
     for await (const item of gen) {
         batch.push(item);
-        if (batch.length === n) {
+        if(batch.length === n) {
             yield batch;
             batch = [];
         }
     }
 
-    if (batch.length > 0) {
+    if(batch.length > 0) {
         yield batch;
     }
 }
@@ -23,15 +23,15 @@ function* syncBatched<T>(
     n: number,
 ): Generator<T[]> {
     let batch: T[] = [];
-    for (const item of gen) {
+    for(const item of gen) {
         batch.push(item);
-        if (batch.length === n) {
+        if(batch.length === n) {
             yield batch;
             batch = [];
         }
     }
 
-    if (batch.length > 0) {
+    if(batch.length > 0) {
         yield batch;
     }
 }
@@ -58,7 +58,7 @@ export function batched<T>(
     gen: Generator<T> | AsyncGenerator<T>,
     n: number,
 ): Generator<T[]> | AsyncGenerator<T[]> {
-    if (isAsyncIterable(gen)) {
+    if(isAsyncIterable(gen)) {
         return asyncBatched(gen, n);
     } else {
         return syncBatched(gen, n);

@@ -1,5 +1,5 @@
-import { assert } from "chai";
-import { multimapAdd, partitionToMultimap } from "./multimap.ts";
+import {assert} from "chai";
+import {multimapAdd, partitionToMultimap} from "./multimap.ts";
 
 describe("data-structure/multimap", () => {
     describe("multimapAdd", () => {
@@ -10,7 +10,7 @@ describe("data-structure/multimap", () => {
 
             assert.deepStrictEqual(mm.get("a"), [1, 2]);
         });
-        
+
         it("should working as expected (example 2)", () => {
             const mm = new Map<string, string[]>();
             multimapAdd(mm, "fruits", "apple");
@@ -20,7 +20,7 @@ describe("data-structure/multimap", () => {
             assert.deepStrictEqual(mm.get("fruits"), ["apple", "banana"]);
             assert.deepStrictEqual(mm.get("vegetables"), ["carrot"]);
         });
-        
+
         it("should working as expected (example 3)", () => {
             const mm = new Map<number, boolean[]>();
             const arr = multimapAdd(mm, 42, true);
@@ -64,10 +64,10 @@ describe("data-structure/multimap", () => {
 
         it("preserves the order of elements in the value arrays", () => {
             const input = [
-                { id: 1, type: "A" },
-                { id: 2, type: "B" },
-                { id: 3, type: "A" },
-                { id: 4, type: "A" },
+                {id: 1, type: "A"},
+                {id: 2, type: "B"},
+                {id: 3, type: "A"},
+                {id: 4, type: "A"},
             ];
             const result = partitionToMultimap(input, (x) => x.type);
 

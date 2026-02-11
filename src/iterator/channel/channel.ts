@@ -1,6 +1,6 @@
-import type { AsyncEvent } from "../generator.ts";
-import type { AsyncChannel } from "./type.ts";
-import { createAsyncSource } from "./source.ts";
+import type {AsyncEvent} from "../generator.ts";
+import type {AsyncChannel} from "./type.ts";
+import {createAsyncSource} from "./source.ts";
 
 /**
  * Creates an async channel that buffers values and replays them to each iterator.
@@ -26,7 +26,7 @@ import { createAsyncSource } from "./source.ts";
  * console.log(await ch.result()); // "done"
  * ```
  */
-export function createAsyncChannel<Y, R=void, T=unknown>(): AsyncChannel<Y, R, T> {
+export function createAsyncChannel<Y, R = void, T = unknown>(): AsyncChannel<Y, R, T> {
     const events: AsyncEvent<Y, R, T>[] = [];
     const waiters: Array<() => void> = [];
 
@@ -44,10 +44,10 @@ export function createAsyncChannel<Y, R=void, T=unknown>(): AsyncChannel<Y, R, T
         const ignore_err = event.type === 'return';
 
         try {
-            for (const waiter of waiters.splice(0)) {
+            for(const waiter of waiters.splice(0)) {
                 waiter();
             }
-        } catch(err) {
+        } catch (err) {
             if(!ignore_err) {
                 rejectResult?.(err as T);
                 return;
@@ -67,12 +67,12 @@ export function createAsyncChannel<Y, R=void, T=unknown>(): AsyncChannel<Y, R, T
     const source = createAsyncSource<Y, R, T>(events, waiters, result_promise);
 
     return {
-        next(y: Y): void { push({ type: 'yield', value: y }); },
+        next(y: Y): void { push({type: 'yield', value: y}); },
         complete(...args): void {
             const r = (args.length > 0 ? args[0] : (void 0)) as R;
-            push({ type: 'return', value: r });
+            push({type: 'return', value: r});
         },
-        error(err: T): void { push({ type: 'throw', value: err }); },
+        error(err: T): void { push({type: 'throw', value: err}); },
         ...source,
     };
 }

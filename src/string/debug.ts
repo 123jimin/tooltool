@@ -24,7 +24,7 @@ export type RowCol = [row: number, col: number];
 export function getRowCol(s: string, ind: number, pretty?: false): RowCol;
 export function getRowCol(s: string, ind: number, pretty: true): `${number}:${number}`;
 export function getRowCol(s: string, ind: number, pretty: boolean = false): RowCol|`${number}:${number}` {
-    if (ind < 0 || ind > s.length) {
+    if(ind < 0 || ind > s.length) {
         throw new RangeError(`Index ${ind} out of bounds [0, ${s.length}]`);
     }
 

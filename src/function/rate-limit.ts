@@ -1,4 +1,4 @@
-import { Deque } from "../data-structure/deque.ts";
+import {Deque} from "../data-structure/deque.ts";
 
 /**
  * A function wrapper returned by {@link rateLimited} enforcing a minimum delay between calls.
@@ -53,7 +53,7 @@ export function rateLimited<ArgsType extends unknown[], T>(
 
     let last_start_time: number|null = null;
     let timer: ReturnType<typeof setTimeout>|null = null;
-    
+
     let processing_count = 0;
 
     const getDuration: () => number =
@@ -100,9 +100,9 @@ export function rateLimited<ArgsType extends unknown[], T>(
         if(processing_count === 0 && timer == null) processQueue();
     });
 
-    Object.defineProperty(wrappedFunction, "limit_duration_ms", { enumerable: true, get: getDuration });
-    Object.defineProperty(wrappedFunction, "wait_count", { enumerable: true, get: () => queue.length });
-    Object.defineProperty(wrappedFunction, "processing_count", { enumerable: true, get: () => processing_count });
+    Object.defineProperty(wrappedFunction, "limit_duration_ms", {enumerable: true, get: getDuration});
+    Object.defineProperty(wrappedFunction, "wait_count", {enumerable: true, get: () => queue.length});
+    Object.defineProperty(wrappedFunction, "processing_count", {enumerable: true, get: () => processing_count});
 
     return wrappedFunction as RateLimitedFunction<ArgsType, T>;
 }

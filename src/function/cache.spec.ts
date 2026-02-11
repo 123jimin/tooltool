@@ -1,5 +1,5 @@
-import { assert } from "chai";
-import { cached } from "./cache.ts";
+import {assert} from "chai";
+import {cached} from "./cache.ts";
 
 describe("function/cache", () => {
     describe("cached", () => {
@@ -7,7 +7,7 @@ describe("function/cache", () => {
             let call_count = 0;
             const fetchProfile = cached(async (id: string) => {
                 call_count += 1;
-                return { id, name: `user-${id}` };
+                return {id, name: `user-${id}`};
             });
 
             const first_promise = fetchProfile("42");
@@ -15,7 +15,7 @@ describe("function/cache", () => {
 
             assert.strictEqual(first_promise, second_promise);
             const profile = await second_promise;
-            assert.deepStrictEqual(profile, { id: "42", name: "user-42" });
+            assert.deepStrictEqual(profile, {id: "42", name: "user-42"});
             assert.strictEqual(call_count, 1);
 
             fetchProfile.clearCache();
@@ -27,7 +27,7 @@ describe("function/cache", () => {
             let attempts = 0;
             const unstable = cached(async (value: string) => {
                 attempts += 1;
-                if (attempts === 1) {
+                if(attempts === 1) {
                     throw new Error("boom");
                 }
 

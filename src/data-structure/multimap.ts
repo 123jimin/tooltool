@@ -39,14 +39,14 @@ export function multimapAdd<K extends PropertyKey, V>(
     k: K,
     v: V,
 ): V[] {
-    if (m instanceof Map) {
+    if(m instanceof Map) {
         const arr = m.get(k) ?? [];
-        if (arr.length === 0) m.set(k, arr);
+        if(arr.length === 0) m.set(k, arr);
         arr.push(v);
         return arr;
     } else {
         const arr = m[k] ?? [];
-        if (arr.length === 0) m[k] = arr;
+        if(arr.length === 0) m[k] = arr;
         arr.push(v);
         return arr;
     }
@@ -78,7 +78,7 @@ export function multimapAdd<K extends PropertyKey, V>(
 export function partitionToMultimap<T, U>(arr: T[], key: (t: T) => U): Map<U, T[]> {
     const map = new Map<U, T[]>();
 
-    for (const item of arr) {
+    for(const item of arr) {
         multimapAdd(map, key(item), item);
     }
 

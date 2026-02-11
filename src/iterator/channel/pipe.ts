@@ -1,5 +1,5 @@
-import type { OptionalIfVoid } from "../../type/index.ts";
-import type { AsyncSink } from "./type.ts";
+import type {OptionalIfVoid} from "../../type/index.ts";
+import type {AsyncSink} from "./type.ts";
 
 /**
  * Pipes values from an async source to an async sink, forwarding all yielded values,
@@ -36,7 +36,7 @@ import type { AsyncSink } from "./type.ts";
  * // Logs: "Value: 1", "Value: 2", "Value: 3", "Done!"
  * ```
  */
-export async function pipeToAsyncSink<Y, R=void, T=unknown>(
+export async function pipeToAsyncSink<Y, R = void, T = unknown>(
     source: AsyncIterable<Y, R> | AsyncIterator<Y, R>,
     sink: AsyncSink<Y, R, T>,
 ): Promise<void> {
@@ -44,7 +44,7 @@ export async function pipeToAsyncSink<Y, R=void, T=unknown>(
         ? source[Symbol.asyncIterator]()
         : source;
 
-    while (true) {
+    while(true) {
         let result: IteratorResult<Y, R>;
         try {
             result = await iterator.next();
@@ -53,7 +53,7 @@ export async function pipeToAsyncSink<Y, R=void, T=unknown>(
             return;
         }
 
-        if (result.done) {
+        if(result.done) {
             sink.complete(...[result.value] as OptionalIfVoid<R>);
             return;
         }

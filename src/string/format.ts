@@ -15,7 +15,7 @@
  */
 export function formatFixedFloat(n: number, fractions: number): string {
     if(fractions <= 0) return `${n}`;
-    
+
     const d = 10 ** fractions;
     const abs = Math.abs(n);
     const sign = n < 0 ? '-' : '';

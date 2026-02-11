@@ -1,5 +1,5 @@
-import type { AsyncEvent } from "../generator.ts";
-import type { AsyncSource } from "./type.ts";
+import type {AsyncEvent} from "../generator.ts";
+import type {AsyncSource} from "./type.ts";
 
 /**
  * Creates an {@link AsyncSource} backed by a shared event buffer.
@@ -22,8 +22,7 @@ export function createAsyncSource<Y, R, E>(
             let position = 0;
 
             const flush = () => {
-                while (position < events.length) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+                while(position < events.length) {
                     callback(events[position]!);
                     position++;
                 }
@@ -33,24 +32,23 @@ export function createAsyncSource<Y, R, E>(
             waiters.push(flush);
         },
         onYield(callback) {
-            this.subscribe((e) => { if (e.type === 'yield') callback(e.value); });
+            this.subscribe((e) => { if(e.type === 'yield') callback(e.value); });
         },
         onReturn(callback) {
-            this.subscribe((e) => { if (e.type === 'return') callback(e.value); });
+            this.subscribe((e) => { if(e.type === 'return') callback(e.value); });
         },
         onThrow(callback) {
-            this.subscribe((e) => { if (e.type === 'throw') callback(e.value); });
+            this.subscribe((e) => { if(e.type === 'throw') callback(e.value); });
         },
-        async *[Symbol.asyncIterator](): AsyncGenerator<Y, R> {
+        async* [Symbol.asyncIterator](): AsyncGenerator<Y, R> {
             let position = 0;
 
-            while (true) {
-                while (position < events.length) {
-                    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+            while(true) {
+                while(position < events.length) {
                     const event = events[position]!;
                     position++;
 
-                    switch (event.type) {
+                    switch(event.type) {
                         case 'yield': yield event.value; break;
                         case 'return': return event.value;
                         case 'throw': throw event.value;

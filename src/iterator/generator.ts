@@ -1,4 +1,4 @@
-import { isAsyncIterable } from "./util.ts";
+import {isAsyncIterable} from "./util.ts";
 
 /** A yield event. @typeParam Y - Yielded value type. */
 export type AsyncYieldEvent<Y> = {type: 'yield'; value: Y};
@@ -7,7 +7,7 @@ export type AsyncYieldEvent<Y> = {type: 'yield'; value: Y};
 export type AsyncReturnEvent<R> = {type: 'return'; value: R};
 
 /** A throw event. @typeParam T - Error type (default: `unknown`). */
-export type AsyncThrowEvent<T=unknown> = {type: 'throw'; value: T};
+export type AsyncThrowEvent<T = unknown> = {type: 'throw'; value: T};
 
 /**
  * Union of generator events: yield, return, or throw.
@@ -16,7 +16,7 @@ export type AsyncThrowEvent<T=unknown> = {type: 'throw'; value: T};
  * @typeParam R - Return value type.
  * @typeParam T - Error type (default: `unknown`).
  */
-export type AsyncEvent<Y, R, T=unknown> = AsyncYieldEvent<Y> | AsyncReturnEvent<R> | AsyncThrowEvent<T>;
+export type AsyncEvent<Y, R, T = unknown> = AsyncYieldEvent<Y> | AsyncReturnEvent<R> | AsyncThrowEvent<T>;
 
 /**
  * Runs a generator to completion, optionally observing each yielded value.
@@ -38,7 +38,7 @@ export function runGenerator<Y, R>(gen: AsyncGenerator<Y, R>, callback?: (y: Y) 
 export function runGenerator<Y, R>(gen: Generator<Y, R>|AsyncGenerator<Y, R>, callback?: (y: Y) => void): R|Promise<R> {
     if(isAsyncIterable(gen)) {
         while(true) {
-            return (async(): Promise<R> => {
+            return (async (): Promise<R> => {
                 while(true) {
                     const {value, done}: IteratorResult<Y, R> = await gen.next();
                     if(done) return value;

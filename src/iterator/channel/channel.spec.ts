@@ -1,7 +1,7 @@
-import { assert } from "chai";
+import {assert} from "chai";
 
-import { sleep } from "../../function/basic.ts";
-import { createAsyncChannel } from "./channel.ts";
+import {sleep} from "../../function/basic.ts";
+import {createAsyncChannel} from "./channel.ts";
 
 describe("iterator/channel/create", () => {
     describe("createAsyncChannel", () => {
@@ -35,7 +35,6 @@ describe("iterator/channel/create", () => {
         });
 
         it("should throw errors via error()", async () => {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
             const ch = createAsyncChannel<number, void, Error>();
             const err = new Error("test error");
 
@@ -43,7 +42,7 @@ describe("iterator/channel/create", () => {
             ch.error(err);
 
             const gen = ch[Symbol.asyncIterator]();
-            assert.deepStrictEqual(await gen.next(), { value: 1, done: false });
+            assert.deepStrictEqual(await gen.next(), {value: 1, done: false});
 
             try {
                 await gen.next();
@@ -79,7 +78,7 @@ describe("iterator/channel/create", () => {
             ch.complete("immediate");
 
             const gen = ch[Symbol.asyncIterator]();
-            assert.deepStrictEqual(await gen.next(), { value: "immediate", done: true });
+            assert.deepStrictEqual(await gen.next(), {value: "immediate", done: true});
         });
 
         it("should buffer events before consumption", async () => {
@@ -121,7 +120,6 @@ describe("iterator/channel/create", () => {
         });
 
         it("should throw immediately with error", async () => {
-            // eslint-disable-next-line @typescript-eslint/no-invalid-void-type
             const ch = createAsyncChannel<number, void, Error>();
             const err = new Error("immediate failure");
 

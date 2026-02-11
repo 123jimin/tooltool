@@ -4,16 +4,16 @@
 function* _rangeNumber(start: number, end: number, raw_step?: number): Generator<number> {
     const step = raw_step ?? 1;
 
-    if (step === 0) {
+    if(step === 0) {
         throw new Error("Step cannot be zero.");
     }
 
-    if (step > 0) {
-        for (let i = start; i < end; i += step) {
+    if(step > 0) {
+        for(let i = start; i < end; i += step) {
             yield i;
         }
     } else { // step < 0
-        for (let i = start; i > end; i += step) {
+        for(let i = start; i > end; i += step) {
             yield i;
         }
     }
@@ -25,16 +25,16 @@ function* _rangeNumber(start: number, end: number, raw_step?: number): Generator
 function* _rangeBigInt(start: bigint, end: bigint, raw_step?: bigint): Generator<bigint> {
     const step = raw_step ?? 1n;
 
-    if (step === 0n) {
+    if(step === 0n) {
         throw new Error("Step cannot be zero.");
     }
 
-    if (step > 0n) {
-        for (let i = start; i < end; i += step) {
+    if(step > 0n) {
+        for(let i = start; i < end; i += step) {
             yield i;
         }
     } else { // step < 0
-        for (let i = start; i > end; i += step) {
+        for(let i = start; i > end; i += step) {
             yield i;
         }
     }
@@ -72,7 +72,7 @@ export function range(start: number, end?: number, step?: number): Generator<num
 export function range(start: bigint, end?: bigint, step?: bigint): Generator<bigint>;
 export function* range(raw_start: number | bigint, raw_end?: number | bigint, raw_step?: number | bigint): Generator<number | bigint> {
     // Handle the single-argument case: range(end)
-    if (raw_end == null) {
+    if(raw_end == null) {
         raw_end = raw_start;
         // Set start to 0 of the appropriate type
         raw_start = typeof raw_start === 'bigint' ? 0n : 0;
@@ -80,7 +80,7 @@ export function* range(raw_start: number | bigint, raw_end?: number | bigint, ra
 
     // Cast arguments and delegate to the appropriate typed helper function.
     // The `as` assertions are safe due to TypeScript's overload resolution and the initial type check.
-    if (typeof raw_start === 'bigint') {
+    if(typeof raw_start === 'bigint') {
         yield* _rangeBigInt(raw_start, raw_end as bigint, raw_step as bigint | undefined);
     } else {
         yield* _rangeNumber(raw_start, raw_end as number, raw_step as number | undefined);

@@ -12,7 +12,6 @@ export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
     clearCache(): void;
 }
 
-
 /**
  * Creates a memoized async function that deduplicates in-flight requests and caches results.
  *
@@ -46,7 +45,7 @@ export function cached<ArgsType extends unknown[], T, K = unknown>(
     const wrappedFunction = (...args: ArgsType): Promise<T> => {
         let key: K;
 
-        if (keyGenerator) {
+        if(keyGenerator) {
             key = keyGenerator(...args);
         } else {
             key = JSON.stringify(args) as K;
@@ -59,7 +58,7 @@ export function cached<ArgsType extends unknown[], T, K = unknown>(
         cache_map.set(key, result_promise);
 
         result_promise.catch(() => {
-            if (cache_map.get(key) === result_promise) {
+            if(cache_map.get(key) === result_promise) {
                 cache_map.delete(key);
             }
         });
@@ -76,6 +75,6 @@ export function cached<ArgsType extends unknown[], T, K = unknown>(
         writable: false,
         value: clearCache,
     });
-    
+
     return wrappedFunction as CachedFunction<ArgsType, T>;
 }

@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 /**
  * Partitions an array into two arrays based on a predicate.
  *

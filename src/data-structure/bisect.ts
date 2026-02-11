@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 /**
  * Finds the leftmost insertion point for `target` in a sorted array.
  *
@@ -22,9 +20,9 @@ export function bisectLeft(sorted_arr: Array<number|bigint>, target: number): nu
     let left = 0;
     let right = sorted_arr.length;
 
-    while (left < right) {
+    while(left < right) {
         const mid = Math.floor((left + right) / 2);
-        if (sorted_arr[mid]! < target) {
+        if(sorted_arr[mid]! < target) {
             left = mid + 1;
         } else {
             right = mid;
@@ -56,9 +54,9 @@ export function bisectRight(sorted_arr: Array<number|bigint>, target: number): n
     let left = 0;
     let right = sorted_arr.length;
 
-    while (left < right) {
+    while(left < right) {
         const mid = Math.floor((left + right) / 2);
-        if (sorted_arr[mid]! <= target) {
+        if(sorted_arr[mid]! <= target) {
             left = mid + 1;
         } else {
             right = mid;

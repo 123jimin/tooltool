@@ -5,7 +5,7 @@ export type JSONScalar = null | boolean | number | string;
 export type JSONArray = JSONValue[];
 
 /** A JSON object. */
-export type JSONObject = { [key: string]: JSONValue };
+export type JSONObject = {[key: string]: JSONValue};
 
 /** Any valid JSON value. */
 export type JSONValue = JSONScalar | JSONArray | JSONObject;

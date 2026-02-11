@@ -1,4 +1,4 @@
-import type { NestedArray } from "../type/index.ts";
+import type {NestedArray} from "../type/index.ts";
 
 /**
  * A synchronous transform function.

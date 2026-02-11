@@ -1,6 +1,6 @@
-import { assert } from "chai";
+import {assert} from "chai";
 
-import { escapeRegExp, REGEX_SRC_UUID, REGEX_UUID } from "./regex.ts";
+import {escapeRegExp, REGEX_SRC_UUID, REGEX_UUID} from "./regex.ts";
 
 describe("string/regex", () => {
     describe("REGEX_SRC_UUID", () => {

@@ -11,6 +11,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.0.0)
+      '@jiminp/eslint-config':
+        specifier: ^1.1.0
+        version: 1.1.0(@eslint/js@10.0.1(eslint@10.0.0))(@stylistic/eslint-plugin@5.8.0(eslint@10.0.0))(eslint@10.0.0)(typescript-eslint@8.55.0(eslint@10.0.0)(typescript@5.9.3))
       '@stylistic/eslint-plugin':
         specifier: ^5.8.0
         version: 5.8.0(eslint@10.0.0)
@@ -113,6 +116,20 @@ packages:
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
+
+  '@jiminp/eslint-config@1.1.0':
+    resolution: {integrity: sha512-rrEnLkpOPNiCqab5ABjFOKi2mBlQptyXzezfxfae1YBx1gCyRuxIvL/oAIhcqIVzrxRkY5gT4/PKluUj1rL9xw==}
+    engines: {node: '>=18.18.0'}
+    peerDependencies:
+      '@eslint/js': ^10.0.1
+      '@stylistic/eslint-plugin': ^5.8.0
+      eslint: ^10.0.0
+      typescript-eslint: ^8.55.0
+    peerDependenciesMeta:
+      '@stylistic/eslint-plugin':
+        optional: true
+      typescript-eslint:
+        optional: true
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -838,6 +855,14 @@ snapshots:
       strip-ansi-cjs: strip-ansi@6.0.1
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
+
+  '@jiminp/eslint-config@1.1.0(@eslint/js@10.0.1(eslint@10.0.0))(@stylistic/eslint-plugin@5.8.0(eslint@10.0.0))(eslint@10.0.0)(typescript-eslint@8.55.0(eslint@10.0.0)(typescript@5.9.3))':
+    dependencies:
+      '@eslint/js': 10.0.1(eslint@10.0.0)
+      eslint: 10.0.0
+    optionalDependencies:
+      '@stylistic/eslint-plugin': 5.8.0(eslint@10.0.0)
+      typescript-eslint: 8.55.0(eslint@10.0.0)(typescript@5.9.3)
 
   '@pkgjs/parseargs@0.11.0':
     optional: true

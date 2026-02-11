@@ -1,5 +1,5 @@
-import { assert } from "chai";
-import { identity, nop } from "./basic.ts";
+import {assert} from "chai";
+import {identity, nop} from "./basic.ts";
 
 describe("function/basic", () => {
     describe("identity", () => {

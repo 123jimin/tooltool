@@ -1,4 +1,4 @@
-import { sleep } from "./basic.ts";
+import {sleep} from "./basic.ts";
 
 /**
  * Information passed to retry-related callbacks.
@@ -53,7 +53,7 @@ export async function retryWithDelay<T>(f: Retryable<T>, doDelay: DelayFunction|
     while(true) {
         try {
             return await f(info);
-        } catch(err) {
+        } catch (err) {
             ++info.attempts;
             info.error = err;
 
@@ -91,7 +91,7 @@ export interface ExponentialBackoffOptionsWithMaxAttempts extends ExponentialBac
  * @returns Delay in milliseconds.
  */
 export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions, attempts: number): number {
-    const { init_delay, max_delay, multiplier = 2 } = options;
+    const {init_delay, max_delay, multiplier = 2} = options;
     const delay = init_delay * Math.pow(multiplier, attempts-1);
     return (max_delay == null || delay <= max_delay) ? delay : max_delay;
 }

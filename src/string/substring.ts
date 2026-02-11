@@ -1,4 +1,4 @@
-import type { Nullable, Nullish } from "../type/index.ts";
+import type {Nullable, Nullish} from "../type/index.ts";
 
 /**
  * Returns the substring after the first occurrence of the delimiter.
@@ -21,7 +21,7 @@ import type { Nullable, Nullish } from "../type/index.ts";
  * substringAfter("no-needle", ':', 'default'); // 'default'
  * ```
  */
-export function substringAfter<T extends string|null = null>(s: Nullish,          delimiter: string|RegExp, on_missing?: T): T;
+export function substringAfter<T extends string|null = null>(s: Nullish, delimiter: string|RegExp, on_missing?: T): T;
 export function substringAfter<T extends string|null = null>(s: Nullable<string>, delimiter: string|RegExp, on_missing?: T): string|T;
 export function substringAfter<T extends string|null = null>(s: Nullable<string>, delimiter: string|RegExp, on_missing: T = null as T): string|T {
     if(s == null) return on_missing;
@@ -53,7 +53,7 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
  * substringBefore("no-needle", ':', 'default'); // 'default'
  * ```
  */
-export function substringBefore<T extends string|null = null>(s: Nullish,          delimiter: string|RegExp, on_missing?: T): T;
+export function substringBefore<T extends string|null = null>(s: Nullish, delimiter: string|RegExp, on_missing?: T): T;
 export function substringBefore<T extends string|null = null>(s: Nullable<string>, delimiter: string|RegExp, on_missing?: T): string|T;
 export function substringBefore<T extends string|null = null>(s: Nullable<string>, delimiter: string|RegExp, on_missing: T = null as T): string|T {
     if(s == null) return on_missing;
@@ -88,11 +88,11 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
  * substringBetween("<a>b", "<a>", "</a>");         // null
  * ```
  */
-export function substringBetween<T extends string|null = null>(s: Nullish,          start: string|RegExp, end: string|RegExp, on_missing?: T): T;
+export function substringBetween<T extends string|null = null>(s: Nullish, start: string|RegExp, end: string|RegExp, on_missing?: T): T;
 export function substringBetween<T extends string|null = null>(s: Nullable<string>, start: string|RegExp, end: string|RegExp, on_missing?: T): string|T;
 export function substringBetween<T extends string|null = null>(s: Nullable<string>, start: string|RegExp, end: string|RegExp, on_missing: T = null as T): string|T {
     const after_start = substringAfter(s, start);
-    if (after_start === null) {
+    if(after_start === null) {
         return on_missing;
     }
     return substringBefore(after_start, end, on_missing);

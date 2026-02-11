@@ -1,5 +1,5 @@
-import type { AsyncEvent } from "../generator.ts";
-import type { OptionalIfVoid } from "../../type/index.ts";
+import type {AsyncEvent} from "../generator.ts";
+import type {OptionalIfVoid} from "../../type/index.ts";
 
 /**
  * Write-side of an async channel that pushes values, completion, or errors.
@@ -19,7 +19,7 @@ import type { OptionalIfVoid } from "../../type/index.ts";
  * sink.complete("done");
  * ```
  */
-export interface AsyncSink<Y, R=void, E=unknown> {
+export interface AsyncSink<Y, R = void, E = unknown> {
     /** Pushes a yielded value into the channel. */
     next(y: Y): void;
     /**
@@ -55,7 +55,7 @@ export interface AsyncSink<Y, R=void, E=unknown> {
  * console.log(await source.result());
  * ```
  */
-export interface AsyncSource<Y, R=void, E=unknown> extends AsyncIterable<Y, R> {
+export interface AsyncSource<Y, R = void, E = unknown> extends AsyncIterable<Y, R> {
     /**
      * Subscribes to all events (yield, return, and throw) as they arrive.
      *
@@ -100,4 +100,4 @@ export interface AsyncSource<Y, R=void, E=unknown> extends AsyncIterable<Y, R> {
  * console.log(await ch.result()); // "done"
  * ```
  */
-export interface AsyncChannel<Y, R=void, E=unknown> extends AsyncSink<Y, R, E>, AsyncSource<Y, R, E> {}
+export interface AsyncChannel<Y, R = void, E = unknown> extends AsyncSink<Y, R, E>, AsyncSource<Y, R, E> {}

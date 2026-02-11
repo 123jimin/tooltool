@@ -1,4 +1,4 @@
-import type { Nullable, RecursivePartial } from "../type/index.ts";
+import type {Nullable, RecursivePartial} from "../type/index.ts";
 
 /**
  * Accesses a nested record at the given path, returning a value and setter.
@@ -25,8 +25,8 @@ export function recordAccess<T = unknown>(
     const flat_path = path.flat();
 
     let current: unknown = obj;
-    for (const key of flat_path) {
-        if (current == null || typeof current !== 'object') {
+    for(const key of flat_path) {
+        if(current == null || typeof current !== 'object') {
             current = (void 0);
             break;
         }
@@ -34,22 +34,20 @@ export function recordAccess<T = unknown>(
     }
 
     const setValue = (value: T): void => {
-        if (flat_path.length === 0) {
+        if(flat_path.length === 0) {
             return;
         }
 
         let target: Record<string, unknown> = obj;
 
-        for (let i = 0; i < flat_path.length-1; i++) {
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        for(let i = 0; i < flat_path.length-1; i++) {
             const key = flat_path[i]!;
-            if (target[key] == null || typeof target[key] !== 'object') {
+            if(target[key] == null || typeof target[key] !== 'object') {
                 target[key] = {};
             }
             target = target[key] as Record<string, unknown>;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         target[flat_path[flat_path.length-1]!] = value;
     };
 

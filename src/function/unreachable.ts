@@ -23,11 +23,11 @@
 export function unreachable(value: never): never {
     const unk_value = value as unknown;
     let repr: string;
-    
+
     if((typeof unk_value === 'object') && unk_value !== null) {
         try {
             repr = JSON.stringify(unk_value);
-        } catch {
+        } catch{
             repr = String(unk_value);
         }
     } else {
