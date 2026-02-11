@@ -11,15 +11,15 @@
     "!**/*.tsbuildinfo"
   ],
   "scripts": {
-    "clean": "npx rimraf dist tsconfig.tsbuildinfo",
+    "clean": "rimraf dist tsconfig.tsbuildinfo",
     "prepare": "npm run build",
-    "build": "npx tsc",
-    "build:watch": "npx tsc --watch",
-    "build-docs": "npx typedoc",
-    "build-docs:watch": "npx typedoc --watch",
-    "lint": "npx eslint src/",
+    "build": "tsc",
+    "build:watch": "tsc --watch",
+    "build-docs": "typedoc",
+    "build-docs:watch": "typedoc --watch",
+    "lint": "eslint src/",
     "pretest": "pnpm build",
-    "test": "npx mocha \"dist/**/*.spec.js\" --parallel"
+    "test": "mocha \"dist/**/*.spec.js\" --parallel"
   },
   "keywords": [
     "utility"
@@ -35,15 +35,15 @@
   },
   "homepage": "https://github.com/123jimin/tooltool",
   "devDependencies": {
-    "@eslint/js": "^9.39.1",
+    "@eslint/js": "^10.0.1",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
-    "chai": "^6.2.1",
-    "eslint": "^9.39.1",
+    "chai": "^6.2.2",
+    "eslint": "^10.0.0",
     "mocha": "^11.7.5",
     "rimraf": "^6.1.2",
-    "typedoc": "^0.28.15",
+    "typedoc": "^0.28.16",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.48.1"
+    "typescript-eslint": "^8.55.0"
   }
 }
