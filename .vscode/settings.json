@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "dabba",
         "Deque",
         "dotenv",
         "eslintcache",
@@ -23,6 +24,16 @@
         "vuepress",
         "wscript",
         "Xcom",
+        "yabbadabbadoo",
         "yeet"
-    ]
+    ],
+    "editor.formatOnSave": true,
+    "eslint.format.enable": true,
+    "prettier.enable": false,
+    "[typescript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    },
+    "[javascript]": {
+        "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+    }
 }
