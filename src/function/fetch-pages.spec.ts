@@ -58,7 +58,7 @@ describe("function/fetch-pages", function () {
         });
 
         it("should not call callback for null or undefined pages", async () => {
-            const pages = [["a"], null, ["c"], undefined];
+            const pages = [["a"], null, ["c"], (void 0)];
             const fetcher = createMockFetcher(pages);
             const collected_pages: {index: number; page: string[]}[] = [];
 
@@ -163,7 +163,7 @@ describe("function/fetch-pages", function () {
         });
 
         it("should not yield null or undefined pages", async () => {
-            const pages = [["a"], null, ["c"], undefined];
+            const pages = [["a"], null, ["c"], (void 0)];
             const fetcher = createMockFetcher(pages);
             const collected_pages: {index: number; page: string[]}[] = [];
 

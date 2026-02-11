@@ -127,7 +127,7 @@ describe("data-structure/record", () => {
                 recordAccess<null>(obj, ["a"])[1](null);
                 assert.isNull(obj.a);
 
-                recordAccess<undefined>(obj, ["b"])[1](undefined);
+                recordAccess<undefined>(obj, ["b"])[1]((void 0));
                 assert.isUndefined(obj.b);
             });
         });
@@ -180,7 +180,7 @@ describe("data-structure/record", () => {
 
         it("should return the base object reference if patch is null or undefined", () => {
             const base = {a: 1};
-            assert.strictEqual(recursiveMerge(base, undefined), base);
+            assert.strictEqual(recursiveMerge(base, (void 0)), base);
             assert.strictEqual(recursiveMerge(base, null), base);
         });
 
@@ -222,7 +222,7 @@ describe("data-structure/record", () => {
 
         it("should ignore properties explicitly set to undefined in patch", () => {
             const base: Record<string, unknown> = {a: 1, b: 2};
-            const patch: Record<string, unknown> = {a: undefined, b: 3};
+            const patch: Record<string, unknown> = {a: (void 0), b: 3};
             const result = recursiveMerge(base, patch);
             assert.deepStrictEqual(result, {a: 1, b: 3});
         });

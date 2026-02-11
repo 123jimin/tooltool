@@ -179,7 +179,10 @@ describe("function/rate-limit", () => {
         context("error handling", () => {
             it("should propagate rejections from the wrapped function", async () => {
                 const err = new Error("boom");
-                const limited = rateLimited(async () => { await sleep(10); throw err; }, 100);
+                const limited = rateLimited(async () => {
+                    await sleep(10);
+                    throw err;
+                }, 100);
 
                 try {
                     await limited();

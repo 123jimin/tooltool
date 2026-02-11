@@ -8,7 +8,7 @@ describe("string/substring", () => {
             assert.strictEqual(substringAfter("path/to/file.txt", '/'), "to/file.txt");
             assert.strictEqual(substringAfter("abc123", /\d+/), '');
             assert.strictEqual(substringAfter("abc123xyz", /\d+/), "xyz");
-            assert.strictEqual(substringAfter(undefined, ':'), null);
+            assert.strictEqual(substringAfter((void 0), ':'), null);
             assert.strictEqual(substringAfter("no-needle", ':'), null);
             assert.strictEqual(substringAfter("no-needle", ':', 'default'), 'default');
             assert.strictEqual(substringAfter(null, ':', ''), '');
@@ -23,9 +23,9 @@ describe("string/substring", () => {
 
         it("should return on_missing for nullish input", () => {
             assert.strictEqual(substringAfter(null, "a"), null);
-            assert.strictEqual(substringAfter(undefined, "a"), null);
+            assert.strictEqual(substringAfter((void 0), "a"), null);
             assert.strictEqual(substringAfter(null, "a", "xyz"), "xyz");
-            assert.strictEqual(substringAfter(undefined, "a", "xyz"), "xyz");
+            assert.strictEqual(substringAfter((void 0), "a", "xyz"), "xyz");
         });
 
         it("should handle empty strings", () => {
@@ -44,7 +44,7 @@ describe("string/substring", () => {
         it("should work as advertised", () => {
             assert.strictEqual(substringBefore("path/to/file.txt", '/'), "path");
             assert.strictEqual(substringBefore("abc123xyz", /\d+/), "abc");
-            assert.strictEqual(substringBefore(undefined, ':'), null);
+            assert.strictEqual(substringBefore((void 0), ':'), null);
             assert.strictEqual(substringBefore("no-needle", ':'), null);
             assert.strictEqual(substringBefore("no-needle", ':', 'default'), 'default');
             assert.strictEqual(substringBefore(null, ':', ''), '');
@@ -59,9 +59,9 @@ describe("string/substring", () => {
 
         it("should return on_missing for nullish input", () => {
             assert.strictEqual(substringBefore(null, "a"), null);
-            assert.strictEqual(substringBefore(undefined, "a"), null);
+            assert.strictEqual(substringBefore((void 0), "a"), null);
             assert.strictEqual(substringBefore(null, "a", "xyz"), "xyz");
-            assert.strictEqual(substringBefore(undefined, "a", "xyz"), "xyz");
+            assert.strictEqual(substringBefore((void 0), "a", "xyz"), "xyz");
         });
 
         it("should handle empty strings", () => {
@@ -84,7 +84,7 @@ describe("string/substring", () => {
             assert.strictEqual(substringBetween("a1b2a", "b", "a"), "2");
             assert.strictEqual(substringBetween("<a>b", "<a>", "</a>"), null);
             assert.strictEqual(substringBetween("ab</a>", "<a>", "</a>"), null);
-            assert.strictEqual(substringBetween(undefined, "<a>", "</a>"), null);
+            assert.strictEqual(substringBetween((void 0), "<a>", "</a>"), null);
             assert.strictEqual(substringBetween("<a>b</a>", "<c>", "</c>", ""), "");
         });
 
@@ -97,9 +97,9 @@ describe("string/substring", () => {
 
         it("should return on_missing for nullish input", () => {
             assert.strictEqual(substringBetween(null, "a", "b"), null);
-            assert.strictEqual(substringBetween(undefined, "a", "b"), null);
+            assert.strictEqual(substringBetween((void 0), "a", "b"), null);
             assert.strictEqual(substringBetween(null, "a", "b", "xyz"), "xyz");
-            assert.strictEqual(substringBetween(undefined, "a", "b", "xyz"), "xyz");
+            assert.strictEqual(substringBetween((void 0), "a", "b", "xyz"), "xyz");
         });
 
         it("should handle empty strings", () => {

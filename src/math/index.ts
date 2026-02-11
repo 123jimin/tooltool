@@ -75,11 +75,11 @@ export function ceilDiv(n: number | bigint, d: number | bigint): number|bigint {
         const r = n % d;
         if(r === 0) return q;
 
-        return q + (n > 0 === d > 0 ? 1 : 0);
+        return q + ((n > 0) === (d > 0) ? 1 : 0);
     } else if(typeof n === "bigint" && typeof d === "bigint") {
         const q = n / d;
         const r = n % d;
-        return r === 0n ? q : q + (n > 0n === d > 0n ? 1n : 0n);
+        return r === 0n ? q : q + ((n > 0n) === (d > 0n) ? 1n : 0n);
     }
 
     throw new TypeError("Both arguments must be of the same type");

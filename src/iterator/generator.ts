@@ -37,15 +37,13 @@ export function runGenerator<Y, R>(gen: Generator<Y, R>, callback?: (y: Y) => vo
 export function runGenerator<Y, R>(gen: AsyncGenerator<Y, R>, callback?: (y: Y) => void): Promise<R>;
 export function runGenerator<Y, R>(gen: Generator<Y, R>|AsyncGenerator<Y, R>, callback?: (y: Y) => void): R|Promise<R> {
     if(isAsyncIterable(gen)) {
-        while(true) {
-            return (async (): Promise<R> => {
-                while(true) {
-                    const {value, done}: IteratorResult<Y, R> = await gen.next();
-                    if(done) return value;
-                    else callback?.(value);
-                }
-            })();
-        }
+        return (async (): Promise<R> => {
+            while(true) {
+                const {value, done}: IteratorResult<Y, R> = await gen.next();
+                if(done) return value;
+                else callback?.(value);
+            }
+        })();
     } else {
         while(true) {
             const {value, done}: IteratorResult<Y, R> = gen.next();
