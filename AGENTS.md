@@ -46,6 +46,7 @@ describe("module-name/file-name", () => {
 - No `any` ever
 - Nullish: return `null` (not `undefined`); accept user input with types `Nullish`/`Nullable<T>`; check with `x == null`
 - Prefer free functions + composition over classes
+- No top-level side effects — the package is `sideEffects: false` (tree-shakeable)
 
 ### JSDoc
 
