@@ -48,5 +48,12 @@
     "typedoc": "^0.28.16",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.55.0"
+  },
+  "pnpm": {
+    "peerDependencyRules": {
+      "allowedVersions": {
+        "eslint": ">=10"
+      }
+    }
   }
 }
