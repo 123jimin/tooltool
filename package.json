@@ -37,23 +37,16 @@
   "homepage": "https://github.com/123jimin/tooltool",
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@jiminp/eslint-config": "^1.1.0",
+    "@jiminp/eslint-config": "^1.1.1",
     "@stylistic/eslint-plugin": "^5.8.0",
     "@types/chai": "^5.2.3",
     "@types/mocha": "^10.0.10",
     "chai": "^6.2.2",
     "eslint": "^10.0.0",
     "mocha": "^11.7.5",
-    "rimraf": "^6.1.2",
-    "typedoc": "^0.28.16",
+    "rimraf": "^6.1.3",
+    "typedoc": "^0.28.17",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.55.0"
-  },
-  "pnpm": {
-    "peerDependencyRules": {
-      "allowedVersions": {
-        "eslint": ">=10"
-      }
-    }
+    "typescript-eslint": "^8.56.0"
   }
 }
