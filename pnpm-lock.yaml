@@ -13,7 +13,7 @@ importers:
         version: 10.0.1(eslint@10.0.2)
       '@jiminp/eslint-config':
         specifier: ^1.1.3
-        version: 1.1.3(@eslint/js@10.0.1(eslint@10.0.2))(@stylistic/eslint-plugin@5.9.0(eslint@10.0.2))(eslint@10.0.2)(typescript-eslint@8.56.1(eslint@10.0.2)(typescript@5.9.3))
+        version: 1.2.0(@eslint/js@10.0.1(eslint@10.0.2))(@stylistic/eslint-plugin@5.9.0(eslint@10.0.2))(eslint@10.0.2)(typescript-eslint@8.56.1(eslint@10.0.2)(typescript@5.9.3))
       '@stylistic/eslint-plugin':
         specifier: ^5.9.0
         version: 5.9.0(eslint@10.0.2)
@@ -109,16 +109,19 @@ packages:
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
     engines: {node: '>=12'}
 
-  '@jiminp/eslint-config@1.1.3':
-    resolution: {integrity: sha512-u6EBMkJPQoiq2ufnvhw3r6fcs81EUspzqgGa2EG5+coIFjG2QUT/4sJMmWcL+/y2sQ8STezr1lwcakx9C3Xjgw==}
+  '@jiminp/eslint-config@1.2.0':
+    resolution: {integrity: sha512-FkacDJRa2F0bHIoy1aj0wtgXBG3LKwiKAAkLGD91RkZaEl75X/idptSR/GzIgPu2Dbd5phnscizi/5/2xyBRrg==}
     engines: {node: '>=18.18.0'}
     peerDependencies:
       '@eslint/js': ^10.0.1
       '@stylistic/eslint-plugin': ^5.8.0
       eslint: ^10.0.0
+      eslint-plugin-simple-import-sort: ^12.1.1
       typescript-eslint: ^8.55.0
     peerDependenciesMeta:
       '@stylistic/eslint-plugin':
+        optional: true
+      eslint-plugin-simple-import-sort:
         optional: true
       typescript-eslint:
         optional: true
@@ -844,7 +847,7 @@ snapshots:
       wrap-ansi: 8.1.0
       wrap-ansi-cjs: wrap-ansi@7.0.0
 
-  '@jiminp/eslint-config@1.1.3(@eslint/js@10.0.1(eslint@10.0.2))(@stylistic/eslint-plugin@5.9.0(eslint@10.0.2))(eslint@10.0.2)(typescript-eslint@8.56.1(eslint@10.0.2)(typescript@5.9.3))':
+  '@jiminp/eslint-config@1.2.0(@eslint/js@10.0.1(eslint@10.0.2))(@stylistic/eslint-plugin@5.9.0(eslint@10.0.2))(eslint@10.0.2)(typescript-eslint@8.56.1(eslint@10.0.2)(typescript@5.9.3))':
     dependencies:
       '@eslint/js': 10.0.1(eslint@10.0.2)
       eslint: 10.0.2
