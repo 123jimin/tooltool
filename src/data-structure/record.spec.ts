@@ -251,5 +251,26 @@ describe("data-structure/record", () => {
             const result = recursiveMerge(base, patch);
             assert.deepStrictEqual(result, {a: 1, b: 2});
         });
+
+        context("when base[k] is a non-object and patch[k] is an object", () => {
+            it("should not silently discard a primitive base value", () => {
+                const result = recursiveMerge(
+                    {sub: 42} as Record<string, unknown>,
+                    {sub: {y: 2}} as Record<string, unknown>,
+                );
+                assert.deepStrictEqual(result["sub"], {y: 2});
+            });
+
+            it("should not convert a base array into a plain object", () => {
+                const result = recursiveMerge(
+                    {sub: [1, 2, 3]} as Record<string, unknown>,
+                    {sub: {y: 2}} as Record<string, unknown>,
+                );
+                const sub = result["sub"] as Record<string, unknown>;
+                assert.notProperty(sub, "0");
+                assert.notProperty(sub, "1");
+                assert.notProperty(sub, "2");
+            });
+        });
     });
 });

@@ -58,6 +58,7 @@ export function recordAccess<T = unknown>(
  * Recursively merges a patch into a base object (deep merge).
  *
  * Arrays and primitives in `patch` overwrite `base`. Nested records are merged recursively.
+ * If `base[k]` is not a plain object (primitive, array, or `null`), an object-valued `patch[k]` overwrites it.
  *
  * @typeParam T - The record type.
  * @param base - The base object.
@@ -93,8 +94,12 @@ export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch
             continue;
         }
 
-        const orig = patched[k] as Record<string, unknown>;
-        patched[k] = recursiveMerge(orig, v);
+        const orig = patched[k];
+        if(typeof orig !== 'object' || orig === null || Array.isArray(orig)) {
+            patched[k] = v;
+            continue;
+        }
+        patched[k] = recursiveMerge(orig as Record<string, unknown>, v);
     }
 
     return patched as T;
