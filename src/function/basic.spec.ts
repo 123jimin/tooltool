@@ -1,5 +1,5 @@
 import {assert} from "chai";
-import {identity, nop} from "./basic.ts";
+import {identity, invoke, nop} from "./basic.ts";
 
 describe("function/basic", () => {
     describe("identity", () => {
@@ -9,6 +9,12 @@ describe("function/basic", () => {
             ]) {
                 assert.strictEqual(identity(value), value);
             }
+        });
+    });
+
+    describe("invoke", () => {
+        it("should work as advertised", () => {
+            assert.strictEqual(invoke(() => 42), 42);
         });
     });
 

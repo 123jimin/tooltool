@@ -3,7 +3,7 @@ import {multimapAdd, partitionToMultimap} from "./multimap.ts";
 
 describe("data-structure/multimap", () => {
     describe("multimapAdd", () => {
-        it("should working as expected (example 1)", () => {
+        it("should work as expected (example 1)", () => {
             const mm = new Map<string, number[]>();
             multimapAdd(mm, "a", 1);
             multimapAdd(mm, "a", 2);
