@@ -23,13 +23,15 @@ export function createAsyncSource<Y, R, E>(
 
             const flush = () => {
                 while(position < events.length) {
-                    callback(events[position]!);
+                    const event = events[position]!;
                     position++;
+                    callback(event);
+                    if(event.type === 'return' || event.type === 'throw') return;
                 }
+                waiters.push(flush);
             };
 
             flush();
-            waiters.push(flush);
         },
         onYield(callback) {
             this.subscribe((e) => { if(e.type === 'yield') callback(e.value); });

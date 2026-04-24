@@ -196,5 +196,98 @@ describe("iterator/channel/create", () => {
             assert.strictEqual(await p1, "done");
             assert.strictEqual(await p2, "done");
         });
+
+        describe("subscribe", () => {
+            it("should receive all events, not just the first", () => {
+                const ch = createAsyncChannel<number, string>();
+                const received: Array<{type: string; value: unknown}> = [];
+
+                ch.subscribe((event) => {
+                    received.push({type: event.type, value: event.value});
+                });
+
+                ch.next(1);
+                ch.next(2);
+                ch.next(3);
+                ch.complete("done");
+
+                assert.deepStrictEqual(received, [
+                    {type: "yield", value: 1},
+                    {type: "yield", value: 2},
+                    {type: "yield", value: 3},
+                    {type: "return", value: "done"},
+                ]);
+            });
+
+            it("should flush already-buffered events immediately", () => {
+                const ch = createAsyncChannel<number>();
+                ch.next(1);
+                ch.next(2);
+
+                const received: number[] = [];
+                ch.onYield((v) => received.push(v));
+
+                assert.deepStrictEqual(received, [1, 2]);
+            });
+
+            it("should receive events buffered before and pushed after subscription", () => {
+                const ch = createAsyncChannel<number>();
+                ch.next(1);
+
+                const received: number[] = [];
+                ch.onYield((v) => received.push(v));
+
+                ch.next(2);
+                ch.next(3);
+                ch.complete();
+
+                assert.deepStrictEqual(received, [1, 2, 3]);
+            });
+        });
+
+        describe("onYield", () => {
+            it("should receive all yielded values", () => {
+                const ch = createAsyncChannel<number>();
+                const values: number[] = [];
+
+                ch.onYield((v) => values.push(v));
+
+                ch.next(10);
+                ch.next(20);
+                ch.next(30);
+                ch.complete();
+
+                assert.deepStrictEqual(values, [10, 20, 30]);
+            });
+        });
+
+        describe("onReturn", () => {
+            it("should receive the return value", () => {
+                const ch = createAsyncChannel<number, string>();
+                const returns: string[] = [];
+
+                ch.onReturn((r) => returns.push(r));
+
+                ch.next(1);
+                ch.complete("finished");
+
+                assert.deepStrictEqual(returns, ["finished"]);
+            });
+        });
+
+        describe("onThrow", () => {
+            it("should receive the thrown error", () => {
+                const ch = createAsyncChannel<number, void, Error>();
+                const errors: Error[] = [];
+                const err = new Error("test");
+
+                ch.onThrow((e) => errors.push(e));
+
+                ch.next(1);
+                ch.error(err);
+
+                assert.deepStrictEqual(errors, [err]);
+            });
+        });
     });
 });
