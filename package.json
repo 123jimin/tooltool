@@ -1,6 +1,6 @@
 {
   "name": "@jiminp/tooltool",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Simple Utility Library for TypeScript",
   "type": "module",
   "sideEffects": false,
