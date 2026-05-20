@@ -2,6 +2,7 @@
 /* eslint-disable @stylistic/max-statements-per-line */
 
 import {assert} from "chai";
+
 import {runGenerator} from "./generator.ts";
 
 describe("iterator/generator", () => {

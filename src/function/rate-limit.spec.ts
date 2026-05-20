@@ -1,7 +1,7 @@
 import {assert} from "chai";
-import {rateLimited} from "./rate-limit.ts";
 
 import {sleep} from "./basic.ts";
+import {rateLimited} from "./rate-limit.ts";
 
 const TOLERANCE_MS = 10;
 

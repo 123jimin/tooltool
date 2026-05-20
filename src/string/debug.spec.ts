@@ -1,4 +1,5 @@
 import {assert} from 'chai';
+
 import {getRowCol} from "./debug.ts";
 
 describe("string/debug", () => {

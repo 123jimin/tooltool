@@ -1,5 +1,5 @@
-import type {Nullable} from "../type/index.ts";
 import {createAsyncChannel} from "../iterator/index.ts";
+import type {Nullable} from "../type/index.ts";
 
 /**
  * A function that fetches a single page of data.

@@ -1,5 +1,6 @@
 import {assert} from "chai";
-import {clamp, lerp, ceilDiv} from "./index.ts";
+
+import {ceilDiv, clamp, lerp} from "./index.ts";
 
 describe("math/index", () => {
     describe("clamp", () => {

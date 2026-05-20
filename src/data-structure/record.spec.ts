@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {recordAccess, recursiveMerge} from "./record.ts";
 
 describe("data-structure/record", () => {

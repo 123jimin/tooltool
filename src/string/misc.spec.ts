@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {trimIndented} from "./misc.ts";
 
 describe("string/misc", () => {

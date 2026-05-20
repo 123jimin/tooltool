@@ -1,7 +1,7 @@
 import {assert} from "chai";
 
-import type {AsyncSink} from "./type.ts";
 import {pipeToAsyncSink} from "./pipe.ts";
+import type {AsyncSink} from "./type.ts";
 
 describe("iterator/channel/pipe", () => {
     describe("pipeToAsyncSink", () => {

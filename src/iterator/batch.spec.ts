@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {batched} from "./batch.ts";
 import {range} from "./range.ts";
 

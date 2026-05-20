@@ -1,5 +1,6 @@
 import {assert} from "chai";
-import {partition, arrayGetOrExtend, arrayGetOrExtendWith} from "./array.ts";
+
+import {arrayGetOrExtend, arrayGetOrExtendWith, partition} from "./array.ts";
 
 describe("data-structure/array", () => {
     describe("partition", () => {
@@ -27,7 +28,10 @@ describe("data-structure/array", () => {
 
         it("should pass index and array to the predicate", () => {
             const indices: number[] = [];
-            partition([10, 20, 30], (_v, i) => { indices.push(i); return false; });
+            partition([10, 20, 30], (_v, i) => {
+                indices.push(i);
+                return false;
+            });
             assert.deepStrictEqual(indices, [0, 1, 2]);
         });
     });

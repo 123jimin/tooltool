@@ -1,5 +1,6 @@
 import {assert} from "chai";
-import {bisectLeft, bisectRight, bisect} from "./bisect.ts";
+
+import {bisect, bisectLeft, bisectRight} from "./bisect.ts";
 
 describe("data-structure/bisect", () => {
     describe("bisectLeft", () => {

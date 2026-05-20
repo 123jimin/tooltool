@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {Deque} from "./deque.ts";
 
 describe("data-structure/deque", () => {

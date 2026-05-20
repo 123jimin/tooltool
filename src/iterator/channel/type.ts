@@ -1,5 +1,5 @@
-import type {AsyncEvent} from "../generator.ts";
 import type {OptionalIfVoid} from "../../type/index.ts";
+import type {AsyncEvent} from "../generator.ts";
 
 /**
  * Write-side of an async channel that pushes values, completion, or errors.

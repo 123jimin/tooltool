@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {formatFixedFloat, formatSignedInt} from "./format.ts";
 
 describe("string/format", () => {

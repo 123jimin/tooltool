@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {chunkText, getNextChunkLength} from "./chunk.ts";
 
 describe("string/chunk", () => {

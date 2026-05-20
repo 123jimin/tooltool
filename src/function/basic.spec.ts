@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {identity, invoke, nop} from "./basic.ts";
 
 describe("function/basic", () => {

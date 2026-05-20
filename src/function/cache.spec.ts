@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {cached} from "./cache.ts";
 
 describe("function/cache", () => {

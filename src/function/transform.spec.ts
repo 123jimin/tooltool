@@ -1,7 +1,7 @@
 import {assert} from "chai";
 
-import {applyTransforms, applyAsyncTransforms} from "./transform.ts";
 import {sleep} from "./basic.ts";
+import {applyAsyncTransforms, applyTransforms} from "./transform.ts";
 
 describe("applyTransforms", () => {
     it("should return original value when no transforms are provided", () => {

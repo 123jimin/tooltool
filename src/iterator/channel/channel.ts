@@ -1,6 +1,6 @@
 import type {AsyncEvent} from "../generator.ts";
-import type {AsyncChannel} from "./type.ts";
 import {createAsyncSource} from "./source.ts";
+import type {AsyncChannel} from "./type.ts";
 
 /**
  * Creates an async channel that buffers values and replays them to each iterator.

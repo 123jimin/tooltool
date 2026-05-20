@@ -1,4 +1,5 @@
 import {assert} from "chai";
+
 import {multimapAdd, partitionToMultimap} from "./multimap.ts";
 
 describe("data-structure/multimap", () => {
