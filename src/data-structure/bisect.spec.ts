@@ -61,6 +61,36 @@ describe("data-structure/bisect", () => {
         });
     });
 
+    describe("bisectLeft (bigint)", () => {
+        it("should find the leftmost insertion point", () => {
+            assert.strictEqual(bisectLeft([1n, 2n, 4n, 4n, 6n], 4n), 2);
+            assert.strictEqual(bisectLeft([1n, 2n, 4n, 4n, 6n], 3n), 2);
+        });
+
+        it("should return 0 for an empty array", () => {
+            assert.strictEqual(bisectLeft([] as bigint[], 1n), 0);
+        });
+
+        it("should return the index before all equal entries", () => {
+            assert.strictEqual(bisectLeft([2n, 2n, 2n], 2n), 0);
+        });
+    });
+
+    describe("bisectRight (bigint)", () => {
+        it("should find the rightmost insertion point", () => {
+            assert.strictEqual(bisectRight([1n, 2n, 4n, 4n, 6n], 4n), 4);
+            assert.strictEqual(bisectRight([1n, 2n, 4n, 4n, 6n], 3n), 2);
+        });
+
+        it("should return 0 for an empty array", () => {
+            assert.strictEqual(bisectRight([] as bigint[], 1n), 0);
+        });
+
+        it("should return the index after all equal entries", () => {
+            assert.strictEqual(bisectRight([2n, 2n, 2n], 2n), 3);
+        });
+    });
+
     describe("bisect", () => {
         it("should be an alias for bisectRight", () => {
             assert.strictEqual(bisect, bisectRight);
