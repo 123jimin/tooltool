@@ -10,7 +10,7 @@ describe("string/misc", () => {
                 world!
             `;
             const trimmed = trimIndented(text);
-            assert.strictEqual(trimmed, "Hello,\nworld!");
+            assert.strictEqual(trimmed, "Hello,\n  world!");
         });
 
         it("should return an empty string for an empty input", () => {
@@ -28,7 +28,7 @@ describe("string/misc", () => {
 
         it("should handle mixed line endings (LF and CRLF)", () => {
             const text = "  a\r\n b\n  c";
-            assert.strictEqual(trimIndented(text), "a\nb\nc");
+            assert.strictEqual(trimIndented(text), " a\nb\n c");
         });
 
         it("should preserve empty lines between text", () => {
@@ -53,7 +53,16 @@ describe("string/misc", () => {
 
         it("should handle text with only one line", () => {
             const text = "   Hello, world!   ";
-            assert.strictEqual(trimIndented(text), "Hello, world!");
+            assert.strictEqual(trimIndented(text), "Hello, world!   ");
+        });
+
+        it("should preserve relative indentation", () => {
+            const text = `
+                if(true) {
+                    console.log("hello");
+                }
+            `;
+            assert.strictEqual(trimIndented(text), "if(true) {\n    console.log(\"hello\");\n}");
         });
     });
 });
