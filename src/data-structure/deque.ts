@@ -108,10 +108,7 @@ export class Deque<T> {
             return null;
         }
 
-        const numeric_index = Number(index);
-        const integer_index = Number.isNaN(numeric_index)
-            ? 0
-            : Math.trunc(numeric_index);
+        const integer_index = Math.trunc(index) || 0;
         const relative_index = integer_index < 0 ? size + integer_index : integer_index;
 
         if(relative_index < 0 || relative_index >= size) {

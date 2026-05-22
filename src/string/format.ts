@@ -39,7 +39,7 @@ export function formatFixedFloat(n: number, fractions: number): string {
  * formatSignedInt(5, 3, '0'); // "+005"
  * ```
  */
-export function formatSignedInt(n: number, min_len?: number, fill_string?: string) {
+export function formatSignedInt(n: number, min_len?: number, fill_string?: string): string {
     let abs_n: string = (n < 0 ? -n : n).toString();
     if(min_len) abs_n = abs_n.padStart(min_len, fill_string);
 

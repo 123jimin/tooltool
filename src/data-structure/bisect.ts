@@ -16,7 +16,9 @@
  * bisectLeft([1, 2, 4, 4, 6], 3); // 2
  * ```
  */
-export function bisectLeft(sorted_arr: Array<number|bigint>, target: number): number {
+export function bisectLeft(sorted_arr: number[], target: number): number;
+export function bisectLeft(sorted_arr: bigint[], target: bigint): number;
+export function bisectLeft(sorted_arr: Array<number|bigint>, target: number|bigint): number {
     let left = 0;
     let right = sorted_arr.length;
 
@@ -50,7 +52,9 @@ export function bisectLeft(sorted_arr: Array<number|bigint>, target: number): nu
  * bisectRight([1, 2, 4, 4, 6], 3); // 2
  * ```
  */
-export function bisectRight(sorted_arr: Array<number|bigint>, target: number): number {
+export function bisectRight(sorted_arr: number[], target: number): number;
+export function bisectRight(sorted_arr: bigint[], target: bigint): number;
+export function bisectRight(sorted_arr: Array<number|bigint>, target: number|bigint): number {
     let left = 0;
     let right = sorted_arr.length;
 
