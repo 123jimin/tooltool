@@ -1,34 +1,34 @@
 import {assert} from "chai";
 
-import {trimIndented} from "./misc.ts";
+import {dedent} from "./misc.ts";
 
 describe("string/misc", () => {
-    describe("trimIndented", () => {
+    describe("dedent", () => {
         it("should work as advertised", () => {
             const text = `
               Hello,
                 world!
             `;
-            const trimmed = trimIndented(text);
+            const trimmed = dedent(text);
             assert.strictEqual(trimmed, "Hello,\n  world!");
         });
 
         it("should return an empty string for an empty input", () => {
-            assert.strictEqual(trimIndented(""), "");
+            assert.strictEqual(dedent(""), "");
         });
 
         it("should return an empty string for a whitespace-only input", () => {
-            assert.strictEqual(trimIndented("   \n\t  \r\n "), "");
+            assert.strictEqual(dedent("   \n\t  \r\n "), "");
         });
 
         it("should not change a string that is already de-indented", () => {
             const text = "Hello,\nworld!";
-            assert.strictEqual(trimIndented(text), text);
+            assert.strictEqual(dedent(text), text);
         });
 
         it("should handle mixed line endings (LF and CRLF)", () => {
             const text = "  a\r\n b\n  c";
-            assert.strictEqual(trimIndented(text), " a\nb\n c");
+            assert.strictEqual(dedent(text), " a\nb\n c");
         });
 
         it("should preserve empty lines between text", () => {
@@ -37,7 +37,7 @@ describe("string/misc", () => {
 
               line2
             `;
-            assert.strictEqual(trimIndented(text), "line1\n\nline2");
+            assert.strictEqual(dedent(text), "line1\n\nline2");
         });
 
         it("should handle text with leading/trailing blank lines", () => {
@@ -48,12 +48,12 @@ describe("string/misc", () => {
               line2
 
             `;
-            assert.strictEqual(trimIndented(text), "line1\n\nline2");
+            assert.strictEqual(dedent(text), "line1\n\nline2");
         });
 
         it("should handle text with only one line", () => {
             const text = "   Hello, world!   ";
-            assert.strictEqual(trimIndented(text), "Hello, world!   ");
+            assert.strictEqual(dedent(text), "Hello, world!   ");
         });
 
         it("should preserve relative indentation", () => {
@@ -62,7 +62,7 @@ describe("string/misc", () => {
                     console.log("hello");
                 }
             `;
-            assert.strictEqual(trimIndented(text), "if(true) {\n    console.log(\"hello\");\n}");
+            assert.strictEqual(dedent(text), "if(true) {\n    console.log(\"hello\");\n}");
         });
     });
 });

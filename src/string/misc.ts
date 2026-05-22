@@ -15,13 +15,13 @@
  *
  * @example
  * ```ts
- * trimIndented(`
+ * dedent(`
  *     Hello,
  *       world!
  * `); // "Hello,\n  world!"
  * ```
  */
-export function trimIndented(text: string): string {
+export function dedent(text: string): string {
     const lines = text.split(/\r?\n/);
 
     while(lines.length > 0 && lines[0]!.trim() === '') lines.shift();
