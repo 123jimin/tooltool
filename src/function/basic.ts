@@ -2,31 +2,40 @@
  * Returns a promise that settles after a timer delay without blocking other work.
  *
  * @param time_ms - Finite duration in milliseconds; nonpositive values yield once asynchronously.
- * @returns A promise that resolves after at least the positive requested duration.
+ * @returns A promise that resolves when the final timer completes.
  * @throws {RangeError} If `time_ms` is not finite.
  *
  * @remarks
- * Timer scheduling is approximate and may finish late. Long waits are split into
- * timers of at most `2 ** 31 - 1` milliseconds. Remaining time is measured with
- * `performance.now()`, so late callbacks count toward the requested delay.
+ * Timer scheduling is approximate. Each iteration chooses a timer from the remaining
+ * duration: up to 1000 ms waits directly and then returns without rechecking the clock;
+ * up to 10000 ms waits for the remainder minus 500 ms; longer waits use 75% of the
+ * remainder, capped at `2 ** 31 - 1` ms. After non-final timers, remaining time is
+ * recomputed using `performance.now()`. The final short timer is trusted, including
+ * any platform truncation of fractional milliseconds.
  *
  * @example
  * ```ts
- * await sleep(500); // waits for 500 ms
+ * await sleep(500); // waits approximately 500 ms
  * ```
  */
 export async function sleep(time_ms: number): Promise<void> {
     if(!Number.isFinite(time_ms)) throw new RangeError("Duration must be finite");
 
     const started_at = performance.now();
-    let remaining = Math.max(0, time_ms);
-    do {
-        const delay = Math.min(remaining, 2 ** 31 - 1);
+    for(let remaining = Math.max(0, time_ms); ;) {
+        const is_final_wait = remaining <= 1000;
+        const delay = is_final_wait
+            ? remaining
+            : remaining <= 10000
+                ? remaining - 500
+                : Math.min(remaining * 0.75, 2 ** 31 - 1);
         await new Promise<void>((resolve) => {
             setTimeout(resolve, delay);
         });
+        if(is_final_wait) break;
         remaining = time_ms - (performance.now() - started_at);
-    } while(remaining > 0);
+        if(remaining <= 0) break;
+    }
 }
 
 /**
