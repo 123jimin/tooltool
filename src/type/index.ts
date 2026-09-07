@@ -1,3 +1,5 @@
+import type {RecursiveAtomic} from "./recursive-atomic.ts";
+
 export * from "./json.ts";
 export * from "./nullable.ts";
 export * from "./result.ts";
@@ -60,8 +62,11 @@ export type NestedArray<T> = NestedArrayElement<T>[];
  * arrays. Unions of arrays keep separate array branches rather than combining
  * their element types into one array. Readonly arrays and tuples follow optional
  * mapped-type semantics.
- * Built-in instances and functions are treated structurally as objects with
- * optional members, not preserved as atomic values or callable signatures.
+ * Dates, regular expressions, mutable and readonly maps and sets, and callable
+ * types are atomic: their members and call signatures are preserved unchanged.
+ * Other object types are treated structurally. TypeScript cannot distinguish
+ * custom-class instances from matching plain records, so their data properties
+ * become optional; callable methods remain callable when present.
  *
  * @typeParam T - The type to be made recursively partial.
  *
@@ -73,9 +78,10 @@ export type NestedArray<T> = NestedArrayElement<T>[];
  * ```
  */
 export type RecursivePartial<T> =
-    T extends Array<infer U> ? Array<RecursivePartial<U>>
-        : T extends object ? {[P in keyof T]?: RecursivePartial<T[P]>}
-            : T;
+    T extends RecursiveAtomic ? T
+        : T extends Array<infer U> ? Array<RecursivePartial<U>>
+            : T extends object ? {[P in keyof T]?: RecursivePartial<T[P]>}
+                : T;
 
 /**
  * Represents a value that may or may not be wrapped in a `Promise`.

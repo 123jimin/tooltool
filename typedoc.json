@@ -3,6 +3,8 @@
     "entryPoints": ["src/*/index.ts"],
     "entryPointStrategy": "resolve",
     "exclude": ["**/*.spec.ts"],
+    "plugin": ["typedoc-plugin-missing-exports"],
+    "excludeExternals": true,
     "groupReferencesByType": true,
     "useFirstParagraphOfCommentAsSummary": true,
     "navigationLinks": {

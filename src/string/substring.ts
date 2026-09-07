@@ -12,6 +12,9 @@ import type {Nullable, Nullish} from "../type/index.ts";
  * If the delimiter is found at the end of the string, an empty string is returned
  * (not `on_missing`). An empty string delimiter matches at the beginning and returns
  * all of `s`. Useful for removing a path, field, or protocol prefix.
+ * Regex flags are preserved, but matching starts from zero without reading or changing
+ * the caller's `lastIndex`. Global regexes return only the first match; sticky regexes
+ * must match at the beginning of `s`.
  *
  * @example
  * ```ts
@@ -32,8 +35,8 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
         if(ind < 0) return on_missing;
         return s.slice(ind + delimiter.length);
     } else {
-        const match = s.match(delimiter);
-        if(match?.index == null) return on_missing;
+        const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
+        if(match == null) return on_missing;
         return s.slice(match.index + match[0].length);
     }
 }
@@ -49,6 +52,9 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
  * @remarks
  * A delimiter at the beginning, including an empty string delimiter, returns an
  * empty string rather than `on_missing`. Useful for extracting a path or field prefix.
+ * Regex flags are preserved, but matching starts from zero without reading or changing
+ * the caller's `lastIndex`. Global regexes return only the first match; sticky regexes
+ * must match at the beginning of `s`.
  *
  * @example
  * ```ts
@@ -68,8 +74,8 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
         if(ind < 0) return on_missing;
         return s.slice(0, ind);
     } else {
-        const match = s.match(delimiter);
-        if(match?.index == null) return on_missing;
+        const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
+        if(match == null) return on_missing;
         return s.slice(0, match.index);
     }
 }
@@ -87,6 +93,8 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
  * Search for `end` begins after `start`. Occurrences of `end` before `start` are ignored.
  * An `end` regex runs against the remaining substring, so `^` anchors immediately
  * after `start`. Adjacent delimiters return an empty string rather than `on_missing`.
+ * Regex flags are preserved and caller `lastIndex` values are neither read nor changed.
+ * Each regex starts at zero in its searched substring; sticky regexes must match there.
  *
  * @example
  * ```ts

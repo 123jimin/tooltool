@@ -47,6 +47,33 @@ describe("type/index", () => {
             ({kind: "left", right: {}} satisfies RecursivePartial<Source>);
         });
 
+        it("preserves atomic built-ins and callable signatures through optional unions", () => {
+            type Atomic =
+                Date
+                |RegExp
+                |Map<string, {value: number}>
+                |ReadonlyMap<string, {value: number}>
+                |Set<{value: number}>
+                |ReadonlySet<{value: number}>
+                |((value: number) => string);
+            assertEqualType<RecursivePartial<Atomic>, Atomic>();
+            assertEqualType<
+                RecursivePartial<{nested?: {value: Atomic|null; enabled: boolean}|null}>,
+                {nested?: {value?: Atomic|null; enabled?: boolean}|null}
+            >();
+        });
+
+        it("makes structural data optional without removing method call signatures", () => {
+            type Source = {
+                value: number;
+                format(radix: number): string;
+            };
+            assertEqualType<
+                RecursivePartial<Source>,
+                {value?: number; format?: (radix: number) => string}
+            >();
+        });
+
         it("keeps mutable arrays and recursively transforms their nullable elements", () => {
             assertEqualType<
                 RecursivePartial<Array<{id: number; details?: {label: string; count: number}|null}|null>|undefined>,

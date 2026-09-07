@@ -469,7 +469,7 @@ describe("data-structure/record", () => {
             assert.deepStrictEqual(patch["__proto__"], {change: 2});
         });
 
-        it("should exclude inherited properties from base and patch", () => {
+        it("should replace custom-prototype roots instead of traversing their inherited members", () => {
             const base = Object.create({inherited_base: {value: 1}}) as Record<string, unknown>;
             base["keep"] = 2;
             const patch = Object.create({inherited_patch: {value: 3}}) as Record<string, unknown>;
@@ -477,7 +477,40 @@ describe("data-structure/record", () => {
 
             const result = recursiveMerge(base, patch);
 
-            assert.deepStrictEqual(result, {keep: 2, added: 4});
+            assert.strictEqual(result, patch);
+            assert.isFalse(Object.hasOwn(result, "keep"));
+            assert.isFalse(Object.hasOwn(result, "inherited_patch"));
+            assert.strictEqual(base["keep"], 2);
+        });
+
+        it("should merge null-prototype records at roots and nested branches", () => {
+            const base = Object.assign(Object.create(null) as Record<string, unknown>, {
+                keep: 1,
+                nested: Object.assign(Object.create(null) as Record<string, unknown>, {left: 2}),
+                ["__proto__"]: {left: 3},
+            });
+            const patch = Object.assign(Object.create(null) as Record<string, unknown>, {
+                nested: {right: 4},
+                ["__proto__"]: {right: 5},
+                constructor: "own constructor",
+                toString: "own string",
+            });
+
+            const result = recursiveMerge(base, patch);
+
+            assert.deepStrictEqual(result, {
+                keep: 1,
+                nested: {left: 2, right: 4},
+                ["__proto__"]: {left: 3, right: 5},
+                constructor: "own constructor",
+                toString: "own string",
+            });
+            assert.strictEqual(Object.getPrototypeOf(result), Object.prototype);
+            assert.strictEqual(Object.getPrototypeOf(base), null);
+            assert.strictEqual(Object.getPrototypeOf(patch), null);
+            assert.deepStrictEqual(base["__proto__"], {left: 3});
+            assert.deepStrictEqual(patch["__proto__"], {right: 5});
+            assert.isTrue(Object.hasOwn(result, "__proto__"));
         });
 
         it("should preserve replacement Date values when merging existing Dates", () => {
@@ -486,9 +519,103 @@ describe("data-structure/record", () => {
 
             const result = recursiveMerge(base, patch);
 
+            assertEqualType<typeof result.updated_at, Date>();
+            assert.strictEqual(result.updated_at, patch.updated_at);
             assert.instanceOf(result.updated_at, Date);
             assert.strictEqual(result.updated_at.getTime(), patch.updated_at.getTime());
             assert.strictEqual(base.updated_at.toISOString(), "2020-01-01T00:00:00.000Z");
+        });
+
+        it("should preserve atomic types and replacement references at roots and nested branches", () => {
+            const readonly_map: ReadonlyMap<string, {value: number}> = new Map([["entry", {value: 1}]]);
+            const readonly_set: ReadonlySet<{value: number}> = new Set([{value: 2}]);
+            const patch = {
+                date: new Date("2025-06-15T12:30:00.000Z"),
+                regexp: /replacement/u,
+                map: new Map([["entry", {value: 3}]]),
+                readonly_map,
+                set: new Set([{value: 4}]),
+                readonly_set,
+                callable: (value: number) => value + 1,
+                array: [1, 2],
+            };
+            const result = recursiveMerge({
+                date: {old: true},
+                regexp: {old: true},
+                map: {old: true},
+                readonly_map: {old: true},
+                set: {old: true},
+                readonly_set: {old: true},
+                callable: {old: true},
+                array: {old: true},
+            }, patch);
+            assertEqualType<typeof result, typeof patch>();
+            assert.strictEqual(result.map.get("entry")?.value, 3);
+            assert.strictEqual(result.readonly_map.get("entry")?.value, 1);
+            assert.isTrue(result.regexp.test("replacement"));
+            assert.strictEqual(result.callable(2), 3);
+
+            for(const replacement of Object.values(patch)) {
+                const root = recursiveMerge({kept: true}, replacement);
+                assertEqualType<typeof root, typeof replacement>();
+                assert.strictEqual(root, replacement);
+                assert.strictEqual(
+                    recursiveMerge({value: {kept: true}}, {value: replacement}).value,
+                    replacement,
+                );
+                const record = {added: true};
+                const replaced = recursiveMerge({value: replacement}, {value: record});
+                assertEqualType<typeof replaced.value, typeof record>();
+                assert.strictEqual(replaced.value, record);
+                // Root bases use the existing record-indexed signature, including for instances.
+                const indexed_base = replacement as typeof replacement & Record<string, unknown>;
+                const replaced_root = recursiveMerge(indexed_base, record);
+                assertEqualType<typeof replaced_root, typeof record>();
+                assert.strictEqual(replaced_root, record);
+                assert.strictEqual(recursiveMerge(indexed_base, null), indexed_base);
+            }
+        });
+
+        it("should retain optional atomic union members without merging their instance properties", () => {
+            const base = {nested: {value: new Date("2020-01-01T00:00:00.000Z"), kept: true}};
+            const merge = (patch: {nested?: {value?: Map<string, number>|Date|null}}) => {
+                const result = recursiveMerge(base, patch);
+                assertEqualType<typeof result.nested, {
+                    value: Date|Map<string, number>|null;
+                    kept: boolean;
+                }>();
+                return result;
+            };
+            const map = new Map([["entry", 2]]);
+            assert.strictEqual(merge({}).nested, base.nested);
+            assert.strictEqual(merge({nested: {}}).nested.value, base.nested.value);
+            assert.strictEqual(merge({nested: {value: map}}).nested.value, map);
+            assert.isNull(merge({nested: {value: null}}).nested.value);
+        });
+
+        it("should replace class instances and keep their methods callable", () => {
+            class State {
+                [key: string]: unknown;
+                readonly value: number;
+                constructor(value: number) { this.value = value; }
+                read(): number { return this.value; }
+            }
+            const base = new State(1);
+            const patch = new State(2);
+            const record = {added: true};
+
+            assert.strictEqual(recursiveMerge(base, patch), patch);
+            // Custom-class result types are structural; verify their runtime replacement identity.
+            assert.strictEqual<unknown>(recursiveMerge(record, patch), patch);
+            assert.strictEqual(recursiveMerge(base, record), record);
+            assert.strictEqual(recursiveMerge(base, null), base);
+            const result = recursiveMerge({value: base}, {value: patch});
+            assertEqualType<typeof result.value.read, () => number>();
+            assert.strictEqual(result.value, patch);
+            assert.strictEqual(result.value.read(), 2);
+            assert.strictEqual<unknown>(recursiveMerge({value: record}, {value: patch}).value, patch);
+            assert.strictEqual(recursiveMerge({value: base}, {value: record}).value, record);
+            assert.strictEqual(base.read(), 1);
         });
 
         it("should handle disjoint keys correctly", () => {

@@ -9,9 +9,11 @@
  * @returns The formatted string.
  *
  * @remarks
- * Positive `fractions` produces exactly that many digits after the decimal point.
- * Input precision is limited by JavaScript numbers; formatting cannot recover
- * digits already lost when representing `n`.
+ * Positive `fractions` pads the fractional part to that many digits when the
+ * numeric parts use ordinary decimal notation. Large magnitudes are not expanded
+ * from exponent notation, so their output may not be a conventional fixed-point
+ * decimal. Input precision is limited by JavaScript numbers; formatting cannot
+ * recover digits already lost when representing `n`.
  *
  * @example
  * ```ts

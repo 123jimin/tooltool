@@ -50,36 +50,28 @@ describe("data-structure/deque", () => {
             assert.strictEqual(empty.at(0), null);
         });
 
-        it("should preserve stored undefined values in at lookups", () => {
-            const deque = new Deque<number | undefined>();
-            deque.push(1, void 0, 3);
-
-            assert.strictEqual(deque.at(1), void 0);
-            assert.strictEqual(deque.at(-2), void 0);
-            assert.strictEqual(deque.at(0), 1);
-            assert.strictEqual(deque.at(2), 3);
-            assert.strictEqual(deque.at(3), null);
-            assert.strictEqual(deque.length, 3);
+        it("should reject element types that admit undefined", () => {
+            // @ts-expect-error Undefined cannot be a deque item type.
+            type _UndefinedDeque = Deque<undefined>;
+            // @ts-expect-error A union containing undefined is not an allowed item type.
+            type _OptionalDeque = Deque<number | undefined>;
+            // @ts-expect-error Unknown includes undefined.
+            type _UnknownDeque = Deque<unknown>;
         });
 
-        it("should preserve a stored undefined value when popping the tail", () => {
-            const deque = new Deque<number | undefined>();
-            deque.push(1, void 0);
+        it("should preserve null items and distinguish removal through length", () => {
+            const deque = new Deque<number | null>();
+            deque.push(0);
+            deque.unshift(null);
 
-            assert.strictEqual(deque.pop(), void 0);
-            assert.strictEqual(deque.length, 1);
-            assert.strictEqual(deque.pop(), 1);
-            assert.strictEqual(deque.pop(), null);
-        });
-
-        it("should preserve a stored undefined value when shifting the head", () => {
-            const deque = new Deque<number | undefined>();
-            deque.unshift(void 0, 1);
-
-            assert.strictEqual(deque.shift(), void 0);
-            assert.strictEqual(deque.length, 1);
-            assert.strictEqual(deque.shift(), 1);
+            assert.strictEqual(deque.at(0), null);
+            assert.strictEqual(deque.at(-1), 0);
+            assert.strictEqual(deque.length, 2);
             assert.strictEqual(deque.shift(), null);
+            assert.strictEqual(deque.length, 1);
+            assert.strictEqual(deque.pop(), 0);
+            assert.strictEqual(deque.length, 0);
+            assert.strictEqual(deque.pop(), null);
         });
     });
 });

@@ -1,4 +1,5 @@
 import type {Nullable, RecursivePartial} from "../type/index.ts";
+import type {RecursiveAtomic} from "../type/recursive-atomic.ts";
 
 /**
  * Accesses a nested record at the given path, returning a value and setter.
@@ -74,13 +75,28 @@ type MergeProperty<T, K extends keyof T> =
 
 type MergeValue<Base, Patch> =
     Patch extends undefined ? Base
-        : Patch extends readonly unknown[] | ((...args: never[]) => unknown) ? Patch
+        : Patch extends readonly unknown[] | RecursiveAtomic ? Patch
             : Patch extends object
-                ? Base extends readonly unknown[] | ((...args: never[]) => unknown) ? Patch
+                ? Base extends readonly unknown[] | RecursiveAtomic ? Patch
                     : Base extends object
-                        ? RecursiveMergeResult<Base, Patch>
+                        ? MergeRecords<Base, Patch>
                         : Patch
                 : Patch;
+
+type MergeRecords<Base, Patch> = {
+    [K in keyof Base]: K extends Extract<keyof Patch, string | number> ? MergeValue<Base[K], MergeProperty<Patch, K>>
+        : string extends K ? Base[K] | MergeValue<Base[K] | undefined, Patch[Extract<keyof Patch, string | number>]>
+            : number extends K ? Base[K] | MergeValue<Base[K] | undefined, Patch[Extract<keyof Patch, number>]>
+                : Base[K];
+} & {
+    [K in keyof Patch as K extends string | number ? K extends keyof Base ? never : K : never]?:
+    string extends K ? MergeValue<Base[Extract<keyof Base, string | number>] | undefined, Patch[K] | undefined>
+        : number extends K ? MergeValue<Base[Extract<keyof Base, number>] | undefined, Patch[K] | undefined>
+            : Patch[K];
+} & {
+    [K in keyof Patch as K extends string | number ? undefined extends MergeProperty<Patch, K> ? never : K : never]-?:
+    MergeValue<K extends keyof Base ? MergeProperty<Base, K> : undefined, Patch[K]>;
+};
 
 /**
  * The inferred record merge, including additions and replacement value types.
@@ -91,45 +107,38 @@ type MergeValue<Base, Patch> =
  * Union patches retain the possible unchanged and merged results.
  * Index signatures conservatively retain both base and patch possibilities.
  *
- * Models ordinary own enumerable record properties; TypeScript cannot distinguish
- * inherited or non-enumerable properties from own properties.
+ * Dates, regular expressions, mutable and readonly maps and sets, callable types,
+ * and arrays are replacements. Other objects are modeled as ordinary records.
+ * TypeScript cannot distinguish custom-class instances from matching plain records,
+ * or inherited/non-enumerable members from own enumerable members. Runtime replacement
+ * of such instances therefore cannot be inferred reliably: additive record members
+ * are only guaranteed when those inputs are known to be plain records.
  */
 export type RecursiveMergeResult<Base, Patch> =
     Patch extends null | undefined ? Base
-        : Base extends unknown ? {
-            [K in keyof Base]: K extends Extract<keyof Patch, string | number> ? MergeValue<Base[K], MergeProperty<Patch, K>>
-                : string extends K ? Base[K] | MergeValue<Base[K] | undefined, Patch[Extract<keyof Patch, string | number>]>
-                    : number extends K ? Base[K] | MergeValue<Base[K] | undefined, Patch[Extract<keyof Patch, number>]>
-                        : Base[K];
-        } & {
-            [K in keyof Patch as K extends string | number ? K extends keyof Base ? never : K : never]?:
-            string extends K ? MergeValue<Base[Extract<keyof Base, string | number>] | undefined, Patch[K] | undefined>
-                : number extends K ? MergeValue<Base[Extract<keyof Base, number>] | undefined, Patch[K] | undefined>
-                    : Patch[K];
-        } & {
-            [K in keyof Patch as K extends string | number ? undefined extends MergeProperty<Patch, K> ? never : K : never]-?:
-            MergeValue<K extends keyof Base ? MergeProperty<Base, K> : undefined, Patch[K]>;
-        } : never;
+        : MergeValue<Base, Patch>;
 
 /**
  * Recursively merges a patch into a base record without mutating either input.
  *
- * Arrays and primitives in `patch` overwrite `base`. Nested records are merged recursively.
- * A record-valued patch replaces a primitive, array, or nullish base value.
+ * Deep-merges only pairs of plain records. Arrays, functions, other objects, and
+ * primitives replace their base values by reference rather than being traversed.
  *
  * @typeParam Base - The base record type.
  * @typeParam Patch - The inferred patch type, including additions and replacements.
  * @param base - The base record.
  * @param patch - Record updates, or `null` or `undefined` to leave `base` unchanged.
- * @returns The merged record, or `base` itself for a nullish or identical patch.
+ * @returns The merged record, the replacement patch, or `base` for a nullish or identical patch.
  *
  * @remarks
+ * - A plain record has exactly this realm's `Object.prototype` or `null` as its prototype.
+ *   Class instances and records with another realm's object prototype are replacements.
  * - Patch properties may add keys or replace existing values with different types.
- * - Own enumerable string-keyed patch properties are applied; inherited properties are ignored.
- *   Names such as `__proto__` are handled as own data properties, not prototype operations.
- * - `undefined` patch values are ignored; `null` overwrites.
- * - Non-nullish, non-identical patches create a new top-level record. Recursively merged branches
- *   are copied, while untouched branches and replacement arrays or objects share input references.
+ * - Plain-record merges apply own enumerable string-keyed patch properties and ignore inherited
+ *   properties. Names such as `__proto__` become own data properties, not prototype operations.
+ *   An `undefined` field is ignored; a `null` field overwrites.
+ * - Non-identical pairs of plain records create new ordinary records. Recursively merged
+ *   branches are copied; untouched branches and replacement values retain input references.
  *   This is not a deep clone.
  *
  * @example
@@ -143,24 +152,27 @@ export function recursiveMerge<
     Base extends Record<string, unknown>,
     Patch extends Nullable<object> = Nullable<RecursivePartial<Base>>,
 >(base: Base, patch: Patch): RecursiveMergeResult<Base, Patch>;
-export function recursiveMerge(base: Record<string, unknown>, patch: Nullable<object>): Record<string, unknown> {
+export function recursiveMerge(base: Record<string, unknown>, patch: Nullable<object>): object {
     if(patch == null || base === patch) return base;
-    if(base == null) return patch as Record<string, unknown>;
+    return isPlainRecord(base) && isPlainRecord(patch) ? mergePlainRecords(base, patch) : patch;
+}
 
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+    if(typeof value !== "object" || value === null) return false;
+    const prototype = Object.getPrototypeOf(value);
+    return prototype === Object.prototype || prototype === null;
+}
+
+function mergePlainRecords(base: Record<string, unknown>, patch: Record<string, unknown>): Record<string, unknown> {
+    if(base === patch) return base;
     const patched: Record<string, unknown> = {...base};
     for(const [k, v] of Object.entries(patch)) {
         if(v === (void 0)) continue;
-        let value = v;
-        if(v !== null && typeof v === 'object' && !Array.isArray(v)) {
-            const orig = Object.hasOwn(patched, k) ? patched[k] : (void 0);
-            if(typeof orig === 'object' && orig !== null && !Array.isArray(orig)) {
-                value = recursiveMerge(orig as Record<string, unknown>, v);
-            }
-        }
+        const orig = Object.hasOwn(patched, k) ? patched[k] : (void 0);
+        const value = isPlainRecord(orig) && isPlainRecord(v) ? mergePlainRecords(orig, v) : v;
         Object.defineProperty(patched, k, {
             value, enumerable: true, writable: true, configurable: true,
         });
     }
-
     return patched;
 }

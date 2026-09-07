@@ -1,13 +1,14 @@
 /**
  * Returns a promise that settles after a timer delay without blocking other work.
  *
- * @param time_ms - Duration in milliseconds.
- * @returns A promise that resolves after the delay.
+ * @param time_ms - Finite duration in milliseconds; nonpositive values yield once asynchronously.
+ * @returns A promise that resolves after at least the positive requested duration.
+ * @throws {RangeError} If `time_ms` is not finite.
  *
  * @remarks
- * Uses the platform's `setTimeout` directly, so delays are approximate. Many runtimes
- * support at most `2 ** 31 - 1` milliseconds per timer; larger delays can overflow
- * and resolve early. Long-duration sleeps are not currently split into safe timers.
+ * Timer scheduling is approximate and may finish late. Long waits are split into
+ * timers of at most `2 ** 31 - 1` milliseconds. Remaining time is measured with
+ * `performance.now()`, so late callbacks count toward the requested delay.
  *
  * @example
  * ```ts
@@ -15,9 +16,17 @@
  * ```
  */
 export async function sleep(time_ms: number): Promise<void> {
-    return new Promise<void>((resolve) => {
-        setTimeout(() => { resolve(); }, time_ms);
-    });
+    if(!Number.isFinite(time_ms)) throw new RangeError("Duration must be finite");
+
+    const started_at = performance.now();
+    let remaining = Math.max(0, time_ms);
+    do {
+        const delay = Math.min(remaining, 2 ** 31 - 1);
+        await new Promise<void>((resolve) => {
+            setTimeout(resolve, delay);
+        });
+        remaining = time_ms - (performance.now() - started_at);
+    } while(remaining > 0);
 }
 
 /**

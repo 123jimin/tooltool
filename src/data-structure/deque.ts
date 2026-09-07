@@ -3,7 +3,12 @@
  *
  * Uses a sparse index map so head and tail grow independently without array shifts.
  *
- * @typeParam T - Item type.
+ * @typeParam T - Item type; must exclude `undefined`. `null` is allowed.
+ *
+ * @remarks
+ * The item-type constraint is enforced by TypeScript, not runtime checks.
+ * Because missing items also return `null`, use `length` to distinguish a stored
+ * null item from an empty deque.
  *
  * @example
  * ```ts
@@ -13,7 +18,7 @@
  * deque.pop(); // 2
  * ```
  */
-export class Deque<T> {
+export class Deque<T extends NonNullable<unknown> | null> {
     #item_map = new Map<number, T>();
     #head_index = 0;
     #tail_index = 0;

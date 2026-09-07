@@ -136,4 +136,37 @@ describe("string/substring", () => {
             assert.strictEqual(substringBetween("axbya", "a", "a"), "xby");
         });
     });
+
+    describe("regex state and flags", () => {
+        it("should ignore caller state without mutating a frozen global regex", () => {
+            const delimiter = /a/gi;
+            delimiter.lastIndex = 4;
+            Object.freeze(delimiter);
+            assert.strictEqual(substringAfter("xxAyyAzz", delimiter), "yyAzz");
+            assert.strictEqual(substringBefore("xxAyyAzz", delimiter), "xx");
+            assert.strictEqual(delimiter.lastIndex, 4);
+        });
+
+        it("should preserve sticky matching at the beginning of the searched string", () => {
+            const delimiter = /a/iy;
+            delimiter.lastIndex = 2;
+            assert.strictEqual(substringAfter("Abc", delimiter), "bc");
+            assert.strictEqual(substringBefore("Abc", delimiter), "");
+            assert.strictEqual(substringAfter("xAbc", delimiter), null);
+            assert.strictEqual(substringBefore("xAbc", delimiter), null);
+            assert.strictEqual(delimiter.lastIndex, 2);
+        });
+
+        it("should handle zero-width global matches", () => {
+            assert.strictEqual(substringAfter("abc", /^/g), "abc");
+            assert.strictEqual(substringBefore("abc", /^/g), "");
+        });
+
+        it("should search independently when both delimiters use the same regex", () => {
+            const delimiter = /\|/g;
+            delimiter.lastIndex = 3;
+            assert.strictEqual(substringBetween("x|first|last", delimiter, delimiter), "first");
+            assert.strictEqual(delimiter.lastIndex, 3);
+        });
+    });
 });

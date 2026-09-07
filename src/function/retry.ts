@@ -23,7 +23,7 @@ export type Retryable<T> = (info: Readonly<RetryInfo>) => Promise<T>;
 export type DelayFunction = (info: Readonly<RetryInfo>) => Promise<void>;
 
 /**
- * A delay function that returns `false` to forfeit further retries.
+ * A delay function that returns `true` after waiting or `false` to forfeit further retries.
  */
 export type DelayFunctionWithForfeit = (info: Readonly<RetryInfo>) => Promise<boolean>;
 
@@ -39,6 +39,8 @@ export type DelayFunctionWithForfeit = (info: Readonly<RetryInfo>) => Promise<bo
  * @remarks
  * `f` runs immediately with zero failures. After each rejection, `doDelay` receives
  * the incremented failure count and latest error. Only an explicit `false` forfeits.
+ * Custom void-returning delays infer a nonnullable result. Boolean-returning delays,
+ * including every {@link createExponentialBackoffDelay} result, infer `T | null`.
  *
  * @example
  * ```ts
@@ -84,7 +86,7 @@ export interface ExponentialBackoffOptions {
  * Exponential backoff options with a maximum attempt limit.
  */
 export interface ExponentialBackoffOptionsWithMaxAttempts extends ExponentialBackoffOptions {
-    /** Maximum total attempts, including the initial call; nonpositive values are ignored at runtime. */
+    /** Maximum total attempts, including the initial call; nonpositive values mean unlimited retries. */
     max_attempts: number;
 }
 
@@ -98,7 +100,7 @@ export interface ExponentialBackoffOptionsWithMaxAttempts extends ExponentialBac
  * @remarks
  * Computes `init_delay * multiplier ** (attempts - 1)`, capped by `max_delay` when
  * provided. Inputs are not validated; nonfinite or extreme values can produce
- * nonfinite delays. The cap does not by itself guarantee a platform-safe timer.
+ * nonfinite delays, which {@link sleep} rejects.
  */
 export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions, attempts: number): number {
     const {init_delay, max_delay, multiplier = 2} = options;
@@ -111,17 +113,15 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
  *
  * @param options - Backoff configuration. A positive `max_attempts` limits total
  *                  attempts including the initial call; reaching it forfeits without
- *                  sleeping. Nonpositive values are ignored at runtime.
- * @returns A delay function.
+ *                  sleeping. Omitted or nonpositive limits allow unlimited retries.
+ * @returns A boolean-returning delay: `true` after waiting, `false` on forfeiture.
  *
  * @remarks
- * Delays have no jitter or cancellation and inherit {@link sleep}'s timer limits.
- * An uncapped exponential delay can exceed those limits; use a suitable `max_delay`.
- * The current overloads do not reliably describe forfeiting behavior: an options
- * variable with a positive limit can infer a void-returning delay and a non-nullable
- * retry result, while an object literal with a nonpositive limit can infer a boolean
- * delay even though runtime returns `undefined`. These type/runtime mismatches remain
- * unresolved.
+ * Delays have no jitter or cancellation. The returned delay rejects with `RangeError`
+ * if its computed wait is not finite; a finite `max_delay` can cap exponential growth.
+ * Finite nonpositive delays still yield asynchronously, and {@link sleep} splits
+ * large finite delays into safe timer chunks.
+ * Factory-based retries conservatively infer `T | null`, even without an attempt limit.
  *
  * @example
  * ```ts
@@ -129,19 +129,18 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
  * await retryWithDelay(fetchData, delay);
  * ```
  */
-export function createExponentialBackoffDelay(options: ExponentialBackoffOptions): DelayFunction;
-export function createExponentialBackoffDelay(options: ExponentialBackoffOptionsWithMaxAttempts): DelayFunctionWithForfeit;
-export function createExponentialBackoffDelay(options: ExponentialBackoffOptions | ExponentialBackoffOptionsWithMaxAttempts): DelayFunction | DelayFunctionWithForfeit {
+export function createExponentialBackoffDelay(options: ExponentialBackoffOptions | ExponentialBackoffOptionsWithMaxAttempts): DelayFunctionWithForfeit {
     if('max_attempts' in options && options.max_attempts > 0) {
         const max_attempts: number = options.max_attempts;
-        return (async (info: RetryInfo) => {
+        return async (info) => {
             if(info.attempts >= max_attempts) return false;
             await sleep(getDelayForExponentialBackoff(options, info.attempts));
             return true;
-        }) satisfies DelayFunctionWithForfeit;
+        };
     } else {
-        return (async (info: RetryInfo) => {
+        return async (info) => {
             await sleep(getDelayForExponentialBackoff(options, info.attempts));
-        }) satisfies DelayFunction;
+            return true;
+        };
     }
 }

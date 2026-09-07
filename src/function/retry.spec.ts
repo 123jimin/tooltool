@@ -1,53 +1,13 @@
 import {assert} from "chai";
-import ts from "typescript";
 
+import {assertEqualType} from "../type/index.ts";
 import {
     createExponentialBackoffDelay,
+    type DelayFunctionWithForfeit,
     getDelayForExponentialBackoff,
     type RetryInfo,
     retryWithDelay,
 } from "./retry.ts";
-
-function getRetryTypeWitnesses(): Record<string, string> {
-    const virtual_path = ts.sys.resolvePath("src/function/retry-type-regression.ts").replaceAll("\\", "/");
-    const source = `
-        import {createExponentialBackoffDelay, retryWithDelay} from "./retry.ts";
-        const options = {init_delay: 0, max_attempts: 1};
-        const delay = createExponentialBackoffDelay(options);
-        const result = retryWithDelay(async () => 42, delay);
-        const unlimited_delay = createExponentialBackoffDelay({init_delay: 0, max_attempts: 0});
-        type DelayCanForfeit = boolean extends Awaited<ReturnType<typeof delay>> ? true : false;
-        type RetryCanBeNull = null extends Awaited<typeof result> ? true : false;
-        type UnlimitedDelayIsVoid = void extends Awaited<ReturnType<typeof unlimited_delay>> ? true : false;
-    `;
-    const options: ts.CompilerOptions = {
-        target: ts.ScriptTarget.ESNext,
-        module: ts.ModuleKind.NodeNext,
-        moduleResolution: ts.ModuleResolutionKind.NodeNext,
-        strict: true,
-        noEmit: true,
-        allowImportingTsExtensions: true,
-        skipLibCheck: true,
-        types: [],
-    };
-    const host = ts.createCompilerHost(options);
-    const getSourceFile = host.getSourceFile;
-    host.getSourceFile = (file_name, language_version, on_error, should_create_new_source_file) =>
-        file_name.replaceAll("\\", "/") === virtual_path
-            ? ts.createSourceFile(file_name, source, language_version, true)
-            : getSourceFile(file_name, language_version, on_error, should_create_new_source_file);
-    const program = ts.createProgram([virtual_path], options, host);
-    const diagnostics = ts.getPreEmitDiagnostics(program);
-    assert.deepStrictEqual(diagnostics.map((diagnostic) => ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")), []);
-    const checker = program.getTypeChecker();
-    const witnesses: Record<string, string> = {};
-    for(const statement of program.getSourceFile(virtual_path)!.statements) {
-        if(ts.isTypeAliasDeclaration(statement)) {
-            witnesses[statement.name.text] = checker.typeToString(checker.getTypeAtLocation(statement.name));
-        }
-    }
-    return witnesses;
-}
 
 describe("function/retry", () => {
     describe("retryWithDelay", () => {
@@ -68,6 +28,7 @@ describe("function/retry", () => {
                 return 42;
             }, async () => { assert.fail("a successful attempt must not trigger a delay"); });
             assert.strictEqual(result, 42);
+            assertEqualType<typeof result, number>();
         });
 
         it("should pass the latest failure and failure count to subsequent attempts", async () => {
@@ -80,6 +41,7 @@ describe("function/retry", () => {
                 return "done";
             }, async (info) => { delays.push({...info}); });
             assert.strictEqual(result, "done");
+            assertEqualType<typeof result, string>();
             assert.deepStrictEqual(attempts, [
                 {attempts: 0},
                 {attempts: 1, error: errors[0]},
@@ -160,6 +122,18 @@ describe("function/retry", () => {
                 assert.strictEqual(calls, 3);
             }
         });
+
+        it("should propagate a nonfinite delay rejection without another attempt", async () => {
+            let calls = 0;
+            await retryWithDelay(async () => {
+                if(++calls === 1) throw new Error("attempt failed");
+                return "unexpected recovery";
+            }, createExponentialBackoffDelay({init_delay: Infinity})).then(
+                () => assert.fail("expected an invalid delay to reject"),
+                (reason: unknown) => { assert.instanceOf(reason, RangeError); },
+            );
+            assert.strictEqual(calls, 1);
+        });
     });
 
     describe("getDelayForExponentialBackoff", () => {
@@ -171,23 +145,45 @@ describe("function/retry", () => {
         });
     });
 
-    context("deferred overload regressions", () => {
-        let witnesses: Record<string, string>;
-        before(function () {
-            this.timeout(10_000);
-            witnesses = getRetryTypeWitnesses();
+    context("factory return types", () => {
+        it("should infer a boolean-returning delay for an options variable with positive max_attempts", async () => {
+            const options = {init_delay: 0, max_attempts: 2};
+            const delay = createExponentialBackoffDelay(options);
+            assertEqualType<typeof delay, DelayFunctionWithForfeit>();
+            assert.strictEqual(await delay({attempts: 1}), true);
+            assert.strictEqual(await delay({attempts: 2}), false);
         });
 
-        it("should infer a boolean-capable delay for an options variable with positive max_attempts", () => {
-            assert.strictEqual(witnesses["DelayCanForfeit"], "true");
+        it("should infer nullable retry results for positive options variables and literals", async () => {
+            const options = {init_delay: 0, max_attempts: 1};
+            const variable_result = retryWithDelay(async () => 42, createExponentialBackoffDelay(options));
+            const literal_result = retryWithDelay(async () => 42, createExponentialBackoffDelay({init_delay: 0, max_attempts: 1}));
+            assertEqualType<typeof variable_result, Promise<number|null>>();
+            assertEqualType<typeof literal_result, Promise<number|null>>();
+            assert.strictEqual(await variable_result, 42);
+            assert.strictEqual(await literal_result, 42);
         });
 
-        it("should infer a nullable retry result for an options variable with positive max_attempts", () => {
-            assert.strictEqual(witnesses["RetryCanBeNull"], "true");
-        });
-
-        it("should infer a void delay for a nonpositive max_attempts literal, matching unlimited runtime behavior", () => {
-            assert.strictEqual(witnesses["UnlimitedDelayIsVoid"], "true");
+        it("should infer boolean delays and nullable retry results for nonpositive and omitted limits", async () => {
+            const zero_delay = createExponentialBackoffDelay({init_delay: 0, max_attempts: 0});
+            const negative_options = {init_delay: 0, max_attempts: -1};
+            const negative_delay = createExponentialBackoffDelay(negative_options);
+            const omitted_delay = createExponentialBackoffDelay({init_delay: 0});
+            assertEqualType<typeof zero_delay, DelayFunctionWithForfeit>();
+            assertEqualType<typeof negative_delay, DelayFunctionWithForfeit>();
+            assertEqualType<typeof omitted_delay, DelayFunctionWithForfeit>();
+            const zero_result = retryWithDelay(async () => 42, zero_delay);
+            const negative_result = retryWithDelay(async () => 42, negative_delay);
+            const omitted_result = retryWithDelay(async () => 42, omitted_delay);
+            assertEqualType<typeof zero_result, Promise<number|null>>();
+            assertEqualType<typeof negative_result, Promise<number|null>>();
+            assertEqualType<typeof omitted_result, Promise<number|null>>();
+            assert.strictEqual(await zero_result, 42);
+            assert.strictEqual(await negative_result, 42);
+            assert.strictEqual(await omitted_result, 42);
+            for(const delay of [zero_delay, negative_delay, omitted_delay]) {
+                assert.strictEqual(await delay({attempts: 3}), true);
+            }
         });
     });
 });
