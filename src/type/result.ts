@@ -78,11 +78,8 @@ export function isResultErr<T, E = Error>(result: Result<T, E>): result is Err<E
  * ```
  */
 export function resultUnwrap<T, E = Error>(result: Result<T, E>): T {
-    if(result.ok) {
-        return result.value;
-    } else {
-        throw result.error;
-    }
+    if(result.ok) return result.value;
+    throw result.error;
 }
 
 /**

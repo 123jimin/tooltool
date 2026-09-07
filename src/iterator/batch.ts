@@ -70,9 +70,5 @@ export function batched<T>(
         throw new RangeError("Batch size must be a nonnegative finite integer.");
     }
 
-    if(isAsyncIterable(gen)) {
-        return asyncBatched(gen, n);
-    } else {
-        return syncBatched(gen, n);
-    }
+    return isAsyncIterable(gen) ? asyncBatched(gen, n) : syncBatched(gen, n);
 }

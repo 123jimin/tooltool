@@ -53,11 +53,7 @@ export function lerp(a: number, b: number, t: number): number {
         return (1-t)*a + t*b;
     }
 
-    if(t < 0.5) {
-        return a + difference * t;
-    } else {
-        return b - difference * (1-t);
-    }
+    return t < 0.5 ? a + difference * t : b - difference * (1-t);
 }
 
 /**

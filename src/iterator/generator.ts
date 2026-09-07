@@ -43,14 +43,14 @@ export function runGenerator<Y, R>(gen: Generator<Y, R>|AsyncGenerator<Y, R>, ca
             while(true) {
                 const {value, done}: IteratorResult<Y, R> = await gen.next();
                 if(done) return value;
-                else callback?.(value);
+                callback?.(value);
             }
         })();
-    } else {
-        while(true) {
-            const {value, done}: IteratorResult<Y, R> = gen.next();
-            if(done) return value;
-            else callback?.(value);
-        }
+    }
+
+    while(true) {
+        const {value, done}: IteratorResult<Y, R> = gen.next();
+        if(done) return value;
+        callback?.(value);
     }
 }

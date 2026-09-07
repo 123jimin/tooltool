@@ -64,8 +64,7 @@ export async function retryWithDelay<T>(f: Retryable<T>, doDelay: DelayFunction|
             ++info.attempts;
             info.error = err;
 
-            const result = await doDelay(info);
-            if(result === false) return null;
+            if(await doDelay(info) === false) return null;
         }
     }
 }
@@ -111,9 +110,8 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
 /**
  * Creates an exponential backoff delay function for use with {@link retryWithDelay}.
  *
- * @param options - Backoff configuration. A positive `max_attempts` limits total
- *                  attempts including the initial call; reaching it forfeits without
- *                  sleeping. Omitted or nonpositive limits allow unlimited retries.
+ * @param options - Backoff configuration. A positive `max_attempts` counts the initial
+ * call and forfeits without sleeping at the limit. Omitted or nonpositive limits allow unlimited retries.
  * @returns A boolean-returning delay: `true` after waiting, `false` on forfeiture.
  *
  * @remarks
@@ -130,17 +128,12 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
  * ```
  */
 export function createExponentialBackoffDelay(options: ExponentialBackoffOptions | ExponentialBackoffOptionsWithMaxAttempts): DelayFunctionWithForfeit {
-    if('max_attempts' in options && options.max_attempts > 0) {
-        const max_attempts: number = options.max_attempts;
-        return async (info) => {
-            if(info.attempts >= max_attempts) return false;
-            await sleep(getDelayForExponentialBackoff(options, info.attempts));
-            return true;
-        };
-    } else {
-        return async (info) => {
-            await sleep(getDelayForExponentialBackoff(options, info.attempts));
-            return true;
-        };
-    }
+    const max_attempts = 'max_attempts' in options && options.max_attempts > 0
+        ? options.max_attempts
+        : null;
+    return async (info) => {
+        if(max_attempts != null && info.attempts >= max_attempts) return false;
+        await sleep(getDelayForExponentialBackoff(options, info.attempts));
+        return true;
+    };
 }

@@ -9,12 +9,10 @@ import type {Nullable, Nullish} from "../type/index.ts";
  * @returns The substring after the delimiter (may be empty string), or `on_missing`.
  *
  * @remarks
- * If the delimiter is found at the end of the string, an empty string is returned
- * (not `on_missing`). An empty string delimiter matches at the beginning and returns
- * all of `s`. Useful for removing a path, field, or protocol prefix.
- * Regex flags are preserved, but matching starts from zero without reading or changing
- * the caller's `lastIndex`. Global regexes return only the first match; sticky regexes
- * must match at the beginning of `s`.
+ * A delimiter at the end returns an empty string, not `on_missing`; an empty delimiter
+ * returns all of `s`. Useful for removing a path, field, or protocol prefix.
+ * Regex flags are preserved; matching starts at zero without reading or changing the
+ * caller's `lastIndex`. Global regexes use the first match; sticky regexes must match at zero.
  *
  * @example
  * ```ts
@@ -32,13 +30,11 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
 
     if(typeof delimiter === 'string') {
         const ind = s.indexOf(delimiter);
-        if(ind < 0) return on_missing;
-        return s.slice(ind + delimiter.length);
-    } else {
-        const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
-        if(match == null) return on_missing;
-        return s.slice(match.index + match[0].length);
+        return ind < 0 ? on_missing : s.slice(ind + delimiter.length);
     }
+
+    const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
+    return match == null ? on_missing : s.slice(match.index + match[0].length);
 }
 
 /**
@@ -52,9 +48,8 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
  * @remarks
  * A delimiter at the beginning, including an empty string delimiter, returns an
  * empty string rather than `on_missing`. Useful for extracting a path or field prefix.
- * Regex flags are preserved, but matching starts from zero without reading or changing
- * the caller's `lastIndex`. Global regexes return only the first match; sticky regexes
- * must match at the beginning of `s`.
+ * Regex flags are preserved; matching starts at zero without reading or changing the
+ * caller's `lastIndex`. Global regexes use the first match; sticky regexes must match at zero.
  *
  * @example
  * ```ts
@@ -71,13 +66,11 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
 
     if(typeof delimiter === 'string') {
         const ind = s.indexOf(delimiter);
-        if(ind < 0) return on_missing;
-        return s.slice(0, ind);
-    } else {
-        const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
-        if(match == null) return on_missing;
-        return s.slice(0, match.index);
+        return ind < 0 ? on_missing : s.slice(0, ind);
     }
+
+    const match = new RegExp(delimiter.source, delimiter.flags).exec(s);
+    return match == null ? on_missing : s.slice(0, match.index);
 }
 
 /**
@@ -107,8 +100,5 @@ export function substringBetween<T extends string|null = null>(s: Nullish, start
 export function substringBetween<T extends string|null = null>(s: Nullable<string>, start: string|RegExp, end: string|RegExp, on_missing?: T): string|T;
 export function substringBetween<T extends string|null = null>(s: Nullable<string>, start: string|RegExp, end: string|RegExp, on_missing: T = null as T): string|T {
     const after_start = substringAfter(s, start);
-    if(after_start === null) {
-        return on_missing;
-    }
-    return substringBefore(after_start, end, on_missing);
+    return after_start === null ? on_missing : substringBefore(after_start, end, on_missing);
 }

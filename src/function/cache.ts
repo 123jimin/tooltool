@@ -1,5 +1,5 @@
 /**
- * A function wrapper returned by {@link cached} with caching capabilities.
+ * An async function with a clearable promise cache, returned by {@link cached}.
  *
  * @typeParam ArgsType - Tuple of the wrapped function's parameter types.
  * @typeParam ReturnType - The resolved type of the wrapped function.
@@ -50,13 +50,7 @@ export function cached<ArgsType extends unknown[], T, K = unknown>(
     const cache_map = new Map<K, Promise<T>>();
 
     const wrappedFunction = (...args: ArgsType): Promise<T> => {
-        let key: K;
-
-        if(keyGenerator) {
-            key = keyGenerator(...args);
-        } else {
-            key = JSON.stringify(args) as K;
-        }
+        const key = keyGenerator ? keyGenerator(...args) : JSON.stringify(args) as K;
 
         const cached_promise = cache_map.get(key);
         if(cached_promise != null) return cached_promise;

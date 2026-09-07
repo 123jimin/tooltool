@@ -32,7 +32,7 @@ export function getRowCol(s: string, ind: number, pretty: boolean = false): RowC
     let row_no = 0;
     let row_start = 0;
 
-    for(let i=0; i<s.length && i<ind; ++i) {
+    for(let i=0; i<ind; ++i) {
         if(s[i] === '\n') {
             ++row_no;
             row_start = i+1;
@@ -41,9 +41,6 @@ export function getRowCol(s: string, ind: number, pretty: boolean = false): RowC
 
     const col_no = ind - row_start;
 
-    if(pretty) {
-        return `${row_no+1}:${col_no+1}`;
-    } else {
-        return [row_no, col_no];
-    }
+    if(pretty) return `${row_no+1}:${col_no+1}`;
+    return [row_no, col_no];
 }

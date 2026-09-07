@@ -6,12 +6,13 @@
  * @throws {RangeError} If `time_ms` is not finite.
  *
  * @remarks
- * Timer scheduling is approximate. Each iteration chooses a timer from the remaining
- * duration: up to 1000 ms waits directly and then returns without rechecking the clock;
- * up to 10000 ms waits for the remainder minus 500 ms; longer waits use 75% of the
- * remainder, capped at `2 ** 31 - 1` ms. After non-final timers, remaining time is
- * recomputed using `performance.now()`. The final short timer is trusted, including
- * any platform truncation of fractional milliseconds.
+ * Timer scheduling is approximate. Each wait uses the remaining duration:
+ * - Up to 1000 ms: wait once, then return without rechecking the clock.
+ * - Up to 10000 ms: wait for the remainder minus 500 ms.
+ * - Longer: wait for 75% of the remainder, capped at `2 ** 31 - 1` ms.
+ *
+ * After non-final waits, recompute the remainder using `performance.now()`.
+ * Trust the final timer, including platform truncation of fractional milliseconds.
  *
  * @example
  * ```ts

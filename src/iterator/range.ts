@@ -1,6 +1,4 @@
-/**
- * Internal helper for generating a range of numbers.
- */
+/** Internal numeric range generator. */
 function* _rangeNumber(start: number, end: number, raw_step?: number): Generator<number> {
     const step = raw_step ?? 1;
 
@@ -12,16 +10,14 @@ function* _rangeNumber(start: number, end: number, raw_step?: number): Generator
         for(let i = start; i < end; i += step) {
             yield i;
         }
-    } else { // step < 0
+    } else {
         for(let i = start; i > end; i += step) {
             yield i;
         }
     }
 }
 
-/**
- * Internal helper for generating a range of bigints.
- */
+/** Internal bigint range generator. */
 function* _rangeBigInt(start: bigint, end: bigint, raw_step?: bigint): Generator<bigint> {
     const step = raw_step ?? 1n;
 
@@ -33,7 +29,7 @@ function* _rangeBigInt(start: bigint, end: bigint, raw_step?: bigint): Generator
         for(let i = start; i < end; i += step) {
             yield i;
         }
-    } else { // step < 0
+    } else {
         for(let i = start; i > end; i += step) {
             yield i;
         }
@@ -77,12 +73,10 @@ export function* range(raw_start: number | bigint, raw_end?: number | bigint, ra
     // Handle the single-argument case: range(end)
     if(raw_end == null) {
         raw_end = raw_start;
-        // Set start to 0 of the appropriate type
         raw_start = typeof raw_start === 'bigint' ? 0n : 0;
     }
 
-    // Cast arguments and delegate to the appropriate typed helper function.
-    // The `as` assertions are safe due to TypeScript's overload resolution and the initial type check.
+    // Overloads keep arguments in the numeric type selected here.
     if(typeof raw_start === 'bigint') {
         yield* _rangeBigInt(raw_start, raw_end as bigint, raw_step as bigint | undefined);
     } else {

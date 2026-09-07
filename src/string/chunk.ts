@@ -9,14 +9,12 @@
  *
  * @remarks
  * - For text exceeding the limit, uses the rightmost eligible occurrence of the first
- *   matching separator. Its start must be at least `Math.floor(max_length / 2)`,
- *   and its end must fit within the limit. Separators stay in the preceding chunk
- *   unless removed by whitespace trimming.
- * - Leading/trailing whitespace is trimmed from every chunk; empty chunks are skipped.
- * - Never splits a UTF-16 surrogate pair. With `max_length` equal to 1, a non-BMP
- *   code point is emitted whole as the sole exception to the length limit (2 units).
- * - Protects code points, not grapheme clusters: combining marks and ZWJ sequences
- *   can still be separated. Existing unpaired surrogates are preserved.
+ *   matching separator: its start must be at least `Math.floor(max_length / 2)` and
+ *   its end within the limit. Separators stay in the preceding chunk unless trimmed.
+ * - Trims every chunk and skips empty chunks.
+ * - Never splits surrogate pairs; a non-BMP code point with `max_length = 1` is
+ *   the sole length-limit exception (2 units). Unpaired surrogates are preserved.
+ * - Code-point safety is not grapheme safety: combining marks and ZWJ sequences may split.
  *
  * @example
  * ```ts
@@ -72,7 +70,6 @@ export function chunkText(text: string, max_length: number, separators: string[]
  */
 export function getNextChunkLength(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): number {
     if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`getNextChunkLength: invalid max_length=${max_length}`);
-    if(text.length === 0) return 0;
     if(text.length <= max_length) return text.length;
     if(max_length === 1) return text.codePointAt(0)! > 0xFFFF ? 2 : 1;
 

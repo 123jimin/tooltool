@@ -96,7 +96,7 @@ export function rateLimited<ArgsType extends unknown[], T>(
 
     const wrappedFunction = (...args: ArgsType): Promise<T> => new Promise<T>((resolve, reject) => {
         queue.push({args, resolve, reject});
-        if(processing_count === 0 && timer == null) processQueue();
+        processQueue();
     });
 
     Object.defineProperty(wrappedFunction, "limit_duration_ms", {enumerable: true, get: getDuration});

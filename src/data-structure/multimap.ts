@@ -61,8 +61,6 @@ export function multimapAdd<K extends PropertyKey, V>(
 /**
  * Groups an array into a `Map`-based multimap using a key extractor.
  *
- * Each element is assigned to a group based on the key returned by the extractor function.
- *
  * @typeParam T - Element type.
  * @typeParam U - Key type.
  * @param arr - The array to group.
@@ -70,8 +68,7 @@ export function multimapAdd<K extends PropertyKey, V>(
  * @returns A `Map` grouping elements by key.
  *
  * @remarks
- * This function groups elements into N buckets (not just 2), making it a grouping
- * operation rather than a traditional binary partition.
+ * Creates N groups, not just two as in a binary partition.
  *
  * @example
  * ```ts

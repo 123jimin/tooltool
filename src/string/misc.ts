@@ -1,18 +1,16 @@
 /**
  * Trims leading/trailing blank lines and removes the common leading indentation from each line.
  *
- * Computes the minimum indentation across all non-empty lines, then strips that
- * many leading whitespace characters from every line. Useful for cleaning up
- * indented template literals.
+ * Uses the minimum indentation of non-blank lines, counted in whitespace characters.
+ * Useful for cleaning up indented template literals.
  *
  * @param text - The text to dedent.
  * @returns The trimmed and dedented text.
  *
  * @remarks
- * Empty lines (whitespace-only) do not contribute to the common indent calculation
- * and become empty strings in the output. Mixed tabs and spaces are treated as
- * individual characters; no tab-width expansion is performed. LF and CRLF line
- * endings are normalized to LF; trailing whitespace on non-blank lines is preserved.
+ * Whitespace-only lines do not contribute to indentation and become empty strings.
+ * Tabs and spaces each count as one character; no tab expansion is performed.
+ * Normalizes LF and CRLF to LF; preserves trailing whitespace on non-blank lines.
  *
  * @example
  * ```ts
@@ -37,8 +35,6 @@ export function dedent(text: string): string {
         const indent = line.length - line.trimStart().length;
         if(indent < common_indent) common_indent = indent;
     }
-
-    if(!Number.isFinite(common_indent)) common_indent = 0;
 
     return lines.map((line) => blank_line.test(line) ? '' : line.slice(common_indent)).join('\n');
 }

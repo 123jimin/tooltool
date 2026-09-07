@@ -28,9 +28,7 @@ export * from "./result.ts";
 export function assertEqualType<T, U extends T>(..._: [T] extends [U] ? [] : [never]): void {}
 
 /**
- * Represents a single element within a {@link NestedArray}.
- *
- * This type is either the leaf value of type `T` or a nested array structure.
+ * Represents a leaf value of type `T` or a {@link NestedArray}.
  *
  * @typeParam T - The type of the leaf values.
  */
@@ -39,9 +37,9 @@ export type NestedArrayElement<T> = T | NestedArray<T>;
 /**
  * Represents an array that can be nested to an arbitrary depth.
  *
- * This structure is commonly used when dealing with recursive data or flat-map operations.
+ * Useful for recursive data and flat-map operations.
  *
- * @typeParam T - The type of the leaf values found within the structure.
+ * @typeParam T - The leaf value type.
  *
  * @example
  * ```ts
@@ -58,15 +56,14 @@ export type NestedArray<T> = NestedArrayElement<T>[];
  * nested object properties optional. Useful for patches and configuration overrides.
  *
  * @remarks
- * Mutable arrays contain recursively partial elements; mutable tuples widen to
- * arrays. Unions of arrays keep separate array branches rather than combining
- * their element types into one array. Readonly arrays and tuples follow optional
+ * Mutable arrays recurse into their elements; mutable tuples widen to arrays.
+ * Array unions keep separate branches. Readonly arrays and tuples use optional
  * mapped-type semantics.
+ *
  * Dates, regular expressions, mutable and readonly maps and sets, and callable
- * types are atomic: their members and call signatures are preserved unchanged.
- * Other object types are treated structurally. TypeScript cannot distinguish
- * custom-class instances from matching plain records, so their data properties
- * become optional; callable methods remain callable when present.
+ * types remain unchanged. Other objects are treated structurally: custom-class
+ * data properties become optional, and methods remain callable when present.
+ * TypeScript cannot distinguish class instances from matching plain records.
  *
  * @typeParam T - The type to be made recursively partial.
  *
@@ -86,8 +83,7 @@ export type RecursivePartial<T> =
 /**
  * Represents a value that may or may not be wrapped in a `Promise`.
  *
- * Convenient for APIs that accept both synchronous and asynchronous return
- * values, avoiding the need for callers to wrap synchronous results.
+ * Useful for APIs accepting both synchronous values and promises.
  *
  * @typeParam T - The underlying value type.
  *
