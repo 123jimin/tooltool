@@ -6,8 +6,14 @@ import type {Nullable, RecursivePartial} from "../type/index.ts";
  * @typeParam T - The value type.
  * @param obj - The nested record.
  * @param path - Path segments (strings or arrays of strings).
- * @returns `[value, setValue]` — value is `undefined` if path doesn't exist;
- *          setter creates intermediate objects as needed.
+ * @returns `[value, setValue]` — the value is `undefined` if an own path segment is missing;
+ *          the setter creates intermediate objects as needed.
+ *
+ * @remarks
+ * Traverses only own properties. The setter creates own data properties, including
+ * names such as `__proto__`, without following inherited objects or invoking inherited setters.
+ * An empty path returns `obj` and a setter that does nothing. The returned value is
+ * a snapshot of the access, not a live getter.
  *
  * @example
  * ```ts
@@ -26,7 +32,7 @@ export function recordAccess<T = unknown>(
 
     let current: unknown = obj;
     for(const key of flat_path) {
-        if(current == null || typeof current !== 'object') {
+        if(current == null || typeof current !== 'object' || !Object.hasOwn(current, key)) {
             current = (void 0);
             break;
         }
@@ -42,37 +48,47 @@ export function recordAccess<T = unknown>(
 
         for(let i = 0; i < flat_path.length-1; i++) {
             const key = flat_path[i]!;
-            if(target[key] == null || typeof target[key] !== 'object') {
-                target[key] = {};
+            let next = Object.hasOwn(target, key) ? target[key] : (void 0);
+            if(next == null || typeof next !== 'object') {
+                next = {};
+                Object.defineProperty(target, key, {
+                    value: next, enumerable: true, writable: true, configurable: true,
+                });
             }
-            target = target[key] as Record<string, unknown>;
+            target = next as Record<string, unknown>;
         }
 
-        target[flat_path[flat_path.length-1]!] = value;
+        Object.defineProperty(target, flat_path[flat_path.length-1]!, {
+            value, enumerable: true, writable: true, configurable: true,
+        });
     };
 
     return [current as T | undefined, setValue];
 }
 
 /**
- * Recursively merges a patch into a base object (deep merge).
+ * Recursively merges a patch into a base record without mutating either input.
  *
  * Arrays and primitives in `patch` overwrite `base`. Nested records are merged recursively.
- * If `base[k]` is not a plain object (primitive, array, or `null`), an object-valued `patch[k]` overwrites it.
+ * A record-valued patch replaces a primitive, array, or nullish base value.
  *
- * @typeParam T - The record type.
- * @param base - The base object.
- * @param patch - Partial updates. If nullish, `base` is returned.
- * @returns A new merged object.
+ * @typeParam T - The base record type and allowed patch properties.
+ * @param base - The base record.
+ * @param patch - Recursive partial updates matching `T`, or `null` or `undefined` to leave `base` unchanged.
+ * @returns The merged record, or `base` itself for a nullish or identical patch.
  *
  * @remarks
- * - Does not mutate `base` or `patch`.
- * - May return `base` directly if `patch` is nullish.
- * - `undefined` values in `patch` are ignored; `null` values overwrite.
+ * - Patch properties must match `T`; declare optional properties or an index signature to allow additional keys.
+ * - Own enumerable string-keyed patch properties are applied; inherited properties are ignored.
+ *   Names such as `__proto__` are handled as own data properties, not prototype operations.
+ * - `undefined` patch values are ignored; `null` overwrites when allowed by the property's type.
+ * - Non-nullish, non-identical patches create a new top-level record. Recursively merged branches
+ *   are copied, while untouched branches and replacement arrays or objects share input references.
+ *   This is not a deep clone.
  *
  * @example
  * ```ts
- * const base = { a: 1, b: { c: 2 } };
+ * const base = { a: 1, b: { c: 2, d: 0 }, e: 0 };
  * const patch = { b: { d: 3 }, e: 4 };
  * recursiveMerge(base, patch); // { a: 1, b: { c: 2, d: 3 }, e: 4 }
  * ```
@@ -84,22 +100,16 @@ export function recursiveMerge<T extends Record<string, unknown>>(base: T, patch
     const patched: Record<string, unknown> = {...base};
     for(const [k, v] of Object.entries(patch)) {
         if(v === (void 0)) continue;
-        if(v === null) {
-            patched[k] = v;
-            continue;
+        let value = v;
+        if(v !== null && typeof v === 'object' && !Array.isArray(v)) {
+            const orig = Object.hasOwn(patched, k) ? patched[k] : (void 0);
+            if(typeof orig === 'object' && orig !== null && !Array.isArray(orig)) {
+                value = recursiveMerge(orig as Record<string, unknown>, v);
+            }
         }
-
-        if((typeof v) !== 'object' || Array.isArray(v)) {
-            patched[k] = v;
-            continue;
-        }
-
-        const orig = patched[k];
-        if(typeof orig !== 'object' || orig === null || Array.isArray(orig)) {
-            patched[k] = v;
-            continue;
-        }
-        patched[k] = recursiveMerge(orig as Record<string, unknown>, v);
+        Object.defineProperty(patched, k, {
+            value, enumerable: true, writable: true, configurable: true,
+        });
     }
 
     return patched as T;

@@ -1,8 +1,13 @@
 /**
- * Pauses execution for the specified duration.
+ * Returns a promise that settles after a timer delay without blocking other work.
  *
  * @param time_ms - Duration in milliseconds.
  * @returns A promise that resolves after the delay.
+ *
+ * @remarks
+ * Uses the platform's `setTimeout` directly, so delays are approximate. Many runtimes
+ * support at most `2 ** 31 - 1` milliseconds per timer; larger delays can overflow
+ * and resolve early. Long-duration sleeps are not currently split into safe timers.
  *
  * @example
  * ```ts
@@ -35,7 +40,7 @@ export function identity<T>(t: T): T {
 }
 
 /**
- * A no-operation function that accepts any arguments and returns `undefined`.
+ * Accepts any arguments and returns `undefined` without performing work.
  *
  * Useful as a placeholder callback or default implementation.
  *

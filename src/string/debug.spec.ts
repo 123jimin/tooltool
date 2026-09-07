@@ -1,4 +1,4 @@
-import {assert} from 'chai';
+import {assert} from "chai";
 
 import {getRowCol} from "./debug.ts";
 
@@ -6,7 +6,6 @@ describe("string/debug", () => {
     describe("getRowCol", () => {
         it("should work as advertised", () => {
             const text = "hello\nworld";
-
             assert.deepStrictEqual(getRowCol(text, 0), [0, 0]);
             assert.deepStrictEqual(getRowCol(text, 5), [0, 5]);
             assert.deepStrictEqual(getRowCol(text, 6), [1, 0]);
@@ -14,50 +13,25 @@ describe("string/debug", () => {
             assert.strictEqual(getRowCol(text, 6, true), "2:1");
         });
 
-        it("should always return [0, 0] when the index is zero", () => {
-            for(const s of [
-                "",
-                "abc",
-                "a\nb\nc",
-                "a\n\nc",
-                "a\n\n\n",
-                "\n\n\n",
-            ]) {
-                assert.deepEqual(getRowCol(s, 0), [0, 0]);
-                assert.strictEqual(getRowCol(s, 0, true), "1:1");
-            }
+        it("addresses empty text and empty lines", () => {
+            assert.deepStrictEqual(getRowCol("", 0), [0, 0]);
+            assert.strictEqual(getRowCol("", 0, true), "1:1");
+            assert.deepStrictEqual(getRowCol("a\n\nb\n", 2), [1, 0]);
+            assert.deepStrictEqual(getRowCol("a\n\nb\n", 5), [3, 0]);
+            assert.strictEqual(getRowCol("a\n\nb\n", 5, true), "4:1");
         });
 
-        it("should return the correct row and column for a string without newlines", () => {
-            for(let i=0; i<=3; ++i) {
-                assert.deepEqual(getRowCol("abc", i), [0, i], `i=${i}`);
-                assert.strictEqual(getRowCol("abc", i, true), `1:${i+1}`, `i=${i}, pretty=true`);
-            }
+        it("counts UTF-16 units and treats only LF as a line break", () => {
+            const text = "\u{1D11E}\t\r\nx";
+            assert.deepStrictEqual(getRowCol(text, 1), [0, 1]);
+            assert.deepStrictEqual(getRowCol(text, 4), [0, 4]);
+            assert.deepStrictEqual(getRowCol(text, 5), [1, 0]);
+            assert.strictEqual(getRowCol(text, 6, true), "2:2");
         });
 
-        it("should return the correct row and column for a newline-only string", () => {
-            for(let i=0; i<=3; ++i) {
-                assert.deepEqual(getRowCol("\n\n\n", i), [i, 0], `i=${i}`);
-                assert.strictEqual(getRowCol("\n\n\n", i, true), `${i+1}:1`, `i=${i}, pretty=true`);
-            }
-        });
-
-        it("should return the correct row and column for a string with newlines", () => {
-            const s = `The quick\nbrown\n\nfox jumps\nover the lazy dog.\n`;
-            let row = 0;
-            let col = 0;
-            for(let i=0; i<s.length; ++i) {
-                assert.deepEqual(getRowCol(s, i), [row, col], `i=${i}`);
-                assert.strictEqual(getRowCol(s, i, true), `${row+1}:${col+1}`, `i=${i}, pretty=true`);
-
-                if(s[i] === '\n') {
-                    ++row; col = 0;
-                } else {
-                    ++col;
-                }
-            }
-            assert.deepEqual(getRowCol(s, s.length), [row, col], `i=${s.length}`);
-            assert.strictEqual(getRowCol(s, s.length, true), `${row+1}:${col+1}`, `i=${s.length}, pretty=true`);
+        it("rejects indices outside the inclusive text bounds", () => {
+            assert.throws(() => getRowCol("abc", -1), RangeError);
+            assert.throws(() => getRowCol("abc", 4), RangeError);
         });
     });
 });

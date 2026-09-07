@@ -14,6 +14,17 @@ import type {AsyncChannel} from "./type.ts";
  * Each call to `[Symbol.asyncIterator]()` returns a fresh iterator starting
  * from the first buffered value. Calling `result()` multiple times returns
  * the same promise without affecting iteration.
+ * A rejected result is internally observed, so iteration-only consumers do not
+ * cause an unhandled result rejection; callers of `result()` still receive it.
+ *
+ * Subscribers run synchronously. If one throws, it is detached, all other
+ * pending consumers are notified, and the first callback exception is rethrown
+ * to the producer. Callback exceptions do not change the channel's result,
+ * including on completion or error. Exceptions during buffered replay instead
+ * propagate from the subscription call.
+ *
+ * Buffered events are retained for the lifetime of the channel; memory grows
+ * with the number of events. Stopping one iterator does not stop the producer.
  *
  * @example
  * ```ts
@@ -37,31 +48,35 @@ export function createAsyncChannel<Y, R = void, T = unknown>(): AsyncChannel<Y, 
         resolveResult = resolve;
         rejectResult = reject;
     });
+    // Observe the internal promise without replacing the result exposed to callers.
+    void result_promise.catch(() => {});
 
     const push = (event: AsyncEvent<Y, R, T>) => {
         events.push(event);
 
-        const ignore_err = event.type === 'return';
-
-        try {
-            for(const waiter of waiters.splice(0)) {
-                waiter();
-            }
-        } catch (err) {
-            if(!ignore_err) {
-                rejectResult?.(err as T);
-                return;
-            }
-        }
-
         switch(event.type) {
             case 'return':
                 resolveResult?.(event.value);
-                return;
+                break;
             case 'throw':
                 rejectResult?.(event.value);
-                return;
+                break;
         }
+
+        let callback_failed = false;
+        let first_error: unknown;
+        for(const waiter of waiters.splice(0)) {
+            try {
+                waiter();
+            } catch (err) {
+                if(!callback_failed) {
+                    callback_failed = true;
+                    first_error = err;
+                }
+            }
+        }
+
+        if(callback_failed) throw first_error;
     };
 
     const source = createAsyncSource<Y, R, T>(events, waiters, result_promise);

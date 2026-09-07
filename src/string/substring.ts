@@ -3,14 +3,15 @@ import type {Nullable, Nullish} from "../type/index.ts";
 /**
  * Returns the substring after the first occurrence of the delimiter.
  *
- * @param s - Input string, or `null`/`undefined`.
+ * @param s - Input string, or `null` or `undefined`.
  * @param delimiter - String or regex marking where to start.
  * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
  * @returns The substring after the delimiter (may be empty string), or `on_missing`.
  *
  * @remarks
  * If the delimiter is found at the end of the string, an empty string is returned
- * (not `on_missing`).
+ * (not `on_missing`). An empty string delimiter matches at the beginning and returns
+ * all of `s`. Useful for removing a path, field, or protocol prefix.
  *
  * @example
  * ```ts
@@ -40,10 +41,14 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
 /**
  * Returns the substring before the first occurrence of the delimiter.
  *
- * @param s - Input string, or `null`/`undefined`.
+ * @param s - Input string, or `null` or `undefined`.
  * @param delimiter - String or regex marking where to end.
  * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
  * @returns The substring before the delimiter, or `on_missing`.
+ *
+ * @remarks
+ * A delimiter at the beginning, including an empty string delimiter, returns an
+ * empty string rather than `on_missing`. Useful for extracting a path or field prefix.
  *
  * @example
  * ```ts
@@ -72,7 +77,7 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
 /**
  * Returns the substring between the first `start` and the first `end` after it.
  *
- * @param s - Input string, or `null`/`undefined`.
+ * @param s - Input string, or `null` or `undefined`.
  * @param start - String or regex marking where to start.
  * @param end - String or regex marking where to end.
  * @param on_missing - Returned if `s` is nullish or delimiters not found (default: `null`).
@@ -80,6 +85,8 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
  *
  * @remarks
  * Search for `end` begins after `start`. Occurrences of `end` before `start` are ignored.
+ * An `end` regex runs against the remaining substring, so `^` anchors immediately
+ * after `start`. Adjacent delimiters return an empty string rather than `on_missing`.
  *
  * @example
  * ```ts

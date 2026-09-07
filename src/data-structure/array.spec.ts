@@ -37,6 +37,17 @@ describe("data-structure/array", () => {
     });
 
     describe("arrayGetOrExtend", () => {
+        it("should work as advertised", () => {
+            const rows: number[][] = [];
+            const template = [0];
+            const row = arrayGetOrExtend(rows, 1, template);
+            assert.deepStrictEqual(rows, [[0], [0]]);
+            assert.strictEqual(row, rows[1]);
+            rows[0]!.push(1);
+            assert.deepStrictEqual(row, [0]);
+            assert.deepStrictEqual(template, [0]);
+        });
+
         it("should return the existing element when index is in bounds", () => {
             const arr = [{x: 1}, {x: 2}];
             assert.strictEqual(arrayGetOrExtend(arr, 0, {x: 0}), arr[0]);
@@ -57,8 +68,45 @@ describe("data-structure/array", () => {
             assert.strictEqual(arr[1]!.x, 0);
         });
 
-        it("should throw RangeError for a negative index", () => {
-            assert.throws(() => arrayGetOrExtend([], -1, {x: 0}), RangeError);
+        it("should reject invalid indices before reading or extending", () => {
+            const arr = [{x: 1}];
+            for(const index of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, 2 ** 32 - 1]) {
+                assert.throws(() => arrayGetOrExtend(arr, index, {x: 0}), RangeError);
+            }
+            assert.deepStrictEqual(arr, [{x: 1}]);
+        });
+
+        it("should preserve nested references in shallow record copies", () => {
+            const template = {nested: {value: 1}};
+            const arr: Array<typeof template> = [];
+            const value = arrayGetOrExtend(arr, 1, template);
+            assert.notStrictEqual(value, template);
+            assert.notStrictEqual(value, arr[0]);
+            assert.strictEqual(value.nested, template.nested);
+        });
+
+        it("should preserve null-prototype records", () => {
+            const template = Object.assign(Object.create(null) as Record<string, number>, {value: 1});
+            const value = arrayGetOrExtend([], 0, template);
+            assert.strictEqual(Object.getPrototypeOf(value), null);
+            assert.deepStrictEqual(value, template);
+            assert.notStrictEqual(value, template);
+        });
+
+        it("should reject unsupported templates without extending", () => {
+            class Entry {
+                value = 1;
+            }
+            for(const template of [new Date(0), new Map(), new Set(), new Entry()]) {
+                const arr: object[] = [];
+                assert.throws(() => arrayGetOrExtend(arr, 1, template), TypeError);
+                assert.deepStrictEqual(arr, []);
+            }
+        });
+
+        it("should return existing entries without copying unsupported templates", () => {
+            const value = new Date(0);
+            assert.strictEqual(arrayGetOrExtend([value], 0, new Date(1)), value);
         });
 
         it("should handle extending by exactly one element", () => {
@@ -70,9 +118,18 @@ describe("data-structure/array", () => {
     });
 
     describe("arrayGetOrExtendWith", () => {
+        it("should work as advertised", () => {
+            const dates: Date[] = [];
+            const value = arrayGetOrExtendWith(dates, 1, (i) => new Date(i));
+            assert.strictEqual(value.getTime(), 1);
+            assert.deepStrictEqual(dates.map((date) => date.getTime()), [0, 1]);
+        });
+
         it("should return the existing element when index is in bounds", () => {
             const arr = [{x: 1}, {x: 2}];
-            assert.strictEqual(arrayGetOrExtendWith(arr, 0, (i) => ({x: i})), arr[0]);
+            assert.strictEqual(arrayGetOrExtendWith(arr, 0, () => {
+                throw new Error("factory must not run for an existing entry");
+            }), arr[0]);
             assert.strictEqual(arr.length, 2);
         });
 
@@ -84,8 +141,17 @@ describe("data-structure/array", () => {
             assert.deepStrictEqual(result, {x: 2});
         });
 
-        it("should throw RangeError for a negative index", () => {
-            assert.throws(() => arrayGetOrExtendWith([], -1, (i) => ({x: i})), RangeError);
+        it("should reject invalid indices without invoking the factory", () => {
+            const arr = [{x: 1}];
+            let calls = 0;
+            for(const index of [-1, 0.5, Number.NaN, Number.POSITIVE_INFINITY, 2 ** 32 - 1]) {
+                assert.throws(() => arrayGetOrExtendWith(arr, index, () => {
+                    ++calls;
+                    return {x: 0};
+                }), RangeError);
+            }
+            assert.strictEqual(calls, 0);
+            assert.deepStrictEqual(arr, [{x: 1}]);
         });
 
         it("should call the factory with the correct indices", () => {

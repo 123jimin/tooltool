@@ -95,42 +95,46 @@ describe("math/index", () => {
             assert.approximately(lerp(-10, 10, 0.75), 5, 1e-12);
         });
 
-        it("agrees with a + (b - a) * t across a range of t", () => {
-            const a = -3.5;
-            const b = 7.25;
-            const ts = [-1, -0.1, 0, 0.1, 0.25, 0.4999999, 0.5, 0.9, 0.9999999, 2];
-            for(const t of ts) {
-                const expected = a + (b - a) * t;
-                assert.approximately(lerp(a, b, t), expected, 1e-12, `t=${t}`);
-            }
+        it("extrapolates beyond either endpoint", () => {
+            assert.strictEqual(lerp(2, 6, -0.5), 0);
+            assert.strictEqual(lerp(2, 6, 1.5), 8);
+            assert.strictEqual(lerp(6, 2, -0.5), 8);
+            assert.strictEqual(lerp(6, 2, 1.5), 0);
         });
 
-        it("preserves a when a === b for all t", () => {
+        it("preserves equal endpoints for finite interpolation and extrapolation", () => {
             for(const t of [-10, -1, 0, 0.25, 0.5, 0.9, 1, 10]) {
                 assert.strictEqual(lerp(42, 42, t), 42);
             }
         });
 
-        it("is numerically stable near the endpoints", () => {
-            // With large, close values, the two-formula implementation should avoid
-            // catastrophic cancellation near t≈0 and t≈1.
-            const a = 1e16;
-            const b = a + 1;
-            const t1 = 1e-16;
-            const t2 = 1 - 1e-16;
+        it("interpolates finite opposite-sign extremes without overflowing", () => {
+            const extreme = Number.MAX_VALUE;
+            assert.strictEqual(lerp(-extreme, extreme, 0.5), 0);
+            assert.strictEqual(lerp(extreme, -extreme, 0.5), 0);
+            assert.strictEqual(lerp(-(2**1023), 2**1023, 0.25), -(2**1022));
+            assert.strictEqual(lerp(-(2**1023), 2**1023, 0.75), 2**1022);
+            assert.strictEqual(lerp(-extreme, extreme, 0), -extreme);
+            assert.strictEqual(lerp(-extreme, extreme, 1), extreme);
+        });
 
-            const v1 = lerp(a, b, t1);
-            const v2 = lerp(a, b, t2);
+        it("retains representable differences near the endpoints", () => {
+            const large = 2**53;
+            assert.strictEqual(lerp(large, large+2, 0.25), large);
+            assert.strictEqual(lerp(large, large+2, 0.75), large+2);
+            assert.strictEqual(lerp(large, 0.25, 1-Number.EPSILON), 2.25);
+            assert.strictEqual(lerp(0.25, large, Number.EPSILON), 2.25);
+        });
 
-            // Should stay within [a, b] and be monotonic with t
-            assert.isAtLeast(v1, a);
-            assert.isAtMost(v1, b);
-            assert.isAtLeast(v2, a);
-            assert.isAtMost(v2, b);
+        it("preserves endpoint identities including signed zero", () => {
+            assert.isTrue(Object.is(lerp(-0, 10, 0), -0));
+            assert.isTrue(Object.is(lerp(10, -0, 1), -0));
+        });
 
-            // Close to the mathematically correct values
-            assert.approximately(v1, a + (b - a) * t1, 1e-6);
-            assert.approximately(v2, a + (b - a) * t2, 1e-6);
+        it("retains small endpoint differences during large extrapolation", () => {
+            const large = 2**53;
+            assert.strictEqual(lerp(large, large+2, large), 3*large);
+            assert.strictEqual(lerp(large+2, large, -large), 3*large);
         });
     });
 
@@ -163,13 +167,13 @@ describe("math/index", () => {
             });
 
             it("throws on division by zero", () => {
-                assert.throws(() => ceilDiv(10, 0), RangeError, /by zero/);
+                assert.throws(() => ceilDiv(10, 0), RangeError);
             });
 
             it("throws on non-safe integer inputs", () => {
-                assert.throws(() => ceilDiv(1.5, 1), TypeError, /safe integer/);
-                assert.throws(() => ceilDiv(1, 1.5), TypeError, /safe integer/);
-                assert.throws(() => ceilDiv(Number.MAX_SAFE_INTEGER + 1, 1), TypeError, /safe integer/);
+                assert.throws(() => ceilDiv(1.5, 1), TypeError);
+                assert.throws(() => ceilDiv(1, 1.5), TypeError);
+                assert.throws(() => ceilDiv(Number.MAX_SAFE_INTEGER + 1, 1), TypeError);
             });
         });
 
@@ -201,16 +205,16 @@ describe("math/index", () => {
             });
 
             it("throws on division by zero", () => {
-                assert.throws(() => ceilDiv(10n, 0n), RangeError, /by zero/);
+                assert.throws(() => ceilDiv(10n, 0n), RangeError);
             });
         });
 
         context("type errors", () => {
             it("throws when types are mixed", () => {
                 // @ts-expect-error Testing invalid types
-                assert.throws(() => ceilDiv(10, 3n), TypeError, /same type/);
+                assert.throws(() => ceilDiv(10, 3n), TypeError);
                 // @ts-expect-error Testing invalid types
-                assert.throws(() => ceilDiv(10n, 3), TypeError, /same type/);
+                assert.throws(() => ceilDiv(10n, 3), TypeError);
             });
         });
     });

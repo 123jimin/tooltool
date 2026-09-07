@@ -48,6 +48,30 @@ describe("function/cache", () => {
             assert.strictEqual(attempts, 2);
         });
 
+        it("should retain a replacement entry when an older cleared request rejects", async () => {
+            const old_request = Promise.withResolvers<string>();
+            const new_request = Promise.withResolvers<string>();
+            let calls = 0;
+            const lookup = cached(() => ++calls === 1 ? old_request.promise : new_request.promise);
+            const old_promise = lookup();
+            const error = new Error("old request failed");
+            const old_failure = old_promise.then(
+                () => assert.fail("expected old request rejection"),
+                (reason: unknown) => { assert.strictEqual(reason, error); },
+            );
+
+            lookup.clearCache();
+            const replacement = lookup();
+            old_request.reject(error);
+            await old_failure;
+
+            assert.strictEqual(lookup(), replacement);
+            new_request.resolve("fresh result");
+            assert.strictEqual(await replacement, "fresh result");
+            assert.strictEqual(await lookup(), "fresh result");
+            assert.strictEqual(calls, 2);
+        });
+
         it("should honor the provided key generator", async () => {
             let call_count = 0;
             const lookupUser = cached(

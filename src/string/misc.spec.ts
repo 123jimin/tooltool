@@ -40,6 +40,11 @@ describe("string/misc", () => {
             assert.strictEqual(dedent(text), "line1\n\nline2");
         });
 
+        it("normalizes whitespace-only lines regardless of common indentation", () => {
+            assert.strictEqual(dedent("a\n   \t\n  b"), "a\n\n  b");
+            assert.strictEqual(dedent("  a\n \t\u00A0  \n    b"), "a\n\n  b");
+        });
+
         it("should handle text with leading/trailing blank lines", () => {
             const text = `
 

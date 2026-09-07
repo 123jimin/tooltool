@@ -4,7 +4,7 @@ import {multimapAdd, partitionToMultimap} from "./multimap.ts";
 
 describe("data-structure/multimap", () => {
     describe("multimapAdd", () => {
-        it("should work as expected (example 1)", () => {
+        it("should work as advertised", () => {
             const mm = new Map<string, number[]>();
             multimapAdd(mm, "a", 1);
             multimapAdd(mm, "a", 2);
@@ -12,7 +12,7 @@ describe("data-structure/multimap", () => {
             assert.deepStrictEqual(mm.get("a"), [1, 2]);
         });
 
-        it("should working as expected (example 2)", () => {
+        it("should keep values for separate keys in separate arrays", () => {
             const mm = new Map<string, string[]>();
             multimapAdd(mm, "fruits", "apple");
             multimapAdd(mm, "fruits", "banana");
@@ -22,12 +22,82 @@ describe("data-structure/multimap", () => {
             assert.deepStrictEqual(mm.get("vegetables"), ["carrot"]);
         });
 
-        it("should working as expected (example 3)", () => {
+        it("should return the stored array for a non-string Map key", () => {
             const mm = new Map<number, boolean[]>();
             const arr = multimapAdd(mm, 42, true);
 
             assert.deepStrictEqual(arr, [true]);
             assert.strictEqual(mm.get(42), arr);
+        });
+
+        context("with a Record-backed multimap", () => {
+            it("should append to an existing own array and return the same array", () => {
+                const values = [1];
+                const multimap = {values};
+
+                const result = multimapAdd(multimap, "values", 2);
+
+                assert.strictEqual(result, values);
+                assert.strictEqual(multimap.values, values);
+                assert.deepStrictEqual(values, [1, 2]);
+            });
+
+            it("should create own arrays for prototype-named keys", () => {
+                for(const key of ["__proto__", "constructor", "toString"]) {
+                    const multimap: Record<string, number[]> = {};
+
+                    const values = multimapAdd(multimap, key, 1);
+                    const result = multimapAdd(multimap, key, 2);
+
+                    assert.isTrue(Object.hasOwn(multimap, key));
+                    assert.strictEqual(Object.getPrototypeOf(multimap), Object.prototype);
+                    assert.strictEqual(multimap[key], values);
+                    assert.strictEqual(result, values);
+                    assert.deepStrictEqual(values, [1, 2]);
+                }
+            });
+
+            it("should not append to inherited arrays", () => {
+                const prototype = {values: [1]};
+                const multimap = Object.create(prototype) as Record<string, number[]>;
+
+                const result = multimapAdd(multimap, "values", 2);
+
+                assert.deepStrictEqual(result, [2]);
+                assert.isTrue(Object.hasOwn(multimap, "values"));
+                assert.strictEqual(multimap["values"], result);
+                assert.deepStrictEqual(prototype.values, [1]);
+            });
+
+            it("should bypass inherited accessors when creating an array", () => {
+                let inherited_value = [1];
+                const prototype = {
+                    get values(): number[] {
+                        throw new Error("Inherited getter must not run");
+                    },
+                    set values(value: number[]) {
+                        inherited_value = value;
+                    },
+                };
+                const multimap = Object.create(prototype) as Record<string, number[]>;
+
+                const result = multimapAdd(multimap, "values", 2);
+
+                assert.deepStrictEqual(result, [2]);
+                assert.strictEqual(multimap["values"], result);
+                assert.deepStrictEqual(inherited_value, [1]);
+            });
+
+            it("should create own symbol-keyed arrays on null-prototype records", () => {
+                const key = Symbol("group");
+                const multimap = Object.create(null) as Record<PropertyKey, number[]>;
+
+                multimapAdd(multimap, key, 1);
+                multimapAdd(multimap, key, 2);
+
+                assert.deepStrictEqual(multimap[key], [1, 2]);
+                assert.strictEqual(Object.getPrototypeOf(multimap), null);
+            });
         });
     });
 

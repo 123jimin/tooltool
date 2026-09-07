@@ -41,8 +41,16 @@ function* syncBatched<T>(
  *
  * @typeParam T - Element type.
  * @param gen - The source generator (sync or async).
- * @param n - Batch size.
- * @returns A generator yielding arrays of up to `n` elements.
+ * @param n - Nonnegative integer batch size; `0` collects the complete source.
+ * @returns A generator yielding batches; an empty source yields no batches.
+ * @throws {RangeError} If `n` is negative, fractional, or nonfinite.
+ *
+ * @remarks
+ * Positive sizes yield arrays of up to `n` elements, including a final partial
+ * batch. Size `0` yields one array only after the source finishes, using memory
+ * proportional to the entire source; an infinite source never yields a batch
+ * and can exhaust memory. Invalid sizes throw when `batched()` is called.
+ * Exiting a batch loop early closes the source generator.
  *
  * @example
  * ```ts
@@ -58,6 +66,10 @@ export function batched<T>(
     gen: Generator<T> | AsyncGenerator<T>,
     n: number,
 ): Generator<T[]> | AsyncGenerator<T[]> {
+    if(!Number.isInteger(n) || n < 0) {
+        throw new RangeError("Batch size must be a nonnegative finite integer.");
+    }
+
     if(isAsyncIterable(gen)) {
         return asyncBatched(gen, n);
     } else {

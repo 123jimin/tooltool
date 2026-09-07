@@ -8,7 +8,7 @@ export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
     /** Executes the function or returns the cached promise. */
     (...args: ArgsType): Promise<ReturnType>;
 
-    /** Clears all cached entries. */
+    /** Clears cached entries without cancelling in-flight calls. */
     clearCache(): void;
 }
 
@@ -22,11 +22,18 @@ export interface CachedFunction<ArgsType extends unknown[], ReturnType> {
  * @typeParam T - The resolved return type.
  * @typeParam K - The cache key type.
  * @param fn - The async function to memoize.
- * @param keyGenerator - Derives a cache key from arguments. Defaults to `JSON.stringify`.
+ * @param keyGenerator - Derives a cache key from arguments. Defaults to `JSON.stringify(args)`.
  * @returns A {@link CachedFunction} with an additional `.clearCache()` method.
  *
  * @remarks
  * Rejections are not cached. To cache negative results, resolve with `Result<T, E>` or `null`.
+ * Default keys use JSON serialization, not object identity or deep equality: property
+ * order can distinguish equivalent objects, while `undefined`, functions, symbols,
+ * and nonfinite numbers can collide with omitted properties or `null`. Cycles and
+ * `bigint` values can throw during key generation. Supply a custom key generator
+ * when these distinctions matter; its keys use `Map` equality.
+ * Fulfilled entries remain until cleared. Clearing does not cancel in-flight calls,
+ * and an older rejection cannot evict a newer entry created after clearing.
  *
  * @example
  * ```ts

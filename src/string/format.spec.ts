@@ -26,6 +26,10 @@ describe("string/format", () => {
         it("handles zero fractions", () => {
             assert.strictEqual(formatFixedFloat(1234, 0), "1234");
         });
+
+        it("formats large integer minor units without exponent notation", () => {
+            assert.strictEqual(formatFixedFloat(1e21, 22), "0.1000000000000000000000");
+        });
     });
 
     describe("formatSignedInt", () => {

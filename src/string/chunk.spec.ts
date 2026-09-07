@@ -5,80 +5,93 @@ import {chunkText, getNextChunkLength} from "./chunk.ts";
 describe("string/chunk", () => {
     describe("chunkText", () => {
         it("should work as advertised", () => {
-            assert.deepStrictEqual(chunkText('hello world', 5), ['hello', 'world']);
-            assert.deepStrictEqual(chunkText('hello world', 7), ['hello', 'world']);
-            assert.deepStrictEqual(chunkText('abcdefghij', 5), ['abcde', 'fghij']);
-            assert.deepStrictEqual(chunkText('a b c d e', 4), ['a b', 'c d', 'e']);
+            assert.deepStrictEqual(chunkText("hello world", 5), ["hello", "world"]);
+            assert.deepStrictEqual(chunkText("hello world", 7), ["hello", "world"]);
+            assert.deepStrictEqual(chunkText("abcdefghij", 5), ["abcde", "fghij"]);
+            assert.deepStrictEqual(chunkText("a b c d e", 4), ["a b", "c d", "e"]);
         });
 
-        it("should return empty array for empty string", () => {
-            assert.deepStrictEqual(chunkText('', 10), []);
+        it("trims short text and the first and final chunks", () => {
+            assert.deepStrictEqual(chunkText(" \tshort\n", 20), ["short"]);
+            assert.deepStrictEqual(chunkText(" \tabc def  \n", 4), ["abc", "def"]);
         });
 
-        it("should handle text shorter than max_length", () => {
-            assert.deepStrictEqual(chunkText('short', 10), ['short']);
+        it("skips empty input and whitespace-only chunks", () => {
+            assert.deepStrictEqual(chunkText("", 2), []);
+            assert.deepStrictEqual(chunkText(" \t\n\u00A0", 2), []);
+            assert.deepStrictEqual(chunkText("a    b", 3), ["a", "b"]);
         });
 
-        it("should split at max_length when no separator found", () => {
-            assert.deepStrictEqual(chunkText('abcdefghij', 5), ['abcde', 'fghij']);
+        it("preserves surrogate pairs at forced UTF-16 boundaries", () => {
+            assert.deepStrictEqual(chunkText("a\u{1D11E}bc", 2, []), ["a", "\u{1D11E}", "bc"]);
+            assert.deepStrictEqual(chunkText("ab\u{1D11E}cd", 3, []), ["ab", "\u{1D11E}c", "d"]);
         });
 
-        it("should trim whitespace from chunks", () => {
-            assert.deepStrictEqual(chunkText('hello   world', 8), ['hello', 'world']);
+        it("preserves non-BMP separators at the length limit", () => {
+            assert.deepStrictEqual(chunkText("abc\u{1D11E}def", 5, ["\u{1D11E}"]), ["abc\u{1D11E}", "def"]);
+            assert.deepStrictEqual(chunkText("ab\u{1D11E} cde", 5), ["ab\u{1D11E}", "cde"]);
         });
 
-        it("should skip empty chunks after trimming", () => {
-            assert.deepStrictEqual(chunkText('a    b', 3), ['a', 'b']);
+        it("emits whole code points and skips whitespace when the limit is one", () => {
+            assert.deepStrictEqual(chunkText(" a\u{1D11E}\t\u{10437} b\n", 1), ["a", "\u{1D11E}", "\u{10437}", "b"]);
+            assert.deepStrictEqual(chunkText("\u{1D11E}", 1), ["\u{1D11E}"]);
+            assert.deepStrictEqual(chunkText(" \n\t", 1), []);
         });
 
-        it("should throw RangeError for invalid max_length", () => {
-            assert.throws(() => chunkText('test', 0), RangeError);
-            assert.throws(() => chunkText('test', -5), RangeError);
-            assert.throws(() => chunkText('test', 1.5), RangeError);
+        it("prefers higher priority separators", () => {
+            assert.deepStrictEqual(chunkText("abcde.fg hi", 10, [" ", "."]), ["abcde.fg", "hi"]);
+            assert.deepStrictEqual(chunkText("abcde.fg hi", 10, [".", " "]), ["abcde.", "fg hi"]);
         });
 
-        it("should split character by character when max_length is 1", () => {
-            assert.deepStrictEqual(chunkText('abc', 1), ['a', 'b', 'c']);
-        });
-
-        it("should prefer higher priority separators", () => {
-            assert.deepStrictEqual(chunkText('abcde.fg hi', 10, [' ', '.']), ['abcde.fg', 'hi']);
-            assert.deepStrictEqual(chunkText('abcde.fg hi', 10, ['.', ' ']), ['abcde.', 'fg hi']);
+        it("rejects invalid limits even for empty text", () => {
+            for(const max_length of [0, -5, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+                assert.throws(() => chunkText("", max_length), RangeError);
+            }
         });
     });
 
     describe("getNextChunkLength", () => {
         it("should work as advertised", () => {
-            const text = "Hello world. This is a test.";
-            assert.strictEqual(getNextChunkLength(text, 10), "Hello ".length);
-            assert.strictEqual(getNextChunkLength(text, 15), "Hello world. ".length);
-            assert.strictEqual(getNextChunkLength("1234567890", 5), 5);
-        });
-
-        it("should return text length if it is smaller than max_length", () => {
-            assert.strictEqual(getNextChunkLength("Short", 10), 5);
-        });
-
-        it("should return 0 for empty string", () => {
-            assert.strictEqual(getNextChunkLength("", 10), 0);
-        });
-
-        it("should throw RangeError if max_length is invalid", () => {
-            assert.throws(() => getNextChunkLength("test", 0), RangeError);
-            assert.throws(() => getNextChunkLength("test", -5), RangeError);
-            assert.throws(() => getNextChunkLength("test", 10.5), RangeError);
-        });
-
-        it("should respect the order of separators", () => {
-            assert.strictEqual(getNextChunkLength("AB CD.EF", 7, ['.', ' ']), 6);
-        });
-
-        it("should handle multi-character separators", () => {
-            assert.strictEqual(getNextChunkLength("12345--67890", 10, ["--"]), 7);
-        });
-
-        it("should force split at max_length if no separator is found", () => {
+            assert.strictEqual(getNextChunkLength("hello world", 7), 6);
             assert.strictEqual(getNextChunkLength("abcdefghij", 5), 5);
+        });
+
+        it("returns the whole untrimmed length when text fits", () => {
+            assert.strictEqual(getNextChunkLength(" a ", 3), 3);
+            assert.strictEqual(getNextChunkLength("\u{1D11E}", 3), 2);
+            assert.strictEqual(getNextChunkLength("", 3), 0);
+        });
+
+        it("backs off a forced split only when it would divide a surrogate pair", () => {
+            assert.strictEqual(getNextChunkLength("a\u{1D11E}b", 2, []), 1);
+            assert.strictEqual(getNextChunkLength("a\u{1D11E}b", 3, []), 3);
+            assert.strictEqual(getNextChunkLength("a\uD834b", 2, []), 2);
+        });
+
+        it("returns two units for an initial non-BMP code point at a one-unit limit", () => {
+            assert.strictEqual(getNextChunkLength("\u{1D11E}x", 1), 2);
+            assert.strictEqual(getNextChunkLength("x\u{1D11E}", 1), 1);
+            assert.strictEqual(getNextChunkLength("\uD834x", 1), 1);
+        });
+
+        it("uses the rightmost complete separator in the latter half", () => {
+            assert.strictEqual(getNextChunkLength("ab--cd--efghi", 8, ["--"]), 8);
+            assert.strictEqual(getNextChunkLength("ab--cd--efghi", 7, ["--"]), 7);
+        });
+
+        it("ignores separator ends inside a pair and finds an earlier safe occurrence", () => {
+            assert.strictEqual(getNextChunkLength("abc\uD834e\u{1D11E}xyz", 7, ["\uD834"]), 4);
+            assert.strictEqual(getNextChunkLength("ab\u{1D11E}cde", 5, ["\uD834"]), 5);
+        });
+
+        it("keeps empty separators from forcing an unsafe boundary", () => {
+            assert.strictEqual(getNextChunkLength("a\u{1D11E}b", 2, [""]), 1);
+        });
+
+        it("rejects invalid limits even for empty text", () => {
+            for(const max_length of [0, -5, 1.5, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1]) {
+                assert.throws(() => getNextChunkLength("", max_length), RangeError);
+            }
         });
     });
 });

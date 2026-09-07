@@ -1,16 +1,22 @@
 /**
- * Splits text into chunks with a maximum length, preferring to split at separators.
+ * Splits text into trimmed, non-empty chunks, preferring separators over forced splits.
  *
  * @param text - The text to split.
- * @param max_length - Maximum chunk length (positive safe integer).
- * @param separators - Split points in order of preference (default: `['\n', ' ', '.']`).
- * @returns Array of text chunks.
+ * @param max_length - Maximum chunk length in UTF-16 code units (positive safe integer).
+ * @param separators - Literal split points in priority order (default: `['\n', ' ', '.']`).
+ * @returns The trimmed, non-empty chunks.
  * @throws {RangeError} If `max_length` is not a positive safe integer.
  *
  * @remarks
- * - Separators are only considered in the latter half of each chunk to avoid tiny chunks.
- * - Each chunk is trimmed (leading/trailing whitespace removed) before being added to results.
- * - Empty chunks (after trimming) are skipped.
+ * - For text exceeding the limit, uses the rightmost eligible occurrence of the first
+ *   matching separator. Its start must be at least `Math.floor(max_length / 2)`,
+ *   and its end must fit within the limit. Separators stay in the preceding chunk
+ *   unless removed by whitespace trimming.
+ * - Leading/trailing whitespace is trimmed from every chunk; empty chunks are skipped.
+ * - Never splits a UTF-16 surrogate pair. With `max_length` equal to 1, a non-BMP
+ *   code point is emitted whole as the sole exception to the length limit (2 units).
+ * - Protects code points, not grapheme clusters: combining marks and ZWJ sequences
+ *   can still be separated. Existing unpaired surrogates are preserved.
  *
  * @example
  * ```ts
@@ -22,8 +28,7 @@
  */
 export function chunkText(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): string[] {
     if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`chunkText: invalid max_length=${max_length}`);
-    if(text.length === 0) return [];
-    if(max_length === 1) return text.split('');
+    text = text.trim();
 
     const chunks: string[] = [];
 
@@ -42,30 +47,48 @@ export function chunkText(text: string, max_length: number, separators: string[]
 /**
  * Calculates the optimal length for the next text chunk.
  *
- * Splits at the last separator within `max_length`, considering only separators
- * in the latter half to avoid tiny chunks.
+ * For text exceeding the limit, uses the rightmost eligible occurrence of the first
+ * matching separator. Its start must be at least `Math.floor(max_length / 2)`,
+ * and its end must fit within the limit at a code-point boundary.
  *
- * @param text - The text to split.
- * @param max_length - Maximum chunk length (positive safe integer).
- * @param separators - Split points in order of preference (default: `['\n', ' ', '.']`).
- * @returns The calculated chunk length.
+ * @param text - The text to split; whitespace is not trimmed.
+ * @param max_length - Maximum chunk length in UTF-16 code units (positive safe integer).
+ * @param separators - Literal split points in priority order (default: `['\n', ' ', '.']`).
+ * @returns The raw prefix length, including its separator, or 0 for empty text.
  * @throws {RangeError} If `max_length` is not a positive safe integer.
+ *
+ * @remarks
+ * Returns the whole length if the text already fits. Otherwise, falls back to the
+ * largest prefix within the limit that does not split a surrogate pair.
+ * With `max_length` equal to 1, an initial non-BMP code point returns 2.
+ * This is code-point safety, not grapheme safety: combining marks and ZWJ sequences
+ * can still be separated. The returned length may exceed the trimmed chunk's length.
+ *
+ * @example
+ * ```ts
+ * getNextChunkLength('hello world', 7); // 6 (includes the space)
+ * getNextChunkLength('abcdefghij', 5);  // 5
+ * ```
  */
 export function getNextChunkLength(text: string, max_length: number, separators: string[] = ['\n', ' ', '.']): number {
     if(!Number.isSafeInteger(max_length) || max_length <= 0) throw new RangeError(`getNextChunkLength: invalid max_length=${max_length}`);
     if(text.length === 0) return 0;
     if(text.length <= max_length) return text.length;
-    if(max_length === 1) return 1;
+    if(max_length === 1) return text.codePointAt(0)! > 0xFFFF ? 2 : 1;
 
-    const comfortable_ind = (max_length >> 1);
+    const comfortable_ind = Math.floor(max_length / 2);
 
     for(const c of separators) {
         const search_limit = max_length - c.length;
         if(search_limit < 0) continue;
 
-        const last_index = text.lastIndexOf(c, search_limit);
-        if(last_index >= 0 && last_index >= comfortable_ind) return last_index + c.length;
+        let last_index = text.lastIndexOf(c, search_limit);
+        while(last_index >= comfortable_ind) {
+            const split_length = last_index + c.length;
+            if(text.codePointAt(split_length - 1)! <= 0xFFFF) return split_length;
+            last_index = text.lastIndexOf(c, last_index - 1);
+        }
     }
 
-    return max_length;
+    return text.codePointAt(max_length - 1)! > 0xFFFF ? max_length - 1 : max_length;
 }

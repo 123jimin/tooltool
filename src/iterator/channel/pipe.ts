@@ -2,8 +2,8 @@ import type {OptionalIfVoid} from "../../type/index.ts";
 import type {AsyncSink} from "./type.ts";
 
 /**
- * Pipes values from an async source to an async sink, forwarding all yielded values,
- * the final return value, and any errors that occur.
+ * Pipes yielded values and the final return value from an async source to an
+ * async sink, forwarding failures from advancing the source to `sink.error()`.
  *
  * Consumes the source and calls the appropriate sink methods: `next()` for each yielded
  * value, `complete()` when the source finishes successfully, and `error()` if the source
@@ -16,7 +16,13 @@ import type {AsyncSink} from "./type.ts";
  * @param source - The async iterable or iterator to consume
  * @param sink - The destination sink that receives values and notifications
  *
- * @returns A promise that resolves when the piping operation completes
+ * @returns Resolves after source completion or an error has been delivered to the sink.
+ * @throws Propagates exceptions from sink methods or obtaining the source iterator.
+ *
+ * @remarks
+ * Sink methods run synchronously and are not awaited. A source error is handled
+ * by `sink.error()` and does not itself reject the returned promise; a throwing
+ * sink method does reject it and stops piping.
  *
  * @example
  * ```ts

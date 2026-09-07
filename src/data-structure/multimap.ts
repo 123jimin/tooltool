@@ -23,7 +23,8 @@ export function multimapAdd<K, V>(m: Map<K, V[]>, k: K, v: V): V[];
 /**
  * Adds a value to the array for a key in a `Record`-backed multimap.
  *
- * Creates the array if the key doesn't exist.
+ * Creates an own array if the key has no own value. Inherited values are ignored,
+ * including `__proto__`, `constructor`, and `toString`; the record's prototype is unchanged.
  *
  * @typeParam K - Key type (must be `PropertyKey`).
  * @typeParam V - Value type.
@@ -45,8 +46,13 @@ export function multimapAdd<K extends PropertyKey, V>(
         arr.push(v);
         return arr;
     } else {
-        const arr = m[k] ?? [];
-        if(arr.length === 0) m[k] = arr;
+        let arr = Object.hasOwn(m, k) ? m[k] : (void 0);
+        if(arr == null) {
+            arr = [];
+            Object.defineProperty(m, k, {
+                value: arr, enumerable: true, writable: true, configurable: true,
+            });
+        }
         arr.push(v);
         return arr;
     }

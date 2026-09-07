@@ -57,7 +57,10 @@ function* _rangeBigInt(start: bigint, end: bigint, raw_step?: bigint): Generator
  *
  * @remarks
  * Floating-point arguments may cause imprecise results due to accumulation errors.
- * Use integers for reliable sequences.
+ * Use safe-integer arguments with every intermediate value remaining a safe
+ * integer, or use `bigint`, for reliable exact sequences. Numeric addition is
+ * not checked for progress: near precision limits, adding `step` may leave the
+ * value unchanged, repeating it indefinitely even with a finite endpoint.
  *
  * @example
  * ```ts

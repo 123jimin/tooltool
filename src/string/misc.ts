@@ -11,7 +11,8 @@
  * @remarks
  * Empty lines (whitespace-only) do not contribute to the common indent calculation
  * and become empty strings in the output. Mixed tabs and spaces are treated as
- * individual characters; no tab-width expansion is performed.
+ * individual characters; no tab-width expansion is performed. LF and CRLF line
+ * endings are normalized to LF; trailing whitespace on non-blank lines is preserved.
  *
  * @example
  * ```ts
@@ -38,5 +39,5 @@ export function dedent(text: string): string {
 
     if(!Number.isFinite(common_indent)) common_indent = 0;
 
-    return lines.map((line) => line.slice(common_indent)).join('\n');
+    return lines.map((line) => line.trim() === '' ? '' : line.slice(common_indent)).join('\n');
 }

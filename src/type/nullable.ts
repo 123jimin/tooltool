@@ -9,7 +9,7 @@ export type Nullish = null | undefined;
 export type Nullable<T> = T | Nullish;
 
 /**
- * Type guard: checks if a value is nullish (`null` or `undefined`).
+ * Checks whether a value is nullish, narrowing it to {@link Nullish}.
  *
  * @param value - The value to check.
  * @returns `true` if nullish.

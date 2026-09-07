@@ -5,7 +5,8 @@ import type {Nullable} from "../type/index.ts";
  * A function that fetches a single page of data.
  *
  * @typeParam Page - The page data type.
- * @returns An object with `num_pages` (total pages) and `page` (data, or `null`/`undefined` if empty).
+ * @param page - Zero-based page index.
+ * @returns An object with `num_pages` (total pages) and `page` (data, or `null` or `undefined` if empty).
  */
 export type PageFetcher<Page> = (page: number) => Promise<{num_pages: number; page?: Nullable<Page>}>;
 
@@ -15,14 +16,17 @@ export type PageFetcher<Page> = (page: number) => Promise<{num_pages: number; pa
  * @typeParam Page - The page data type.
  * @param fetcher - Fetches a page by zero-based index.
  * @param callback - Called for each non-nullish page (may be out-of-order).
- * @returns Resolves when all pages are fetched.
+ * @returns Resolves when all fetches and synchronous page callbacks finish.
  *
  * @remarks
- * All pages are fetched in parallel with no concurrency limit; consider using
- * {@link rateLimited} to wrap the fetcher. If a page reports a higher `num_pages`,
- * additional pages are fetched automatically.
+ * Page `0` is fetched first to discover the count, even for an empty result.
+ * All discovered remaining pages are then fetched in parallel with no
+ * concurrency limit; consider using {@link rateLimited} to wrap the fetcher.
+ * Higher reported counts schedule additional pages; lower counts do not cancel
+ * already scheduled pages. Callbacks are synchronous and are not awaited.
  *
- * @throws Rejects immediately if any fetch fails; in-flight fetches continue but are ignored.
+ * @throws Propagates fetch failures and synchronous callback exceptions. In-flight
+ * fetches continue after failure, but their pages and reported counts are ignored.
  *
  * @example
  * ```ts
@@ -99,6 +103,11 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
  * @yields `{ page, index }` for each non-nullish page.
  * @throws If any fetch fails.
  *
+ * @remarks
+ * Fetching starts on the first iteration. Exiting the generator early does not
+ * cancel in-flight fetches or prevent subsequently discovered pages from being
+ * fetched. Pages are buffered without backpressure for slower consumers.
+ *
  * @example
  * ```ts
  * for await (const { page, index } of fetchPages(fetcher)) {
@@ -111,11 +120,10 @@ export async function forEachPage<Page>(fetcher: PageFetcher<Page>, callback: (p
 export async function* fetchPages<Page>(fetcher: PageFetcher<Page>): AsyncGenerator<{index: number; page: NonNullable<Page>}> {
     const channel = createAsyncChannel<{index: number; page: NonNullable<Page>}>();
 
-    try {
-        void forEachPage(fetcher, (page, index) => channel.next({page, index})).catch(channel.error.bind(channel)).then(channel.complete.bind(channel));
-    } catch (err) {
-        channel.error(err);
-    }
+    void forEachPage(fetcher, (page, index) => channel.next({page, index})).then(
+        () => channel.complete(),
+        (err: unknown) => channel.error(err),
+    );
 
     yield* channel;
 }

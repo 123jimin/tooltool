@@ -5,7 +5,7 @@
  * if all cases aren't handled.
  *
  * @param value - Should be `never` if all cases are handled.
- * @throws Always throws with the unexpected value.
+ * @throws {Error} Always throws with the unexpected value.
  *
  * @example
  * ```ts

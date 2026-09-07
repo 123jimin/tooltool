@@ -24,8 +24,10 @@ export type AsyncEvent<Y, R, T = unknown> = AsyncYieldEvent<Y> | AsyncReturnEven
  * @typeParam Y - Yielded value type.
  * @typeParam R - Return value type.
  * @param gen - The generator (sync or async).
- * @param callback - Called for each yielded value.
+ * @param callback - Called synchronously for each yielded value; not awaited.
  * @returns The generator's return value (`R` or `Promise<R>` for async).
+ * @throws Propagates generator and synchronous callback exceptions, rejecting
+ * the returned promise for an async generator.
  *
  * @example
  * ```ts

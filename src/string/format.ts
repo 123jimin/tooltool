@@ -1,11 +1,17 @@
 /**
  * Formats an integer as a fixed-point decimal string.
  *
- * Treats `n` as if multiplied by `10 ** fractions`. Useful for currency formatting.
+ * Interprets `n` as integer minor units and formats `n / 10 ** fractions`.
+ * Useful for currency amounts stored as cents or other fixed-point values.
  *
- * @param n - The integer value.
- * @param fractions - Number of decimal places.
+ * @param n - The finite integer value in minor units.
+ * @param fractions - Integer number of decimal places; non-positive values leave `n` unscaled.
  * @returns The formatted string.
+ *
+ * @remarks
+ * Positive `fractions` produces exactly that many digits after the decimal point.
+ * Input precision is limited by JavaScript numbers; formatting cannot recover
+ * digits already lost when representing `n`.
  *
  * @example
  * ```ts
@@ -27,9 +33,14 @@ export function formatFixedFloat(n: number, fractions: number): string {
  * Formats a number with an explicit sign prefix (`+`, `-`, or `±` for zero).
  *
  * @param n - The number to format.
- * @param min_len - Minimum length of the numeric part (pads absolute value).
+ * @param min_len - Minimum UTF-16 length of the numeric part, excluding the sign.
  * @param fill_string - Padding string (default: `' '`).
  * @returns The formatted string with sign prefix.
+ *
+ * @remarks
+ * Uses the number's string representation without rounding or truncating it to an
+ * integer. Padding is applied before the numeric part but after the sign; an empty
+ * padding string adds nothing. Both positive and negative zero use `±`.
  *
  * @example
  * ```ts

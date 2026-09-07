@@ -3,14 +3,14 @@ export * from "./nullable.ts";
 export * from "./result.ts";
 
 /**
- * Compile-time assertion that two types are exactly equal.
+ * Asserts at compile time that two types are mutually assignable.
  *
- * This function performs a bidirectional type check to ensure `T` and `U` are
- * the same type. It causes a TypeScript compilation error if the types differ.
- * The function body is empty as verification happens entirely at the type level.
+ * Checks assignability in both directions, not exact type identity. Structurally
+ * compatible types can pass even if they differ in readonly or optional members.
+ * Performs no runtime validation.
  *
- * @template T - The first type to compare
- * @template U - The second type to compare
+ * @typeParam T - The first type to compare.
+ * @typeParam U - The second type to compare.
  *
  * @example
  * ```ts
@@ -18,8 +18,8 @@ export * from "./result.ts";
  * type B = { name: string };
  * type C = { name: string; age: number };
  *
- * assertEqualType<A, B>(); // ✓ OK - types are equal
- * assertEqualType<A, C>(); // ✗ Error - types differ
+ * assertEqualType<A, B>(); // OK: mutually assignable
+ * assertEqualType<A, C>(); // Error: A is not assignable to C
  * ```
  */
 
@@ -30,7 +30,7 @@ export function assertEqualType<T, U extends T>(..._: [T] extends [U] ? [] : [ne
  *
  * This type is either the leaf value of type `T` or a nested array structure.
  *
- * @template T - The type of the leaf values.
+ * @typeParam T - The type of the leaf values.
  */
 export type NestedArrayElement<T> = T | NestedArray<T>;
 
@@ -39,7 +39,7 @@ export type NestedArrayElement<T> = T | NestedArray<T>;
  *
  * This structure is commonly used when dealing with recursive data or flat-map operations.
  *
- * @template T - The type of the leaf values found within the structure.
+ * @typeParam T - The type of the leaf values found within the structure.
  *
  * @example
  * ```ts
@@ -52,16 +52,28 @@ export type NestedArray<T> = NestedArrayElement<T>[];
 /**
  * Recursively makes all properties of type `T` optional.
  *
- * Unlike the standard `Partial<T>`, this type traverses down the object structure,
- * making every nested property optional as well. Useful for patch objects or
- * configuration overrides where you don't want to specify the full structure.
+ * Distributes over unions, retaining primitive and nullish members while making
+ * nested object properties optional. Useful for patches and configuration overrides.
  *
- * @template T - The type to be made recursively partial.
+ * @remarks
+ * Mutable arrays contain recursively partial elements; mutable tuples widen to
+ * arrays. Readonly arrays and tuples follow optional mapped-type semantics.
+ * Built-in instances and functions are treated structurally as objects with
+ * optional members, not preserved as atomic values or callable signatures.
+ *
+ * @typeParam T - The type to be made recursively partial.
+ *
+ * @example
+ * ```ts
+ * const patch: RecursivePartial<{ settings?: { theme: string; size: number } | null }> = {
+ *     settings: { theme: "dark" },
+ * };
+ * ```
  */
 export type RecursivePartial<T> =
-    [T] extends [Array<infer U>] ? Array<RecursivePartial<U>>
-        : [T] extends [object] ? {[P in keyof T]?: RecursivePartial<T[P]>}
-                : T;
+    T extends Array<infer U> ? Array<RecursivePartial<U>>
+        : T extends object ? {[P in keyof T]?: RecursivePartial<T[P]>}
+            : T;
 
 /**
  * Represents a value that may or may not be wrapped in a `Promise`.
@@ -69,7 +81,7 @@ export type RecursivePartial<T> =
  * Convenient for APIs that accept both synchronous and asynchronous return
  * values, avoiding the need for callers to wrap synchronous results.
  *
- * @template T - The underlying value type.
+ * @typeParam T - The underlying value type.
  *
  * @example
  * ```ts
@@ -78,19 +90,20 @@ export type RecursivePartial<T> =
  *     return value.length;
  * }
  *
- * process('hello');                  // ✓ OK — synchronous
- * process(Promise.resolve('hello')); // ✓ OK — asynchronous
+ * process("hello");                  // Synchronous value
+ * process(Promise.resolve("hello")); // Promise
  * ```
  */
 export type Promisable<T> = T | Promise<T>;
 
 /**
- * Converts a type into a tuple that is optional when `T` is `void` or `undefined`.
+ * Converts a type into a tuple whose element is optional when `T` is assignable
+ * to `void | undefined`.
  *
- * Designed for use with rest parameters in generic functions, allowing callers
- * to omit the argument entirely when the type indicates no value is expected.
+ * Designed for rest parameters. The check considers the whole type, so a union
+ * such as `string | undefined` still requires an argument.
  *
- * @template T - The type to evaluate for optionality.
+ * @typeParam T - The type to evaluate for optionality.
  *
  * @example
  * ```ts
@@ -98,9 +111,9 @@ export type Promisable<T> = T | Promise<T>;
  *     // ...
  * }
  *
- * dispatch<void>('reset');           // ✓ OK — payload omitted
- * dispatch<number>('increment', 5);  // ✓ OK — payload required
- * dispatch<number>('increment');     // ✗ Error — missing argument
+ * dispatch<void>("reset");          // Payload omitted
+ * dispatch<number>("increment", 5); // Payload required
+ * dispatch<number>("increment");    // Error: missing argument
  * ```
  */
 

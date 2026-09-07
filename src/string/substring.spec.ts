@@ -38,6 +38,10 @@ describe("string/substring", () => {
             assert.strictEqual(substringAfter("abc-123-xyz", /-\d+-/), "xyz");
             assert.strictEqual(substringAfter("abc-123", /-\d+/), "");
         });
+
+        it("returns text after the first global regex match", () => {
+            assert.strictEqual(substringAfter("alpha12beta34gamma", /\d+/g), "beta34gamma");
+        });
     });
 
     describe("substringBefore", () => {
@@ -73,6 +77,10 @@ describe("string/substring", () => {
         it("should work with regex delimiter", () => {
             assert.strictEqual(substringBefore("abc-123-xyz", /-\d+-/), "abc");
             assert.strictEqual(substringBefore("abc-123", /-\d+/), "abc");
+        });
+
+        it("returns text before the first global regex match", () => {
+            assert.strictEqual(substringBefore("alpha12beta34gamma", /\d+/g), "alpha");
         });
     });
 
@@ -113,6 +121,14 @@ describe("string/substring", () => {
         it("should work with regex delimiters", () => {
             assert.strictEqual(substringBetween("[123]", /\[/, /\]/), "123");
             assert.strictEqual(substringBetween("<a>b</a>", /<.*?>/, /<\/.*?>/), "b");
+        });
+
+        it("finds the first pair with a global start regex", () => {
+            assert.strictEqual(substringBetween("x<first>y<second>", /</g, />/), "first");
+        });
+
+        it("finds the first pair with a global end regex", () => {
+            assert.strictEqual(substringBetween("x<first>y<second>", /</, />/g), "first");
         });
 
         it("should handle overlapping delimiters", () => {

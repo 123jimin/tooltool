@@ -1,11 +1,14 @@
 /**
  * Clamps a value to the inclusive range `[min, max]`.
  *
- * @typeParam T - `number` or `bigint`.
  * @param value - The value to clamp.
  * @param min - Lower bound (inclusive).
  * @param max - Upper bound (inclusive).
  * @returns The clamped value.
+ *
+ * @remarks
+ * Requires `min <= max`; reversed bounds are not validated. For numbers, a `NaN`
+ * value is returned unchanged and comparisons against a `NaN` bound are false.
  *
  * @example
  * ```ts
@@ -26,8 +29,14 @@ export function clamp<T extends number|bigint>(value: T, min: T, max: T): T {
  *
  * @param a - Start value.
  * @param b - End value.
- * @param t - Interpolation factor (`[0, 1]` for normal range; any real accepted).
- * @returns `a + (b - a) * t`.
+ * @param t - Interpolation factor (`[0, 1]` interpolates; values outside extrapolate).
+ * @returns The floating-point linear blend of `a` and `b`.
+ *
+ * @remarks
+ * Returns the corresponding endpoint exactly at `t = 0` or `t = 1`. For finite
+ * endpoints, interpolation avoids overflow from subtracting opposite-sign
+ * extremes. Extrapolated results can overflow; other non-finite inputs follow
+ * JavaScript arithmetic.
  *
  * @example
  * ```ts
@@ -36,10 +45,18 @@ export function clamp<T extends number|bigint>(value: T, min: T, max: T): T {
  * ```
  */
 export function lerp(a: number, b: number, t: number): number {
+    if(t === 0) return a;
+    if(t === 1) return b;
+
+    const difference = b-a;
+    if(!Number.isFinite(difference) && Number.isFinite(a) && Number.isFinite(b)) {
+        return (1-t)*a + t*b;
+    }
+
     if(t < 0.5) {
-        return a + (b-a) * t;
+        return a + difference * t;
     } else {
-        return b - (b-a) * (1-t);
+        return b - difference * (1-t);
     }
 }
 

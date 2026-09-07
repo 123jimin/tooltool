@@ -8,6 +8,11 @@ import type {AsyncEvent} from "../generator.ts";
  * @typeParam R - Return value type.
  * @typeParam E - Error type (default: `unknown`).
  *
+ * @remarks
+ * Subscriber callbacks run synchronously. If callbacks throw, all pending
+ * consumers are notified before the first exception is rethrown to the caller.
+ * Faulty subscribers are detached; callback errors do not change the result.
+ *
  * @see {@link AsyncSource} for the read-side counterpart.
  * @see {@link AsyncChannel} for the combined read/write interface.
  *
@@ -62,19 +67,24 @@ export interface AsyncSource<Y, R = void, E = unknown> extends AsyncIterable<Y, 
      * @remarks
      * Immediately flushes any already-buffered events to `callback`, then
      * continues to deliver new events in order.
+     * Callbacks run synchronously and are not awaited. A throwing callback is
+     * detached: during replay its exception propagates from this call; for new
+     * events, all pending consumers are notified before the producer receives
+     * the first callback exception. Channel completion and errors are unaffected.
      */
     subscribe(callback: (event: AsyncEvent<Y, R, E>) => void): void;
 
-    /** Subscribes to yielded values only. */
+    /** Subscribes to yielded values only, with the callback policy of {@link subscribe}. */
     onYield(callback: (y: Y) => void): void;
-    /** Subscribes to the return value only. */
+    /** Subscribes to the return value only, with the callback policy of {@link subscribe}. */
     onReturn(callback: (ret: R) => void): void;
-    /** Subscribes to thrown errors only. */
+    /** Subscribes to thrown errors only, with the callback policy of {@link subscribe}. */
     onThrow(callback: (err: E) => void): void;
 
     /**
      * Returns a promise that resolves with the channel's return value,
      * or rejects with its error.
+     * Repeated calls return the same promise without consuming buffered events.
      */
     result(): Promise<R>;
 }

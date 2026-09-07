@@ -11,6 +11,12 @@ import type {AsyncSource} from "./type.ts";
  * @param waiters - The shared waiter list; resolved when new events arrive.
  * @param result_promise - A promise that resolves/rejects with the channel result.
  * @returns An {@link AsyncSource}.
+ *
+ * @remarks
+ * Subscribers replay buffered events synchronously and stop at the first
+ * terminal event. A callback exception propagates to the caller flushing the
+ * subscription and detaches that subscriber. The producer must notify the
+ * remaining waiters even if one throws, as {@link createAsyncChannel} does.
  */
 export function createAsyncSource<Y, R, E>(
     events: AsyncEvent<Y, R, E>[],

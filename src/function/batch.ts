@@ -9,6 +9,11 @@ import type {Nullable} from "../type/index.ts";
  * @param fn - Async callback `(batch, startIndex) => Promise<void>`.
  * @throws {Error} If `batch_size` is negative or not a safe integer.
  *
+ * @remarks
+ * Callbacks are awaited sequentially and receive shallow copies. A rejection stops
+ * iteration. With size `0`, the callback runs once even for an empty array; with a
+ * positive size, empty arrays produce no callbacks.
+ *
  * @example
  * ```ts
  * await batchedForEach([1, 2, 3, 4, 5], 2, async (batch, i) => {
@@ -46,6 +51,11 @@ export async function batchedForEach<T>(
  * @returns Flattened array of all mapped items.
  * @throws {Error} If `batch_size` is negative or not a safe integer.
  *
+ * @remarks
+ * Mappers are awaited sequentially and receive shallow copies. Nullish results are
+ * omitted, and a rejection stops mapping. With size `0`, the mapper runs once even
+ * for an empty array; with a positive size, empty arrays produce no callbacks.
+ *
  * @example
  * ```ts
  * await batchedMap([1, 2, 3], 2, async (b) => b.map((x) => x * 2)); // [2, 4, 6]
@@ -64,13 +74,17 @@ export async function batchedMap<T, U>(
 
     if(batch_size === 0) {
         const batch_result = await fn(arr.slice(0), 0);
-        if(batch_result) result.push(...batch_result);
+        if(batch_result != null) {
+            for(const item of batch_result) result.push(item);
+        }
         return result;
     }
 
     for(let i = 0; i < arr.length; i += batch_size) {
         const batch_result = await fn(arr.slice(i, i + batch_size), i);
-        if(batch_result) result.push(...batch_result);
+        if(batch_result != null) {
+            for(const item of batch_result) result.push(item);
+        }
     }
 
     return result;

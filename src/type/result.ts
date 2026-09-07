@@ -11,7 +11,7 @@ export interface Ok<T> {
 /**
  * A failed result.
  *
- * @typeParam E - Error type (default: `Error`).
+ * @typeParam E - Failure value type; need not extend `Error` (default: `Error`).
  */
 export interface Err<E = Error> {
     ok: false;
@@ -22,12 +22,12 @@ export interface Err<E = Error> {
  * A discriminated union representing success or failure.
  *
  * @typeParam T - Success value type.
- * @typeParam E - Error type (default: `Error`).
+ * @typeParam E - Failure value type; need not extend `Error` (default: `Error`).
  */
 export type Result<T, E = Error> = Ok<T> | Err<E>;
 
 /**
- * Type guard: checks if a result is successful.
+ * Checks whether a result is successful, narrowing it to {@link Ok}.
  *
  * @param result - The result to check.
  * @returns `true` if `Ok`, `false` otherwise.
@@ -44,7 +44,7 @@ export function isResultOk<T, E = Error>(result: Result<T, E>): result is Ok<T> 
 }
 
 /**
- * Type guard: checks if a result is failed.
+ * Checks whether a result is failed, narrowing it to {@link Err}.
  *
  * @param result - The result to check.
  * @returns `true` if `Err`, `false` otherwise.
@@ -65,7 +65,11 @@ export function isResultErr<T, E = Error>(result: Result<T, E>): result is Err<E
  *
  * @param result - The result to unwrap.
  * @returns The success value.
- * @throws The error if the result is `Err`.
+ * @throws The original failure value, including values that are not `Error` instances.
+ *
+ * @remarks
+ * The `ok` discriminant controls unwrapping; falsy and nullish success values
+ * are returned unchanged.
  *
  * @example
  * ```ts
@@ -88,6 +92,10 @@ export function resultUnwrap<T, E = Error>(result: Result<T, E>): T {
  * @param fallback - Value to return if `Err`.
  * @returns The success value or fallback.
  *
+ * @remarks
+ * The fallback is returned only for `Err`, not for falsy or nullish success values.
+ * Use {@link resultUnwrapOrElse} to defer computing an expensive fallback.
+ *
  * @example
  * ```ts
  * resultUnwrapOr({ ok: true, value: 42 }, 0);  // 42
@@ -102,8 +110,12 @@ export function resultUnwrapOr<T, E = Error, U = T>(result: Result<T, E>, fallba
  * Extracts the value from a successful result, or computes a fallback from the error.
  *
  * @param result - The result to unwrap.
- * @param fallback - Computes a fallback from the error.
+ * @param fallback - Called once, only for `Err`, with the original failure value.
  * @returns The success value or the computed fallback.
+ *
+ * @remarks
+ * Returns falsy and nullish success values unchanged. The fallback runs
+ * synchronously; exceptions it throws propagate to the caller.
  *
  * @example
  * ```ts

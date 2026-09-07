@@ -13,6 +13,23 @@ describe("iterator/range", () => {
             assert.deepStrictEqual([...range(0n, 5n)], [0n, 1n, 2n, 3n, 4n]);
         });
 
+        it("should retain repeated numeric values when the step cannot make precision-limit progress", () => {
+            const start = Number.MAX_SAFE_INTEGER + 1;
+            const sequence = range(start, start + 4);
+            try {
+                assert.deepStrictEqual(sequence.next(), {value: start, done: false});
+                assert.deepStrictEqual(sequence.next(), {value: start, done: false});
+                assert.deepStrictEqual(sequence.next(), {value: start, done: false});
+            } finally {
+                sequence.return(void 0);
+            }
+
+            assert.deepStrictEqual(
+                [...range(9007199254740992n, 9007199254740996n)],
+                [9007199254740992n, 9007199254740993n, 9007199254740994n, 9007199254740995n],
+            );
+        });
+
         context("one argument", () => {
             it("should return an empty generator when the argument is 0", () => {
                 assert.deepStrictEqual([...range(0)], []);

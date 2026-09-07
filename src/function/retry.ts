@@ -4,7 +4,7 @@ import {sleep} from "./basic.ts";
  * Information passed to retry-related callbacks.
  */
 export interface RetryInfo {
-    /** Number of failed attempts so far. */
+    /** Number of failed attempts so far; `0` before the initial call. */
     attempts: number;
     /** The error from the most recent failed attempt. */
     error?: unknown;
@@ -34,6 +34,11 @@ export type DelayFunctionWithForfeit = (info: Readonly<RetryInfo>) => Promise<bo
  * @param f - The function to retry.
  * @param doDelay - Called after each failure. If it returns `false`, retries stop and `null` is returned.
  * @returns The result of `f`, or `null` if retries were forfeited.
+ * @throws Propagates errors thrown or rejected by `doDelay`; errors from `f` are retried.
+ *
+ * @remarks
+ * `f` runs immediately with zero failures. After each rejection, `doDelay` receives
+ * the incremented failure count and latest error. Only an explicit `false` forfeits.
  *
  * @example
  * ```ts
@@ -71,7 +76,7 @@ export interface ExponentialBackoffOptions {
     init_delay: number;
     /** Maximum delay cap in milliseconds. */
     max_delay?: number;
-    /** Multiplier for each attempt (default: `2`). */
+    /** Multiplier for each successive failure's delay (default: `2`). */
     multiplier?: number;
 }
 
@@ -79,7 +84,7 @@ export interface ExponentialBackoffOptions {
  * Exponential backoff options with a maximum attempt limit.
  */
 export interface ExponentialBackoffOptionsWithMaxAttempts extends ExponentialBackoffOptions {
-    /** Maximum number of retry attempts before forfeiting. */
+    /** Maximum total attempts, including the initial call; nonpositive values are ignored at runtime. */
     max_attempts: number;
 }
 
@@ -87,8 +92,13 @@ export interface ExponentialBackoffOptionsWithMaxAttempts extends ExponentialBac
  * Computes the delay for a given attempt using exponential backoff.
  *
  * @param options - Backoff configuration.
- * @param attempts - The current attempt number (1-indexed).
+ * @param attempts - Number of failures so far (1-indexed).
  * @returns Delay in milliseconds.
+ *
+ * @remarks
+ * Computes `init_delay * multiplier ** (attempts - 1)`, capped by `max_delay` when
+ * provided. Inputs are not validated; nonfinite or extreme values can produce
+ * nonfinite delays. The cap does not by itself guarantee a platform-safe timer.
  */
 export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions, attempts: number): number {
     const {init_delay, max_delay, multiplier = 2} = options;
@@ -99,11 +109,19 @@ export function getDelayForExponentialBackoff(options: ExponentialBackoffOptions
 /**
  * Creates an exponential backoff delay function for use with {@link retryWithDelay}.
  *
- * @param options - Backoff configuration. If `max_attempts` is provided and positive,
- *                  returns a {@link DelayFunctionWithForfeit} that forfeits after the limit.
- *                  If `max_attempts` is 0 or negative, it's ignored and a {@link DelayFunction}
- *                  is returned (infinite retries).
+ * @param options - Backoff configuration. A positive `max_attempts` limits total
+ *                  attempts including the initial call; reaching it forfeits without
+ *                  sleeping. Nonpositive values are ignored at runtime.
  * @returns A delay function.
+ *
+ * @remarks
+ * Delays have no jitter or cancellation and inherit {@link sleep}'s timer limits.
+ * An uncapped exponential delay can exceed those limits; use a suitable `max_delay`.
+ * The current overloads do not reliably describe forfeiting behavior: an options
+ * variable with a positive limit can infer a void-returning delay and a non-nullable
+ * retry result, while an object literal with a nonpositive limit can infer a boolean
+ * delay even though runtime returns `undefined`. These type/runtime mismatches remain
+ * unresolved.
  *
  * @example
  * ```ts

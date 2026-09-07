@@ -60,6 +60,22 @@ describe("data-structure/record", () => {
                 assert.deepStrictEqual(recordAccess<{x: number}>(obj, ["obj"])[0], {x: 1});
                 assert.isNull(recordAccess<null>(obj, ["nil"])[0]);
             });
+
+            it("should ignore inherited values and getters", () => {
+                const prototype = {
+                    nested: {value: 42},
+                    get secret(): number {
+                        throw new Error("Inherited getter must not run");
+                    },
+                };
+                const obj = Object.create(prototype) as Record<string, unknown>;
+
+                assert.isUndefined(recordAccess(obj, "nested", "value")[0]);
+                assert.isUndefined(recordAccess(obj, "secret")[0]);
+                assert.isUndefined(recordAccess({}, "__proto__")[0]);
+                assert.isUndefined(recordAccess({}, "constructor")[0]);
+                assert.isUndefined(recordAccess({}, "toString")[0]);
+            });
         });
 
         describe("setting values", () => {
@@ -131,6 +147,72 @@ describe("data-structure/record", () => {
                 recordAccess<undefined>(obj, ["b"])[1]((void 0));
                 assert.isUndefined(obj.b);
             });
+
+            it("should create own paths without mutating inherited objects", () => {
+                for(const key of ["__proto__", "constructor", "toString", "shared"]) {
+                    const inherited = {nested: {value: 1}};
+                    const prototype = {[key]: inherited};
+                    const obj = Object.create(prototype) as Record<string, unknown>;
+                    const [value, setValue] = recordAccess<number>(obj, key, "nested", "value");
+
+                    assert.isUndefined(value);
+                    setValue(2);
+
+                    assert.isTrue(Object.hasOwn(obj, key));
+                    assert.deepStrictEqual(obj[key], {nested: {value: 2}});
+                    assert.deepStrictEqual(inherited, {nested: {value: 1}});
+                    assert.strictEqual(Object.getPrototypeOf(obj), prototype);
+                }
+            });
+
+            it("should write prototype-named leaf keys as own data properties", () => {
+                for(const key of ["__proto__", "constructor", "toString"]) {
+                    const obj: Record<string, unknown> = {};
+                    const value = {safe: true};
+
+                    recordAccess(obj, key)[1](value);
+
+                    assert.isTrue(Object.hasOwn(obj, key));
+                    assert.strictEqual(obj[key], value);
+                    assert.strictEqual(Object.getPrototypeOf(obj), Object.prototype);
+                }
+            });
+
+            it("should bypass inherited setters when creating leaf properties", () => {
+                let inherited_value = 1;
+                const prototype = {
+                    set value(value: number) {
+                        inherited_value = value;
+                    },
+                };
+                const obj = Object.create(prototype) as Record<string, unknown>;
+
+                recordAccess<number>(obj, "value")[1](2);
+
+                assert.strictEqual(obj["value"], 2);
+                assert.strictEqual(inherited_value, 1);
+                assert.isTrue(Object.hasOwn(obj, "value"));
+            });
+
+            it("should traverse and update own prototype-named records", () => {
+                const obj = {
+                    ["__proto__"]: {value: 1},
+                    constructor: {prototype: {value: 2}},
+                };
+                const [proto_value, setProtoValue] = recordAccess<number>(obj, "__proto__", "value");
+                const [constructor_value, setConstructorValue] = recordAccess<number>(
+                    obj, "constructor", "prototype", "value",
+                );
+
+                assert.strictEqual(proto_value, 1);
+                assert.strictEqual(constructor_value, 2);
+                setProtoValue(3);
+                setConstructorValue(4);
+
+                assert.strictEqual(obj["__proto__"].value, 3);
+                assert.strictEqual(obj.constructor.prototype.value, 4);
+                assert.strictEqual(Object.getPrototypeOf(obj), Object.prototype);
+            });
         });
 
         describe("edge cases", () => {
@@ -172,8 +254,8 @@ describe("data-structure/record", () => {
 
     describe("recursiveMerge", () => {
         it("should work as advertised", () => {
-            const base: Record<string, unknown> = {a: 1, b: {c: 2}};
-            const patch: Record<string, unknown> = {b: {d: 3}, e: 4};
+            const base = {a: 1, b: {c: 2, d: 0}, e: 0};
+            const patch = {b: {d: 3}, e: 4};
 
             const result = recursiveMerge(base, patch);
             assert.deepStrictEqual(result, {a: 1, b: {c: 2, d: 3}, e: 4});
@@ -245,6 +327,79 @@ describe("data-structure/record", () => {
             assert.deepStrictEqual(patch, {nested: {b: 2}}, "Patch should remain unchanged");
         });
 
+        it("should share untouched branches and replacement arrays while copying merged branches", () => {
+            const base = {
+                stable: {value: 1},
+                nested: {left: 1, right: 2},
+                list: [1, 2],
+            };
+            const patch = {nested: {right: 3}, list: [4, 5]};
+
+            const result = recursiveMerge(base, patch);
+
+            assert.strictEqual(result.stable, base.stable);
+            assert.strictEqual(result.list, patch.list);
+            assert.notStrictEqual(result.nested, base.nested);
+            assert.notStrictEqual(result.nested, patch.nested);
+            assert.deepStrictEqual(result.nested, {left: 1, right: 3});
+        });
+
+        it("should preserve prototype-named patch keys without changing the result prototype", () => {
+            const base: Record<string, unknown> = {keep: 1};
+            const patch = {
+                ["__proto__"]: {injected: true},
+                constructor: {prototype: {value: 2}},
+                toString: "literal",
+            };
+
+            const result = recursiveMerge(base, patch);
+
+            assert.strictEqual(Object.getPrototypeOf(result), Object.prototype);
+            assert.isTrue(Object.hasOwn(result, "__proto__"));
+            assert.isTrue(Object.hasOwn(result, "constructor"));
+            assert.isTrue(Object.hasOwn(result, "toString"));
+            assert.strictEqual(result["__proto__"], patch["__proto__"]);
+            assert.strictEqual(result["constructor"], patch.constructor);
+            assert.strictEqual(result["toString"], "literal");
+            assert.isUndefined(result["injected"]);
+            assert.deepStrictEqual(base, {keep: 1});
+        });
+
+        it("should recursively merge own __proto__ records without mutating either input", () => {
+            const base = {["__proto__"]: {keep: 1, change: 1}};
+            const patch = {["__proto__"]: {change: 2}};
+
+            const result = recursiveMerge(base, patch);
+
+            assert.strictEqual(Object.getPrototypeOf(result), Object.prototype);
+            assert.isTrue(Object.hasOwn(result, "__proto__"));
+            assert.deepStrictEqual(result["__proto__"], {keep: 1, change: 2});
+            assert.deepStrictEqual(base["__proto__"], {keep: 1, change: 1});
+            assert.deepStrictEqual(patch["__proto__"], {change: 2});
+        });
+
+        it("should exclude inherited properties from base and patch", () => {
+            const base = Object.create({inherited_base: {value: 1}}) as Record<string, unknown>;
+            base["keep"] = 2;
+            const patch = Object.create({inherited_patch: {value: 3}}) as Record<string, unknown>;
+            patch["added"] = 4;
+
+            const result = recursiveMerge(base, patch);
+
+            assert.deepStrictEqual(result, {keep: 2, added: 4});
+        });
+
+        it("should preserve replacement Date values when merging existing Dates", () => {
+            const base = {updated_at: new Date("2020-01-01T00:00:00.000Z")};
+            const patch = {updated_at: new Date("2025-06-15T12:30:00.000Z")};
+
+            const result = recursiveMerge(base, patch);
+
+            assert.instanceOf(result.updated_at, Date);
+            assert.strictEqual(result.updated_at.getTime(), patch.updated_at.getTime());
+            assert.strictEqual(base.updated_at.toISOString(), "2020-01-01T00:00:00.000Z");
+        });
+
         it("should handle disjoint keys correctly", () => {
             const base: Record<string, unknown> = {a: 1};
             const patch: Record<string, unknown> = {b: 2};
@@ -253,8 +408,8 @@ describe("data-structure/record", () => {
             assert.deepStrictEqual(result, {a: 1, b: 2});
         });
 
-        context("when base[k] is a non-object and patch[k] is an object", () => {
-            it("should not silently discard a primitive base value", () => {
+        context("when a record patch replaces a non-record value", () => {
+            it("should replace a primitive base value with the patch record", () => {
                 const result = recursiveMerge(
                     {sub: 42} as Record<string, unknown>,
                     {sub: {y: 2}} as Record<string, unknown>,
@@ -262,15 +417,12 @@ describe("data-structure/record", () => {
                 assert.deepStrictEqual(result["sub"], {y: 2});
             });
 
-            it("should not convert a base array into a plain object", () => {
+            it("should replace a base array with the patch record", () => {
                 const result = recursiveMerge(
                     {sub: [1, 2, 3]} as Record<string, unknown>,
                     {sub: {y: 2}} as Record<string, unknown>,
                 );
-                const sub = result["sub"] as Record<string, unknown>;
-                assert.notProperty(sub, "0");
-                assert.notProperty(sub, "1");
-                assert.notProperty(sub, "2");
+                assert.deepStrictEqual(result, {sub: {y: 2}});
             });
         });
     });

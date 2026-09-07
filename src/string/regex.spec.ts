@@ -10,19 +10,11 @@ describe("string/regex", () => {
             assert.strictEqual(match?.[1], '550e8400-e29b-41d4-a716-446655440000');
         });
 
-        it("should match uppercase UUIDs with case-insensitive flag", () => {
-            const pattern = new RegExp(REGEX_SRC_UUID, 'i');
-            assert.strictEqual(pattern.test('550E8400-E29B-41D4-A716-446655440000'), true);
-        });
-
-        it("should match lowercase UUIDs with case-insensitive flag", () => {
-            const pattern = new RegExp(REGEX_SRC_UUID, 'i');
-            assert.strictEqual(pattern.test('550e8400-e29b-41d4-a716-446655440000'), true);
-        });
-
-        it("should match mixed-case UUIDs with case-insensitive flag", () => {
-            const pattern = new RegExp(REGEX_SRC_UUID, 'i');
-            assert.strictEqual(pattern.test('550E8400-e29b-41D4-a716-446655440000'), true);
+        it("requires the case-insensitive flag for lowercase hexadecimal", () => {
+            const pattern = new RegExp(REGEX_SRC_UUID);
+            assert.strictEqual(pattern.test("550E8400-E29B-41D4-A716-446655440000"), true);
+            assert.strictEqual(pattern.test("550E8400-e29b-41D4-a716-446655440000"), false);
+            assert.strictEqual(new RegExp(REGEX_SRC_UUID, "i").test("550E8400-e29b-41D4-a716-446655440000"), true);
         });
 
         it("should not be anchored", () => {
@@ -78,67 +70,23 @@ describe("string/regex", () => {
             assert.strictEqual(new RegExp(escapeRegExp('example.com')).test('exampleXcom'), false);
         });
 
-        it("should escape dots", () => {
-            assert.strictEqual(escapeRegExp('.'), '\\.');
+        it("matches metacharacters literally in a larger pattern", () => {
+            const literal = `a.b*c+d?^\${e}(f)|[g]\\h`;
+            const pattern = new RegExp(`^prefix:${escapeRegExp(literal)}:suffix$`, "u");
+            assert.strictEqual(pattern.test(`prefix:${literal}:suffix`), true);
+            assert.strictEqual(pattern.test(`prefix:aXb*c+d?^\${e}(f)|[g]\\h:suffix`), false);
+            assert.strictEqual(pattern.test(`prefix:a.b*c+d?^\${e}(f)|g\\h:suffix`), false);
         });
 
-        it("should escape asterisks", () => {
-            assert.strictEqual(escapeRegExp('*'), '\\*');
-        });
+        it("supports empty and plain literal patterns", () => {
+            const empty_pattern = new RegExp(`^${escapeRegExp("")}$`, "u");
+            assert.strictEqual(empty_pattern.test(""), true);
+            assert.strictEqual(empty_pattern.test("a"), false);
 
-        it("should escape plus signs", () => {
-            assert.strictEqual(escapeRegExp('+'), '\\+');
-        });
-
-        it("should escape question marks", () => {
-            assert.strictEqual(escapeRegExp('?'), '\\?');
-        });
-
-        it("should escape caret", () => {
-            assert.strictEqual(escapeRegExp('^'), '\\^');
-        });
-
-        it("should escape dollar sign", () => {
-            assert.strictEqual(escapeRegExp('$'), '\\$');
-        });
-
-        it("should escape curly braces", () => {
-            assert.strictEqual(escapeRegExp('{}'), '\\{\\}');
-        });
-
-        it("should escape parentheses", () => {
-            assert.strictEqual(escapeRegExp('()'), '\\(\\)');
-        });
-
-        it("should escape pipe", () => {
-            assert.strictEqual(escapeRegExp('|'), '\\|');
-        });
-
-        it("should escape square brackets", () => {
-            assert.strictEqual(escapeRegExp('[]'), '\\[\\]');
-        });
-
-        it("should escape backslash", () => {
-            assert.strictEqual(escapeRegExp('\\'), '\\\\');
-        });
-
-        it("should escape multiple special characters in sequence", () => {
-            assert.strictEqual(escapeRegExp('a.b*c?d'), 'a\\.b\\*c\\?d');
-        });
-
-        it("should return empty string for empty input", () => {
-            assert.strictEqual(escapeRegExp(''), '');
-        });
-
-        it("should not modify strings without special characters", () => {
-            assert.strictEqual(escapeRegExp('hello world'), 'hello world');
-        });
-
-        it("should produce patterns that match literal strings", () => {
-            const special = 'file[1].txt (copy)';
-            const pattern = new RegExp(`^${escapeRegExp(special)}$`);
-            assert.strictEqual(pattern.test(special), true);
-            assert.strictEqual(pattern.test('file1.txt copy'), false);
+            const literal = "/a-b,\n\u{1D11E}";
+            const pattern = new RegExp(`^${escapeRegExp(literal)}$`, "u");
+            assert.strictEqual(pattern.test(literal), true);
+            assert.strictEqual(pattern.test("/a-b,\nother"), false);
         });
     });
 });

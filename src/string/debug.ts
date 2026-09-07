@@ -1,17 +1,18 @@
-/** A tuple of `[row, col]` (0-indexed). */
+/** A zero-based `[row, col]` tuple; columns count UTF-16 code units. */
 export type RowCol = [row: number, col: number];
 
 /**
- * Calculates the row and column of a character index in a string.
+ * Calculates the row and column of a UTF-16 code-unit index for diagnostic locations.
  *
  * @param s - The string.
- * @param ind - Zero-based character index (`s.length` returns position after last char).
+ * @param ind - Zero-based integer index; `s.length` addresses the position after the text.
  * @param pretty - If `true`, returns 1-based `"row:col"`; otherwise 0-based tuple.
  * @returns `[row, col]` tuple or `"row:col"` string.
  * @throws {RangeError} If `ind` is out of bounds.
  *
  * @remarks
- * Line breaks are `\n` only; `\r` is treated as a regular character.
+ * Line breaks are `\n` only; `\r` is treated as a regular code unit. Columns count
+ * UTF-16 code units, not code points or display cells; tabs are not expanded.
  *
  * @example
  * ```ts
