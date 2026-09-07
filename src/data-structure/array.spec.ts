@@ -48,6 +48,23 @@ describe("data-structure/array", () => {
             assert.deepStrictEqual(template, [0]);
         });
 
+        it("should extend with scalar defaults without boxing or replacing them", () => {
+            for(const value of [4n, "foo", null, 0, false, Symbol("value"), void 0]) {
+                const arr: Array<typeof value> = [];
+                assert.strictEqual(arrayGetOrExtend(arr, 2, value), value);
+                assert.deepStrictEqual(arr, [value, value, value]);
+            }
+        });
+
+        it("should preserve scalar result types and existing null entries", () => {
+            const values: bigint[] = [];
+            const value: bigint = arrayGetOrExtend(values, 2, 4n);
+            assert.strictEqual(value, 4n);
+            const nullable_values: Array<string | null> = [null];
+            assert.strictEqual(arrayGetOrExtend(nullable_values, 0, "foo"), null);
+            assert.deepStrictEqual(nullable_values, [null]);
+        });
+
         it("should return the existing element when index is in bounds", () => {
             const arr = [{x: 1}, {x: 2}];
             assert.strictEqual(arrayGetOrExtend(arr, 0, {x: 0}), arr[0]);

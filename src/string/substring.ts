@@ -3,7 +3,7 @@ import type {Nullable, Nullish} from "../type/index.ts";
 /**
  * Returns the substring after the first occurrence of the delimiter.
  *
- * @param s - Input string, or `null` or `undefined`.
+ * @param s - Input string, `null`, or `undefined`.
  * @param delimiter - String or regex marking where to start.
  * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
  * @returns The substring after the delimiter (may be empty string), or `on_missing`.
@@ -41,7 +41,7 @@ export function substringAfter<T extends string|null = null>(s: Nullable<string>
 /**
  * Returns the substring before the first occurrence of the delimiter.
  *
- * @param s - Input string, or `null` or `undefined`.
+ * @param s - Input string, `null`, or `undefined`.
  * @param delimiter - String or regex marking where to end.
  * @param on_missing - Returned if `s` is nullish or delimiter not found (default: `null`).
  * @returns The substring before the delimiter, or `on_missing`.
@@ -77,7 +77,7 @@ export function substringBefore<T extends string|null = null>(s: Nullable<string
 /**
  * Returns the substring between the first `start` and the first `end` after it.
  *
- * @param s - Input string, or `null` or `undefined`.
+ * @param s - Input string, `null`, or `undefined`.
  * @param start - String or regex marking where to start.
  * @param end - String or regex marking where to end.
  * @param on_missing - Returned if `s` is nullish or delimiters not found (default: `null`).

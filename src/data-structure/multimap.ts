@@ -46,7 +46,7 @@ export function multimapAdd<K extends PropertyKey, V>(
         arr.push(v);
         return arr;
     } else {
-        let arr = Object.hasOwn(m, k) ? m[k] : (void 0);
+        let arr = Object.hasOwn(m, k) ? m[k] : null;
         if(arr == null) {
             arr = [];
             Object.defineProperty(m, k, {

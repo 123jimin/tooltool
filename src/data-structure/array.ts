@@ -25,19 +25,20 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
 }
 
 /**
- * Gets the element at the given index, extending with shallow copies if out of bounds.
+ * Gets an element, extending with scalar values or shallow copies if out of bounds.
  *
  * @typeParam T - Element type.
  * @param arr - The dense array.
  * @param index - Integer array index from `0` through `2 ** 32 - 2`.
- * @param default_value - Plain record or array template for new entries.
+ * @param default_value - Scalar value, plain record, or array template for new entries.
  * @returns The element at `index`.
  * @throws {RangeError} If `index` is not a valid array index.
  * @throws {TypeError} If extension requires copying an unsupported template.
  *
  * @remarks
- * Copies array elements or enumerable own record properties, retaining nested references.
- * Templates must have this realm's `Object.prototype` or `Array.prototype`, or a null
+ * Scalars (including `null` and `undefined`) are stored unchanged. For objects, copies
+ * array elements or enumerable own record properties, retaining nested references.
+ * Object templates must have this realm's `Object.prototype` or `Array.prototype`, or a null
  * prototype for records. Null-prototype records retain their null prototype. Existing
  * entries are returned without inspecting the template. Use {@link arrayGetOrExtendWith}
  * for built-ins, class instances, or templates from another realm.
@@ -47,13 +48,23 @@ export function partition<T>(arr: T[], predicate: (value: T, index: number, arra
  * const rows: number[][] = [];
  * arrayGetOrExtend(rows, 1, [0]); // [0]; rows is [[0], [0]]
  * rows[0]!.push(1);              // rows[1] remains [0]
+ *
+ * const values: bigint[] = [];
+ * arrayGetOrExtend(values, 2, 4n); // 4n; values is [4n, 4n, 4n]
+ * arrayGetOrExtend([], 0, "foo");  // "foo"
+ * arrayGetOrExtend([], 0, null);   // null
  * ```
  */
-export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index: number, default_value: T): T {
+export function arrayGetOrExtend<T>(arr: T[], index: number, default_value: T): T {
     if(!Number.isInteger(index) || index < 0 || index >= 0xFFFFFFFF) {
         throw new RangeError("Index must be an integer in [0, 2 ** 32 - 2]");
     }
     if(index < arr.length) return arr[index]!;
+
+    if(default_value == null || (typeof default_value !== 'object' && typeof default_value !== 'function')) {
+        for(let i = arr.length; i <= index; ++i) arr.push(default_value);
+        return arr[index]!;
+    }
 
     const is_array = Array.isArray(default_value);
     const prototype: unknown = Object.getPrototypeOf(default_value);
@@ -65,7 +76,7 @@ export function arrayGetOrExtend<T extends NonNullable<object>>(arr: T[], index:
         const value = is_array
             ? (default_value as unknown[]).slice()
             : prototype === null
-                ? Object.assign(Object.create(null) as T, default_value)
+                ? Object.assign(Object.create(null) as object, default_value)
                 : {...default_value};
         arr.push(value as T);
     }

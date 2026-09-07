@@ -57,7 +57,9 @@ export type NestedArray<T> = NestedArrayElement<T>[];
  *
  * @remarks
  * Mutable arrays contain recursively partial elements; mutable tuples widen to
- * arrays. Readonly arrays and tuples follow optional mapped-type semantics.
+ * arrays. Unions of arrays keep separate array branches rather than combining
+ * their element types into one array. Readonly arrays and tuples follow optional
+ * mapped-type semantics.
  * Built-in instances and functions are treated structurally as objects with
  * optional members, not preserved as atomic values or callable signatures.
  *

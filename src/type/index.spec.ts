@@ -33,6 +33,20 @@ describe("type/index", () => {
             >();
         });
 
+        it("preserves disjoint object union branches", () => {
+            type Source =
+                {kind: "left"; left: {value: number}}
+                |{kind: "right"; right: {label: string}};
+            assertEqualType<
+                RecursivePartial<Source>,
+                {kind?: "left"; left?: {value?: number}}
+                |{kind?: "right"; right?: {label?: string}}
+            >();
+
+            // @ts-expect-error A known discriminator must retain its matching branch.
+            ({kind: "left", right: {}} satisfies RecursivePartial<Source>);
+        });
+
         it("keeps mutable arrays and recursively transforms their nullable elements", () => {
             assertEqualType<
                 RecursivePartial<Array<{id: number; details?: {label: string; count: number}|null}|null>|undefined>,
@@ -44,6 +58,20 @@ describe("type/index", () => {
             >();
         });
 
+        it("keeps array union branches separate instead of mixing their elements", () => {
+            type Source =
+                Array<{kind: "left"; value: number}>
+                |Array<{kind: "right"; label: string}>;
+            assertEqualType<
+                RecursivePartial<Source>,
+                Array<{kind?: "left"; value?: number}>
+                |Array<{kind?: "right"; label?: string}>
+            >();
+
+            // @ts-expect-error One array cannot mix elements from distinct array branches.
+            ([{kind: "left"}, {kind: "right"}] satisfies RecursivePartial<Source>);
+        });
+
         it("preserves readonly mapped-array and tuple behavior", () => {
             assertEqualType<
                 RecursivePartial<readonly {id: number}[]>,
@@ -53,6 +81,11 @@ describe("type/index", () => {
                 RecursivePartial<readonly [{id: number}, {name: string}]>,
                 readonly [{id?: number}?, {name?: string}?]
             >();
+        });
+
+        it("preserves never and unknown", () => {
+            assertEqualType<RecursivePartial<never>, never>();
+            assertEqualType<RecursivePartial<unknown>, unknown>();
         });
     });
 });

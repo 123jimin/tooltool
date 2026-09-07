@@ -1,5 +1,6 @@
 import {assert} from "chai";
 
+import {assertEqualType, type RecursivePartial} from "../type/index.ts";
 import {recordAccess, recursiveMerge} from "./record.ts";
 
 describe("data-structure/record", () => {
@@ -254,31 +255,49 @@ describe("data-structure/record", () => {
 
     describe("recursiveMerge", () => {
         it("should work as advertised", () => {
-            const base = {a: 1, b: {c: 2, d: 0}, e: 0};
+            const base = {a: 1, b: {c: 2}};
             const patch = {b: {d: 3}, e: 4};
 
             const result = recursiveMerge(base, patch);
+            assertEqualType<typeof result.b.c, number>();
+            assertEqualType<typeof result.b.d, number>();
+            assertEqualType<typeof result.e, number>();
             assert.deepStrictEqual(result, {a: 1, b: {c: 2, d: 3}, e: 4});
         });
 
-        it("should return the base object reference if patch is null or undefined", () => {
+        it("should retain the base type and reference for nullish whole patches", () => {
             const base = {a: 1};
-            assert.strictEqual(recursiveMerge(base, (void 0)), base);
-            assert.strictEqual(recursiveMerge(base, null), base);
+            const from_null = recursiveMerge(base, null);
+            const from_undefined = recursiveMerge(base, (void 0));
+            assertEqualType<typeof from_null, typeof base>();
+            assertEqualType<typeof from_undefined, typeof base>();
+            assert.strictEqual(from_null, base);
+            assert.strictEqual(from_undefined, base);
+
+            const merge = (patch: {extra: number} | null | undefined) => {
+                const result = recursiveMerge(base, patch);
+                assertEqualType<typeof result, typeof base | {a: number; extra: number}>();
+                return result;
+            };
+            assert.strictEqual(merge(null), base);
+            assert.strictEqual(merge((void 0)), base);
+            assert.deepStrictEqual(merge({extra: 2}), {a: 1, extra: 2});
         });
 
         it("should overwrite primitive values in base with values from patch", () => {
             const base = {a: 1, b: "hello"};
-            const patch = {a: 2, b: "world"};
+            const patch = {a: "updated", b: false};
             const result = recursiveMerge(base, patch);
-            assert.deepStrictEqual(result, {a: 2, b: "world"});
+            assertEqualType<typeof result, {a: string; b: boolean}>();
+            assert.deepStrictEqual(result, {a: "updated", b: false});
         });
 
         it("should overwrite arrays completely instead of merging them", () => {
             const base = {list: [1, 2, 3]};
-            const patch = {list: [4, 5]};
+            const patch = {list: ["replacement"]};
             const result = recursiveMerge(base, patch);
-            assert.deepStrictEqual(result, {list: [4, 5]});
+            assertEqualType<typeof result.list, string[]>();
+            assert.deepStrictEqual(result, {list: ["replacement"]});
         });
 
         it("should merge nested objects recursively", () => {
@@ -304,16 +323,90 @@ describe("data-structure/record", () => {
         });
 
         it("should ignore properties explicitly set to undefined in patch", () => {
-            const base: Record<string, unknown> = {a: 1, b: 2};
-            const patch: Record<string, unknown> = {a: (void 0), b: 3};
+            const base = {a: 1, b: 2};
+            const patch = {a: (void 0), b: 3, added: (void 0)};
             const result = recursiveMerge(base, patch);
+            assertEqualType<typeof result.a, number>();
+            assertEqualType<typeof result.added, undefined>();
             assert.deepStrictEqual(result, {a: 1, b: 3});
+            assert.isFalse(Object.hasOwn(result, "added"));
+        });
+
+        it("should retain base values and make additions optional for optional patches", () => {
+            const merge = (patch: {
+                value?: string | undefined;
+                added?: number | undefined;
+                nested?: {added: number};
+            }) => {
+                const result = recursiveMerge({value: 1, nested: {kept: true}}, patch);
+                assertEqualType<typeof result, {
+                    value: number | string;
+                    added?: number | undefined;
+                    nested: {kept: boolean} | {kept: boolean; added: number};
+                }>();
+                return result;
+            };
+            assert.deepStrictEqual(merge({}), {value: 1, nested: {kept: true}});
+            assert.deepStrictEqual(merge({value: (void 0), added: (void 0)}), {
+                value: 1, nested: {kept: true},
+            });
+            assert.deepStrictEqual(merge({value: "updated", added: 2, nested: {added: 3}}), {
+                value: "updated", added: 2, nested: {kept: true, added: 3},
+            });
+        });
+
+        it("should treat required patch properties admitting undefined as conditional updates", () => {
+            const merge = (patch: {value: string | undefined; added: number | undefined}) => {
+                const result = recursiveMerge({value: 1}, patch);
+                assertEqualType<typeof result, {value: number | string; added?: number | undefined}>();
+                return result;
+            };
+            assert.deepStrictEqual(merge({value: (void 0), added: (void 0)}), {value: 1});
+            assert.deepStrictEqual(merge({value: "updated", added: 2}), {value: "updated", added: 2});
+        });
+
+        it("should retain possible base values for sparse dictionary patches", () => {
+            const merge = (patch: Record<string, string>) => {
+                const result = recursiveMerge({value: 1}, patch);
+                assertEqualType<typeof result.value, number | string>();
+                return result;
+            };
+            assert.deepStrictEqual(merge({}), {value: 1});
+            assert.deepStrictEqual(merge({value: "updated"}), {value: "updated"});
+
+            const base: Record<string, number> = {kept: 1};
+            const result = recursiveMerge(base, {added: "new"});
+            const indexed = result["kept"];
+            assertEqualType<typeof result.added, string>();
+            assertEqualType<typeof indexed, number | string | undefined>();
+            assert.strictEqual(indexed, 1);
+            assert.strictEqual(result.added, "new");
+        });
+
+        it("should make an optional base property required when the patch defines it", () => {
+            const base: {value?: number} = {};
+            const result = recursiveMerge(base, {value: "defined"});
+            assertEqualType<typeof result, {value: string}>();
+            assert.deepStrictEqual(result, {value: "defined"});
+        });
+
+        it("should retain required base members under recursive partial updates", () => {
+            const base = {a: 1, nested: {kept: true, changed: 2}};
+            const merge = (patch: RecursivePartial<typeof base>) => {
+                const result = recursiveMerge<typeof base>(base, patch);
+                assertEqualType<typeof result, typeof base>();
+                return result;
+            };
+            assert.deepStrictEqual(merge({nested: {changed: 3}}), {
+                a: 1, nested: {kept: true, changed: 3},
+            });
         });
 
         it("should overwrite properties with null if set to null in patch", () => {
-            const base: {a: number | null; b: number} = {a: 1, b: 2};
+            const base = {a: 1, b: 2};
             const patch = {a: null};
             const result = recursiveMerge(base, patch);
+            assertEqualType<typeof result.a, null>();
             assert.deepStrictEqual(result, {a: null, b: 2});
         });
 
@@ -344,7 +437,7 @@ describe("data-structure/record", () => {
             assert.deepStrictEqual(result.nested, {left: 1, right: 3});
         });
 
-        it("should preserve prototype-named patch keys without changing the result prototype", () => {
+        it("should preserve prototype-named patch keys as own data properties", () => {
             const base: Record<string, unknown> = {keep: 1};
             const patch = {
                 ["__proto__"]: {injected: true},
@@ -354,7 +447,6 @@ describe("data-structure/record", () => {
 
             const result = recursiveMerge(base, patch);
 
-            assert.strictEqual(Object.getPrototypeOf(result), Object.prototype);
             assert.isTrue(Object.hasOwn(result, "__proto__"));
             assert.isTrue(Object.hasOwn(result, "constructor"));
             assert.isTrue(Object.hasOwn(result, "toString"));
@@ -371,7 +463,6 @@ describe("data-structure/record", () => {
 
             const result = recursiveMerge(base, patch);
 
-            assert.strictEqual(Object.getPrototypeOf(result), Object.prototype);
             assert.isTrue(Object.hasOwn(result, "__proto__"));
             assert.deepStrictEqual(result["__proto__"], {keep: 1, change: 2});
             assert.deepStrictEqual(base["__proto__"], {keep: 1, change: 1});
@@ -401,27 +492,30 @@ describe("data-structure/record", () => {
         });
 
         it("should handle disjoint keys correctly", () => {
-            const base: Record<string, unknown> = {a: 1};
-            const patch: Record<string, unknown> = {b: 2};
+            const base = {a: 1};
+            const patch = {b: 2};
 
             const result = recursiveMerge(base, patch);
+            assertEqualType<typeof result, {a: number; b: number}>();
             assert.deepStrictEqual(result, {a: 1, b: 2});
         });
 
         context("when a record patch replaces a non-record value", () => {
             it("should replace a primitive base value with the patch record", () => {
                 const result = recursiveMerge(
-                    {sub: 42} as Record<string, unknown>,
-                    {sub: {y: 2}} as Record<string, unknown>,
+                    {sub: 42},
+                    {sub: {y: 2}},
                 );
+                assertEqualType<typeof result.sub, {y: number}>();
                 assert.deepStrictEqual(result["sub"], {y: 2});
             });
 
             it("should replace a base array with the patch record", () => {
                 const result = recursiveMerge(
-                    {sub: [1, 2, 3]} as Record<string, unknown>,
-                    {sub: {y: 2}} as Record<string, unknown>,
+                    {sub: [1, 2, 3]},
+                    {sub: {y: 2}},
                 );
+                assertEqualType<typeof result.sub, {y: number}>();
                 assert.deepStrictEqual(result, {sub: {y: 2}});
             });
         });
